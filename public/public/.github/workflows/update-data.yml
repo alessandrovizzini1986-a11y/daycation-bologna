@@ -1,0 +1,39 @@
+name: Update BLQ flight data
+
+on:
+  schedule:
+    # Ogni giorno alle 04:00 UTC (06:00 italiana, dopo eventuali aggiornamenti notturni del sito BLQ)
+    - cron: '0 4 * * *'
+  workflow_dispatch:   # Permette esecuzione manuale dal pannello GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install poppler-utils (pdftotext)
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run parser
+        run: python3 parse_blq.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data.json
+          if git diff --staged --quiet; then
+            echo "Nessun cambiamento nei dati BLQ"
+          else
+            git commit -m "🔄 Update BLQ flight data ($(date -u +%Y-%m-%d))"
+            git push
+          fi
