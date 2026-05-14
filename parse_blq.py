@@ -2,36 +2,23 @@
 """
 Daycation Bologna - Parser orari ufficiali BLQ
 Scarica il PDF corrente da bologna-airport.it, parsa partenze + arrivi,
-e genera /public/data.json pronto per l'app.
-
-Uso: python3 parse_blq.py
+e genera data.json alla radice del repo.
 """
 import re, json, sys, os, subprocess, urllib.request, datetime, pathlib
 
-# ─────────────────────────────────────────────────────────────────────
-# CONFIG
-# ─────────────────────────────────────────────────────────────────────
 BASE_URL = "https://www.bologna-airport.it/System/pdf"
-OUTPUT_DIR = pathlib.Path(__file__).parent / "public"
-OUTPUT_FILE = OUTPUT_DIR / "data.json"
+OUTPUT_FILE = pathlib.Path(__file__).parent / "data.json"
 TMP_PDF = "/tmp/blq_current.pdf"
 TMP_TXT = "/tmp/blq_current.txt"
 
 
 def detect_current_season():
-    """Determina la stagione IATA corrente.
-    Estate: ultima domenica di marzo → ultima domenica di ottobre.
-    Inverno: il resto.
-    """
     today = datetime.date.today()
     year = today.year
-    # ultima domenica di marzo
     last_sun_mar = max(d for d in (datetime.date(year, 3, day) for day in range(25, 32))
                        if d.weekday() == 6)
-    # ultima domenica di ottobre
     last_sun_oct = max(d for d in (datetime.date(year, 10, day) for day in range(25, 32))
                        if d.weekday() == 6)
-
     if last_sun_mar <= today < last_sun_oct:
         return f"summer_{year}"
     elif today < last_sun_mar:
@@ -41,10 +28,8 @@ def detect_current_season():
 
 
 def download_pdf(season):
-    """Prova a scaricare il PDF per la stagione data.
-    Ritorna True se ok, False altrimenti."""
     url = f"{BASE_URL}/orario_voli_{season}.pdf"
-    print(f"📥 Download {url}", file=sys.stderr)
+    print(f"Download {url}", file=sys.stderr)
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (daycation-bologna parser)"})
         with urllib.request.urlopen(req, timeout=30) as resp:
@@ -59,18 +44,12 @@ def download_pdf(season):
 
 
 def pdf_to_text():
-    """Estrae testo dal PDF preservando il layout tabellare."""
-    result = subprocess.run(
-        ["pdftotext", "-layout", TMP_PDF, TMP_TXT],
-        capture_output=True, text=True
-    )
+    result = subprocess.run(["pdftotext", "-layout", TMP_PDF, TMP_TXT],
+                            capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"pdftotext failed: {result.stderr}")
 
 
-# ─────────────────────────────────────────────────────────────────────
-# REGEX (riusate dal parser validato sul PDF Estate 2026)
-# ─────────────────────────────────────────────────────────────────────
 RE_FLIGHT = re.compile(
     r'^\s{0,40}'
     r'(?P<dest>[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\u2019\'\.\- ]{1,40}?)\s{2,}'
@@ -94,18 +73,15 @@ def freq_bitmap(freq_list):
 
 
 def vstr_compact(a, b):
-    """'09/04/2026' '31/08/2026' -> ['0409','0831']"""
-    da, ma, ya = a.split('/')
-    db, mb, yb = b.split('/')
+    da, ma, _ = a.split('/')
+    db, mb, _ = b.split('/')
     return [ma+da, mb+db]
 
 
 def find_departures_arrivals_split(lines):
-    """Trova l'indice di riga dove inizia la sezione Arrivi."""
     for i, ln in enumerate(lines):
         if 'Arrivi voli di linea' in ln or 'Flight arrivals' in ln:
             return i
-    # fallback: cerca header "Da" (origine)
     for i, ln in enumerate(lines):
         if re.match(r'^\s+Da\s+Compagnia', ln):
             return i
@@ -113,7 +89,6 @@ def find_departures_arrivals_split(lines):
 
 
 def parse_section(lines):
-    """Parsa una sezione (partenze o arrivi) e ritorna lista di voli."""
     types, payloads = [], []
     for ln in lines:
         if ':' in ln and re.search(r'\d{2}:\d{2}', ln):
@@ -135,8 +110,6 @@ def parse_section(lines):
     F_idx = [i for i, t in enumerate(types) if t == 'F']
     F_pos = {x: i for i, x in enumerate(F_idx)}
     flight_vals = [[] for _ in F_idx]
-
-    # Validità orfane assegnate al volo precedente (regola del PDF BLQ)
     last_F = None
     for i, t in enumerate(types):
         if t == 'F':
@@ -145,7 +118,6 @@ def parse_section(lines):
             if last_F is not None:
                 flight_vals[F_pos[last_F]].append(payloads[i])
             else:
-                # validità prima del primo volo: assegna al successivo
                 for j in range(i+1, len(types)):
                     if types[j] == 'F':
                         flight_vals[F_pos[j]].append(payloads[i])
@@ -177,45 +149,37 @@ def parse_section(lines):
 
 def main():
     season = detect_current_season()
-    print(f"📅 Stagione corrente: {season}", file=sys.stderr)
+    print(f"Stagione: {season}", file=sys.stderr)
 
     if not download_pdf(season):
-        # fallback: prova stagione prossima/precedente
-        print("Tentativo fallback su altre stagioni...", file=sys.stderr)
+        print("Fallback...", file=sys.stderr)
         for fallback in [f"summer_{datetime.date.today().year}",
                           f"winter_{datetime.date.today().year-1}_{datetime.date.today().year}"]:
             if fallback != season and download_pdf(fallback):
                 season = fallback
                 break
         else:
-            print("❌ Impossibile scaricare PDF da BLQ", file=sys.stderr)
+            print("ERRORE: PDF non scaricabile", file=sys.stderr)
             sys.exit(1)
 
     pdf_to_text()
     lines = open(TMP_TXT).readlines()
     split_idx = find_departures_arrivals_split(lines)
     if not split_idx:
-        print("❌ Impossibile trovare divisione partenze/arrivi", file=sys.stderr)
+        print("ERRORE: split partenze/arrivi non trovato", file=sys.stderr)
         sys.exit(1)
 
-    print(f"   Split a riga {split_idx}", file=sys.stderr)
     deps = parse_section(lines[:split_idx])
     arrs = parse_section(lines[split_idx:])
     print(f"   Partenze: {len(deps)} | Arrivi: {len(arrs)}", file=sys.stderr)
 
-    # ─── FILTRO daycation-utile ───
-    # Partenze utili: parte tra 04:00 e 14:00 (per arrivare a destinazione entro il primo pomeriggio)
-    # Arrivi utili: arrivano a BLQ tra 16:00 e 23:59 (sera, ritorno serale)
     deps_dc = [v for v in deps if '04:00' <= v['dep'] <= '14:00']
     arrs_dc = [v for v in arrs if v['arr'] >= '16:00']
+    cities = set(v['city'] for v in deps_dc) & set(v['city'] for v in arrs_dc)
+    deps_dc = [v for v in deps_dc if v['city'] in cities]
+    arrs_dc = [v for v in arrs_dc if v['city'] in cities]
+    print(f"   Daycation: {len(deps_dc)} dep + {len(arrs_dc)} arr | Città: {len(cities)}", file=sys.stderr)
 
-    # Tieni solo città con sia andata sia ritorno utili
-    cities_with_both = set(v['city'] for v in deps_dc) & set(v['city'] for v in arrs_dc)
-    deps_dc = [v for v in deps_dc if v['city'] in cities_with_both]
-    arrs_dc = [v for v in arrs_dc if v['city'] in cities_with_both]
-    print(f"   Daycation-utili: {len(deps_dc)} dep + {len(arrs_dc)} arr | Città: {len(cities_with_both)}", file=sys.stderr)
-
-    # ─── Formato compatto array ───
     def compact(v):
         return [v['city'], v['flightNo'], v['dep'], v['arr'],
                 freq_bitmap(v['freq']), v['val']]
@@ -230,16 +194,15 @@ def main():
             "arrs_total": len(arrs),
             "deps_daycation": len(deps_dc),
             "arrs_daycation": len(arrs_dc),
-            "cities": sorted(cities_with_both),
+            "cities": sorted(cities),
         },
         "d": [compact(v) for v in deps_dc],
         "a": [compact(v) for v in arrs_dc],
     }
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, 'w') as f:
         json.dump(output, f, ensure_ascii=False, separators=(',', ':'))
-    print(f"✅ Scritto {OUTPUT_FILE} ({os.path.getsize(OUTPUT_FILE)} bytes)", file=sys.stderr)
+    print(f"Scritto {OUTPUT_FILE} ({os.path.getsize(OUTPUT_FILE)} bytes)", file=sys.stderr)
 
 
 if __name__ == '__main__':
