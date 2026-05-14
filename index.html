@@ -38,6 +38,27 @@ input[type=date]:focus,input[type=text]:focus,select:focus{border-color:#0A1628}
 .range-btn{flex:1;height:38px;border:1.5px solid #E1E6EE;background:#fff;color:#94A3B8;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer}
 .range-btn.on{border-color:#0A1628;background:#0A1628;color:#fff}
 
+/* Custom dropdown */
+.dropdown{position:relative}
+.dropdown-input{display:flex;align-items:center;height:46px;border:1.5px solid #E1E6EE;border-radius:11px;padding:0 12px;background:#fff;cursor:pointer;font-size:15px;font-weight:600;justify-content:space-between}
+.dropdown-input.open{border-color:#0A1628}
+.dropdown-input .placeholder{color:#94A3B8;font-weight:500}
+.dropdown-input .caret{color:#94A3B8;font-size:11px;flex-shrink:0;margin-left:8px;transition:transform .15s}
+.dropdown-input.open .caret{transform:rotate(180deg)}
+.dropdown-input .selected-flag{margin-right:6px}
+.dropdown-input .clear-btn{background:#F5F7FB;border:none;border-radius:50%;width:22px;height:22px;color:#6B7785;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px;font-weight:700;line-height:1}
+.dropdown-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border-radius:12px;box-shadow:0 12px 40px rgba(10,22,40,.18);border:1px solid #E1E6EE;z-index:100;overflow:hidden;max-height:60vh;display:none;flex-direction:column}
+.dropdown-panel.open{display:flex}
+.dropdown-search{padding:10px 12px;border-bottom:1px solid #EAEEF5}
+.dropdown-search input{width:100%;height:38px;border:1px solid #E1E6EE;border-radius:9px;padding:0 12px;font-size:14px;outline:none;font-weight:500}
+.dropdown-search input:focus{border-color:#0A1628}
+.dropdown-list{overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:50vh}
+.dropdown-item{padding:11px 14px;border-bottom:1px solid #F5F7FB;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+.dropdown-item:active,.dropdown-item:hover{background:#F5F7FB}
+.dropdown-item .iata{font-size:11px;color:#6B7785;font-weight:500;margin-left:auto}
+.dropdown-item.no-results{color:#94A3B8;font-weight:500;font-style:italic;justify-content:center;cursor:default}
+.dropdown-item.no-results:active,.dropdown-item.no-results:hover{background:#fff}
+
 .card{background:#fff;border-radius:18px;margin-bottom:12px;overflow:hidden;border:1px solid #EAEEF5}
 .c-head{padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .c-title{font-size:19px;font-weight:800;letter-spacing:-.3px;line-height:1.2}
@@ -64,7 +85,8 @@ input[type=date]:focus,input[type=text]:focus,select:focus{border-color:#0A1628}
 .state{text-align:center;padding:48px 24px}
 .state-icon{font-size:42px;margin-bottom:14px;opacity:.7}
 .state-title{font-size:18px;font-weight:800;margin-bottom:8px}
-.state-msg{font-size:13px;color:#6B7785;line-height:1.6;max-width:300px;margin:0 auto}
+.state-msg{font-size:13px;color:#6B7785;line-height:1.6;max-width:320px;margin:0 auto}
+.state-hint{margin-top:16px;padding:12px 16px;background:#FFF7E6;border-radius:10px;font-size:12px;color:#8B5A0A;max-width:320px;margin-left:auto;margin-right:auto;text-align:left;line-height:1.5}
 
 .loading{padding:60px 20px;text-align:center;color:#6B7785;font-size:13px}
 .spin{display:inline-block;width:22px;height:22px;border:2.5px solid #E1E6EE;border-top-color:#F5A623;border-radius:50%;animation:s 1s linear infinite;margin-bottom:10px}
@@ -83,6 +105,10 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
 .date-card .c-title{font-size:17px}
 .date-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;background:#FFF7E6;color:#8B5A0A;margin-left:6px;text-transform:uppercase;letter-spacing:.3px}
 .date-badge.weekend{background:#E6F9F3;color:#0A7A50}
+
+/* Backdrop quando dropdown è aperto su mobile */
+.dropdown-backdrop{display:none;position:fixed;inset:0;background:rgba(10,22,40,.25);z-index:90}
+.dropdown-backdrop.on{display:block}
 </style>
 </head>
 <body>
@@ -127,9 +153,20 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
 
   <div class="form-card" id="formDest" style="display:none">
     <div class="lbl">Dove vuoi andare?</div>
-    <input type="text" id="cityInput" list="citiesList" placeholder="Inizia a digitare…" autocomplete="off">
-    <datalist id="citiesList"></datalist>
-    <div class="tiny muted" style="margin-top:4px">Seleziona una città servita da BLQ</div>
+    <div class="dropdown" id="cityDropdown">
+      <div class="dropdown-input" id="cityDropdownInput">
+        <span id="cityDropdownLabel" class="placeholder">Scegli una città…</span>
+        <span class="caret">▼</span>
+      </div>
+      <div class="dropdown-panel" id="cityDropdownPanel">
+        <div class="dropdown-search">
+          <input type="text" id="cityDropdownSearch" placeholder="Cerca città…" autocomplete="off" inputmode="search">
+        </div>
+        <div class="dropdown-list" id="cityDropdownList"></div>
+      </div>
+    </div>
+    <div class="tiny muted" style="margin-top:6px" id="cityDropdownHint">Solo destinazioni davvero raggiungibili in giornata</div>
+
     <div style="display:flex;gap:10px;margin-top:14px">
       <div style="flex:1">
         <div class="lbl">Persone</div>
@@ -170,6 +207,8 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
   </div>
 </div>
 
+<div class="dropdown-backdrop" id="dropdownBackdrop"></div>
+
 <main>
   <div id="content">
     <div class="loading">
@@ -186,6 +225,7 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
 
 <script>
 let DATA = null;
+let DAYCATION_CITIES = []; // città con almeno una daycation possibile in stagione (>= 3h)
 const STATE = { mode: 'data', date: null, city: null, pax: 2, minH: 5, sort: 'ore', range: 60, weekdays: [] };
 
 const t2m = t => parseInt(t)*60 + parseInt(t.slice(3));
@@ -198,6 +238,7 @@ const DAYS_S = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const fmtDate = iso => { if(!iso)return''; const d=new Date(iso); return `${DAYS[d.getDay()]} ${parseInt(iso.slice(8))} ${MONTHS[parseInt(iso.slice(5,7))-1]}`; };
 const fmtDateShort = iso => { const d=new Date(iso); return `${DAYS_S[d.getDay()]} ${parseInt(iso.slice(8))} ${MONTHS[parseInt(iso.slice(5,7))-1]}`; };
 const isoWd = iso => { const d = new Date(iso); return d.getDay() === 0 ? 7 : d.getDay(); };
+const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
 const AIRLINES = {FR:{n:'Ryanair',c:'#0033A0'},W4:{n:'Wizz Air',c:'#C1167C'},W6:{n:'Wizz Air',c:'#C1167C'},VY:{n:'Vueling',c:'#FFCB05'},V7:{n:'Volotea',c:'#1B4FBB'},NO:{n:'Neos',c:'#E8002D'},TB:{n:'TUI',c:'#003087'},RK:{n:'Ryanair UK',c:'#0033A0'},D8:{n:'Norwegian',c:'#D81939'},BJ:{n:'Nouvelair',c:'#E5002B'},JU:{n:'Air Serbia',c:'#2B3990'},SN:{n:'Brussels Airlines',c:'#0033A0'},LG:{n:'Luxair',c:'#0062AE'},TU:{n:'Tunisair',c:'#CC0001'},OS:{n:'Austrian',c:'#CC0001'},AY:{n:'Finnair',c:'#003580'},SK:{n:'SAS',c:'#001B72'},IB:{n:'Iberia',c:'#CC0000'},TP:{n:'TAP Portugal',c:'#007749'},EN:{n:'Air Dolomiti',c:'#003189'},TK:{n:'Turkish Airlines',c:'#C8102E'},A3:{n:'Aegean',c:'#00529B'},KL:{n:'KLM',c:'#009DE0'},LH:{n:'Lufthansa',c:'#05164D'},EW:{n:'Eurowings',c:'#7B2D8B'},AZ:{n:'ITA Airways',c:'#0D2A5C'},EK:{n:'Emirates',c:'#D71921'},U2:{n:'easyJet',c:'#FF6600'},HV:{n:'Transavia',c:'#1DB954'},BA:{n:'British Airways',c:'#075AAA'},EI:{n:'Aer Lingus',c:'#00833E'},RO:{n:'TAROM',c:'#0033A0'},GP:{n:'APG',c:'#6B7785'}};
 function airline(fno){const p=fno.replace(/\d/g,'');return AIRLINES[p.slice(0,2)]||AIRLINES[p.slice(0,1)]||{n:fno.slice(0,3),c:'#6B7785'};}
@@ -257,6 +298,30 @@ function findByCity(city,minH,rangeOpt,weekdaysOk){
   return res;
 }
 
+// Precomputa quali città hanno ALMENO UNA daycation possibile nella stagione (soglia 3h)
+function computeDaycationCapableCities(){
+  const allDates=DATA.d.flatMap(v=>v[5]).flat();
+  if(!allDates.length)return [];
+  const minMd=allDates.reduce((a,b)=>a<b?a:b);
+  const maxMd=allDates.reduce((a,b)=>a>b?a:b);
+  const yr=new Date().getFullYear();
+  const start=new Date(yr, parseInt(minMd.slice(0,2))-1, parseInt(minMd.slice(2)));
+  const end=new Date(yr, parseInt(maxMd.slice(0,2))-1, parseInt(maxMd.slice(2)));
+  const cities=[...new Set(DATA.d.map(v=>v[0]))];
+  const capable=[];
+  for(const c of cities){
+    const cur=new Date(start);
+    let found=false;
+    while(cur<=end && !found){
+      const iso=cur.toISOString().slice(0,10);
+      if(bestComboForCity(c, iso, 3)){found=true;break;}
+      cur.setDate(cur.getDate()+1);
+    }
+    if(found)capable.push(c);
+  }
+  return capable.sort();
+}
+
 function cardCityHTML(r){
   const ci=cityInfo(r.city);
   const sky=skyLink(ci.iata,STATE.date,STATE.pax);
@@ -293,25 +358,21 @@ function renderByDate(root){
   }
   const results=findByDate(STATE.date,STATE.minH);
   if(!results.length){
-    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessuna daycation possibile</div><div class="state-msg">${DAYS[new Date(STATE.date).getDay()]}: nessun volo diretto da BLQ permette almeno ${STATE.minH}h sul posto.</div></div>`;
+    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessuna daycation possibile</div><div class="state-msg">${DAYS[new Date(STATE.date).getDay()]}: nessun volo diretto da BLQ permette almeno ${STATE.minH}h sul posto.</div>${STATE.minH>3?'<div class="state-hint">💡 Prova a ridurre le ore minime a 3h o 5h per vedere più opzioni.</div>':''}</div>`;
     return;
   }
   if(STATE.sort==='ore')results.sort((a,b)=>b.orePosto-a.orePosto);
   else if(STATE.sort==='partenza')results.sort((a,b)=>a.out[2].localeCompare(b.out[2]));
   else if(STATE.sort==='rientro')results.sort((a,b)=>a.ret[3].localeCompare(b.ret[3]));
 
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} gite possibili</div><div class="result-day">${DAYS[new Date(STATE.date).getDay()]}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra prima</button></div>${results.map(cardCityHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Mostro solo voli <strong>diretti</strong> andata+ritorno nello stesso giorno secondo l'orario ufficiale BLQ. Per ogni città scelgo la combinazione che lascia più tempo sul posto.</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} gite possibili</div><div class="result-day">${DAYS[new Date(STATE.date).getDay()]}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra prima</button></div>${results.map(cardCityHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Mostro solo voli <strong>diretti</strong> andata+ritorno nello stesso giorno secondo l'orario ufficiale BLQ. Per ogni città scelgo la combinazione che lascia più tempo sul posto.<br><br>Dataset BLQ: <strong>${DATA.meta.cities.length} città totali servite</strong>, di cui <strong>${DAYCATION_CITIES.length} davvero raggiungibili in giornata</strong>.</div>`;
 
   root.querySelectorAll('.sort-pill').forEach(b=>b.addEventListener('click',()=>{STATE.sort=b.dataset.s;render();}));
 }
 
 function renderByDest(root){
   if(!STATE.city){
-    root.innerHTML=`<div class="state"><div class="state-icon">📍</div><div class="state-title">Scegli una destinazione</div><div class="state-msg">Inizia a digitare il nome di una città servita da BLQ nel campo qui sopra.</div></div>`;
-    return;
-  }
-  if(!DATA.meta.cities.includes(STATE.city)){
-    root.innerHTML=`<div class="state"><div class="state-icon">❓</div><div class="state-title">Città non disponibile</div><div class="state-msg"><strong>${STATE.city}</strong> non è servita da BLQ in questa stagione, o non è raggiungibile con un volo diretto.</div></div>`;
+    root.innerHTML=`<div class="state"><div class="state-icon">📍</div><div class="state-title">Scegli una destinazione</div><div class="state-msg">Tocca il campo qui sopra e scegli tra le <strong>${DAYCATION_CITIES.length} città</strong> davvero raggiungibili in giornata da Bologna.</div></div>`;
     return;
   }
   const results=findByCity(STATE.city,STATE.minH,STATE.range,STATE.weekdays);
@@ -319,7 +380,16 @@ function renderByDest(root){
     const ci=cityInfo(STATE.city);
     const rTxt=STATE.range==='all'?"in questa stagione":`nei prossimi ${STATE.range} giorni`;
     const wTxt=STATE.weekdays.length?" coi giorni filtrati":"";
-    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessuna daycation per ${STATE.city}</div><div class="state-msg">${ci.flag} Non c'è una combinazione andata+ritorno diretta da BLQ ${rTxt}${wTxt} con almeno ${STATE.minH}h sul posto.</div></div>`;
+    // Suggerimento intelligente
+    let hint = '';
+    if (STATE.minH > 3 || STATE.weekdays.length || STATE.range !== 'all') {
+      const hints = [];
+      if (STATE.minH > 3) hints.push('riduci le ore minime');
+      if (STATE.weekdays.length) hints.push('togli il filtro sui giorni');
+      if (STATE.range !== 'all') hints.push('estendi a tutta la stagione');
+      hint = `<div class="state-hint">💡 Prova a: ${hints.join(', ')}.</div>`;
+    }
+    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessuna daycation per ${STATE.city}</div><div class="state-msg">${ci.flag} Non c'è una combinazione andata+ritorno diretta da BLQ ${rTxt}${wTxt} con almeno ${STATE.minH}h sul posto.</div>${hint}</div>`;
     return;
   }
   const ci=cityInfo(STATE.city);
@@ -333,6 +403,79 @@ function switchMode(m){
   document.getElementById('formData').style.display=m==='data'?'block':'none';
   document.getElementById('formDest').style.display=m==='dest'?'block':'none';
   render();
+}
+
+// ─── CUSTOM CITY DROPDOWN ───
+function setupCityDropdown(){
+  const root=document.getElementById('cityDropdown');
+  const input=document.getElementById('cityDropdownInput');
+  const panel=document.getElementById('cityDropdownPanel');
+  const search=document.getElementById('cityDropdownSearch');
+  const list=document.getElementById('cityDropdownList');
+  const label=document.getElementById('cityDropdownLabel');
+  const backdrop=document.getElementById('dropdownBackdrop');
+
+  function renderList(filter=''){
+    const q=normalize(filter.trim());
+    const filtered=DAYCATION_CITIES.filter(c=>!q||normalize(c).includes(q));
+    if(!filtered.length){
+      list.innerHTML='<div class="dropdown-item no-results">Nessuna città trovata</div>';
+      return;
+    }
+    list.innerHTML=filtered.map(c=>{
+      const ci=cityInfo(c);
+      return `<div class="dropdown-item" data-city="${c}">${ci.flag} <span>${c}</span><span class="iata">${ci.iata}</span></div>`;
+    }).join('');
+    list.querySelectorAll('.dropdown-item[data-city]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const c=el.dataset.city;
+        STATE.city=c;
+        const ci=cityInfo(c);
+        label.innerHTML=`<span class="selected-flag">${ci.flag}</span><span>${c}</span>`;
+        label.classList.remove('placeholder');
+        // Aggiungi pulsante clear se non c'è
+        if(!input.querySelector('.clear-btn')){
+          const clr=document.createElement('button');
+          clr.className='clear-btn';
+          clr.textContent='×';
+          clr.setAttribute('aria-label','Cancella');
+          clr.addEventListener('click',e=>{
+            e.stopPropagation();
+            STATE.city=null;
+            label.textContent='Scegli una città…';
+            label.classList.add('placeholder');
+            clr.remove();
+            render();
+          });
+          input.insertBefore(clr,input.querySelector('.caret'));
+        }
+        close();
+        render();
+      });
+    });
+  }
+
+  function open(){
+    panel.classList.add('open');
+    input.classList.add('open');
+    backdrop.classList.add('on');
+    search.value='';
+    renderList();
+    // Su mobile, dare focus può scatenare tastiera che copre — meglio aspettare un attimo
+    setTimeout(()=>search.focus(),50);
+  }
+  function close(){
+    panel.classList.remove('open');
+    input.classList.remove('open');
+    backdrop.classList.remove('on');
+  }
+  input.addEventListener('click',e=>{
+    // se ho cliccato il clear, non aprire
+    if(e.target.classList.contains('clear-btn'))return;
+    if(panel.classList.contains('open'))close();else open();
+  });
+  search.addEventListener('input',e=>renderList(e.target.value));
+  backdrop.addEventListener('click',close);
 }
 
 async function init(){
@@ -349,10 +492,6 @@ async function init(){
     render();
   }));
 
-  const ci=document.getElementById('cityInput');
-  const tryCommit=v=>{v=v.trim();if(DATA&&DATA.meta.cities.includes(v)){STATE.city=v;render();}};
-  ci.addEventListener('change',e=>tryCommit(e.target.value));
-  ci.addEventListener('input',e=>tryCommit(e.target.value));
   document.getElementById('paxInput2').addEventListener('change',e=>{STATE.pax=parseInt(e.target.value);document.getElementById('paxInput').value=e.target.value;render();});
   document.querySelectorAll('#hoursFilter2 .chip').forEach(b=>b.addEventListener('click',()=>{
     document.querySelectorAll('#hoursFilter2 .chip').forEach(c=>c.classList.remove('on'));
@@ -379,9 +518,9 @@ async function init(){
     const resp=await fetch('data.json',{cache:'no-cache'});
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     DATA=await resp.json();
-    document.getElementById('metaInfo').textContent=`${DATA.meta.cities.length} destinazioni · ${DATA.meta.season.replace('_',' ')}`;
-    const dl=document.getElementById('citiesList');
-    DATA.meta.cities.forEach(c=>{const o=document.createElement('option');o.value=c;dl.appendChild(o);});
+    DAYCATION_CITIES=computeDaycationCapableCities();
+    document.getElementById('metaInfo').textContent=`${DAYCATION_CITIES.length} destinazioni daycation · ${DATA.meta.season.replace('_',' ')}`;
+    setupCityDropdown();
     render();
   }catch(e){
     document.getElementById('content').innerHTML=`<div class="state"><div class="state-icon">⚠️</div><div class="state-title">Errore di caricamento</div><div class="state-msg">Non riesco a caricare gli orari aggiornati.<br><br><span class="tiny muted">${e.message}</span></div></div>`;
