@@ -4,8 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0A1628">
-<title>Daycation Bologna</title>
-<meta name="description" content="Gite in giornata in aereo da Bologna, con orari ufficiali dell'aeroporto Marconi.">
+<title>Daycation Bologna · Voli diretti, in giornata, da BLQ</title>
+<meta name="description" content="Trova voli diretti andata+ritorno in giornata da Bologna. 28 destinazioni reali, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
+
+<!-- Open Graph (Facebook, LinkedIn, WhatsApp, Telegram) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Daycation Bologna">
+<meta property="og:title" content="Daycation Bologna · Voli diretti, in giornata, da BLQ">
+<meta property="og:description" content="28 destinazioni reali da Bologna in giornata. Orari ufficiali aeroporto Marconi, zero stime, prezzi live su Skyscanner.">
+<meta property="og:url" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/">
+<meta property="og:image" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Daycation Bologna - 28 destinazioni daycation da BLQ">
+<meta property="og:locale" content="it_IT">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Daycation Bologna · Voli diretti, in giornata, da BLQ">
+<meta name="twitter:description" content="28 destinazioni reali da Bologna in giornata. Orari ufficiali, prezzi live su Skyscanner.">
+<meta name="twitter:image" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/og-image.png">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
+<!-- iOS Home Screen -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Daycation">
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
@@ -220,18 +250,98 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
 
 <footer>
   <div>Dati: <a href="https://www.bologna-airport.it" target="_blank" rel="noopener">Aeroporto G. Marconi Bologna</a> · prezzi reali su Skyscanner</div>
-  <div class="sig">AV · 2026</div>
+  <div id="freshInfo" class="tiny muted" style="margin-top:4px"></div>
+  <div class="sig" id="sigStats" style="cursor:pointer" title="Statistiche">AV · 2026</div>
 </footer>
 
 <script>
 let DATA = null;
 let DAYCATION_CITIES = [];
+
+/* ===== Contatore d'uso (solo questo dispositivo, localStorage) ===== */
+const STATS_KEY='dcb_stats_v1';
+function loadStats(){try{return JSON.parse(localStorage.getItem(STATS_KEY))||{}}catch(e){return{}}}
+function track(ev,detail){
+  try{
+    const s=loadStats();
+    s.firstUse=s.firstUse||new Date().toISOString();
+    s.lastUse=new Date().toISOString();
+    s.events=s.events||{};
+    s.events[ev]=(s.events[ev]||0)+1;
+    if(detail){s.byCity=s.byCity||{};s.byCity[ev]=s.byCity[ev]||{};s.byCity[ev][detail]=(s.byCity[ev][detail]||0)+1;}
+    localStorage.setItem(STATS_KEY,JSON.stringify(s));
+  }catch(e){}
+}
+function topCities(obj){if(!obj)return[];return Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`${c} (${n})`);}
+function renderStats(){
+  const s=loadStats();const e=s.events||{};
+  const days=s.firstUse?Math.max(1,Math.round((Date.now()-new Date(s.firstUse))/864e5)):0;
+  const opens=e.open||0;
+  const md=e.open_data||0,mt=e.open_dest||0,tot=md+mt;
+  const pd=tot?Math.round(md/tot*100):0,pt=tot?Math.round(mt/tot*100):0;
+  const byCity=(s.byCity||{});
+  const sel=topCities(byCity.city);
+  const noRes=topCities(byCity.noresult_dest);
+  const root=document.getElementById('content');
+  document.getElementById('formData').style.display='none';
+  document.getElementById('formDest').style.display='none';
+  document.querySelector('.mode-tabs').style.display='none';
+  root.innerHTML=`
+  <div style="background:#fff;border-radius:16px;border:1px solid #EAEEF5;padding:20px 18px;margin-bottom:14px">
+    <div style="font-size:18px;font-weight:800;color:#0A1628;margin-bottom:2px">📊 Statistiche d'uso</div>
+    <div class="tiny muted" style="margin-bottom:16px">Solo questo telefono · ${days} giorni · ${opens} aperture</div>
+
+    <div style="font-size:12px;font-weight:700;color:#6B7785;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Modalità più usata</div>
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <div style="flex:1;background:#F5F7FA;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:#0A1628">${md}</div>
+        <div class="tiny muted">📅 Per data · ${pd}%</div>
+      </div>
+      <div style="flex:1;background:#F5F7FA;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:#0A1628">${mt}</div>
+        <div class="tiny muted">📍 Per dest. · ${pt}%</div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#6B7785;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">"Nessun risultato"</div>
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <div style="flex:1;background:#F5F7FA;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:#0A1628">${e.noresult_data||0}</div>
+        <div class="tiny muted">in Per data</div>
+      </div>
+      <div style="flex:1;background:#FFF4E5;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:#0A1628">${e.noresult_dest||0}</div>
+        <div class="tiny muted">in Per dest.</div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#6B7785;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Città cercate</div>
+    <div class="tiny" style="color:#0A1628;line-height:1.8;margin-bottom:16px">${sel.length?sel.slice(0,12).join(' · '):'<span class="muted">nessuna ancora</span>'}</div>
+
+    <div style="font-size:12px;font-weight:700;color:#6B7785;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Città scelte → 0 risultati ⚠️</div>
+    <div class="tiny" style="color:#B45309;line-height:1.8;margin-bottom:18px">${noRes.length?noRes.slice(0,12).join(' · '):'<span class="muted">nessuna — buon segno</span>'}</div>
+
+    <button id="copyStats" style="width:100%;height:46px;border:none;background:#0A1628;color:#fff;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px">📋 Copia dati (poi incollameli)</button>
+    <button id="resetStats" style="width:100%;height:40px;border:1px solid #EAEEF5;background:#fff;color:#B91C1C;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px">Azzera statistiche</button>
+    <a href="./" style="display:block;text-align:center;font-size:13px;color:#6B7785;padding:8px">← Torna all'app</a>
+  </div>`;
+  document.getElementById('copyStats').addEventListener('click',()=>{
+    const payload=JSON.stringify(loadStats());
+    navigator.clipboard.writeText(payload).then(()=>{
+      const b=document.getElementById('copyStats');b.textContent='✓ Copiato — incollalo in chat';setTimeout(()=>b.textContent='📋 Copia dati (poi incollameli)',2500);
+    }).catch(()=>{prompt('Copia questo testo:',payload);});
+  });
+  document.getElementById('resetStats').addEventListener('click',()=>{
+    if(confirm('Azzero le statistiche di questo telefono?')){localStorage.removeItem(STATS_KEY);renderStats();}
+  });
+}
 const STATE = { mode: 'data', date: null, city: null, pax: 2, minH: 5, sort: 'ore', range: 60, weekdays: [] };
 
 const t2m = t => parseInt(t)*60 + parseInt(t.slice(3));
 const freqOk = (bm, wd) => (bm >> (wd-1)) & 1;
 const inVal = (iso, vals) => { const md = iso.slice(5,7)+iso.slice(8,10); return vals.some(([f,t]) => f<=md && md<=t); };
-const todayPlus = n => { const d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+const fmtISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayPlus = n => { const d=new Date(); d.setDate(d.getDate()+n); return fmtISO(d); };
 const MONTHS = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 const DAYS = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
 const DAYS_S = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
@@ -245,6 +355,13 @@ function airline(fno){const p=fno.replace(/\d/g,'');return AIRLINES[p.slice(0,2)
 
 const CITY_INFO = {'Alghero':{iata:'AHO',flag:'🇮🇹',desc:'Sardegna · spiagge · centro catalano'},'Alicante':{iata:'ALC',flag:'🇪🇸',desc:'Costa Blanca · castello · spiagge'},'Amsterdam':{iata:'AMS',flag:'🇳🇱',desc:'Canali · musei · Vondelpark'},'Atene':{iata:'ATH',flag:'🇬🇷',desc:'Acropoli · Plaka'},'Barcellona':{iata:'BCN',flag:'🇪🇸',desc:'Gaudí · Ramblas · spiaggia'},'Bari':{iata:'BRI',flag:'🇮🇹',desc:'Puglia · centro storico · mare'},'Belgrado':{iata:'BEG',flag:'🇷🇸',desc:'Kalemegdan · centro · caffè'},'Berlino':{iata:'BER',flag:'🇩🇪',desc:'Muro · musei · Tiergarten'},'Brindisi':{iata:'BDS',flag:'🇮🇹',desc:'Puglia · Salento · mare'},'Bruxelles':{iata:'BRU',flag:'🇧🇪',desc:'Grand Place · cioccolato'},'Budapest':{iata:'BUD',flag:'🇭🇺',desc:'Terme · Parlamento · Danubio'},'Cagliari':{iata:'CAG',flag:'🇮🇹',desc:'Sardegna · Castello · Poetto'},'Casablanca':{iata:'CMN',flag:'🇲🇦',desc:'Marocco · moschea Hassan II'},'Catania':{iata:'CTA',flag:'🇮🇹',desc:'Sicilia · Etna · pasticceria'},'Chania':{iata:'CHQ',flag:'🇬🇷',desc:'Creta ovest · porto veneziano'},'Chisinau':{iata:'KIV',flag:'🇲🇩',desc:'Moldavia · vini · centro'},'Copenaghen':{iata:'CPH',flag:'🇩🇰',desc:'Nyhavn · Tivoli · design'},'Corfù':{iata:'CFU',flag:'🇬🇷',desc:'Isole Ionie · centro UNESCO'},'Cracovia':{iata:'KRK',flag:'🇵🇱',desc:'Centro UNESCO · Wawel'},'Crotone':{iata:'CRV',flag:'🇮🇹',desc:'Calabria · mare cristallino'},'Dublino':{iata:'DUB',flag:'🇮🇪',desc:'Guinness · Temple Bar · Trinity'},'Dusseldorf':{iata:'DUS',flag:'🇩🇪',desc:'Altstadt · Reno · birrerie'},'Edimburgo':{iata:'EDI',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',desc:'Castello · Royal Mile'},'Eindhoven':{iata:'EIN',flag:'🇳🇱',desc:'Design · Philips · Strijp-S'},'Fez':{iata:'FEZ',flag:'🇲🇦',desc:'Marocco · medina UNESCO'},'Francoforte':{iata:'FRA',flag:'🇩🇪',desc:'Skyline · Römer · musei'},'Fuerteventura':{iata:'FUE',flag:'🇪🇸',desc:'Canarie · dune · spiagge'},'Helsinki':{iata:'HEL',flag:'🇫🇮',desc:'Design · sauna · Suomenlinna'},'Heraklion':{iata:'HER',flag:'🇬🇷',desc:'Creta · Cnosso · spiagge'},'Ibiza':{iata:'IBZ',flag:'🇪🇸',desc:'Spiagge · Dalt Vila · vita notturna'},'Istanbul':{iata:'IST',flag:'🇹🇷',desc:'Bosforo · bazar · moschee'},'Karpathos':{iata:'AOK',flag:'🇬🇷',desc:'Dodecaneso · spiagge · tradizioni'},'Lamezia Terme':{iata:'SUF',flag:'🇮🇹',desc:'Calabria · Tropea vicina'},'Lanzarote':{iata:'ACE',flag:'🇪🇸',desc:'Canarie · vulcani · Timanfaya'},'Lisbona':{iata:'LIS',flag:'🇵🇹',desc:'Alfama · pastéis · tram 28'},'Lussemburgo':{iata:'LUX',flag:'🇱🇺',desc:'Centro UNESCO · vini'},'Madrid':{iata:'MAD',flag:'🇪🇸',desc:'Prado · Plaza Mayor · tapas'},'Mahon':{iata:'MAH',flag:'🇪🇸',desc:'Minorca · porto · spiagge'},'Malaga':{iata:'AGP',flag:'🇪🇸',desc:'Costa del Sol · Picasso'},'Malta':{iata:'MLA',flag:'🇲🇹',desc:'Valletta · Mdina · scogliere'},'Manchester':{iata:'MAN',flag:'🇬🇧',desc:'Musei · Old Trafford'},'Marrakech':{iata:'RAK',flag:'🇲🇦',desc:'Medina · suk · Atlas'},'Marsa Alam':{iata:'RMF',flag:'🇪🇬',desc:'Mar Rosso · diving'},'Marsiglia':{iata:'MRS',flag:'🇫🇷',desc:'Vieux Port · calanques'},'Mikonos':{iata:'JMK',flag:'🇬🇷',desc:'Cicladi · spiagge · vento'},'Monaco':{iata:'MUC',flag:'🇩🇪',desc:'Marienplatz · birrerie · BMW'},'Olbia':{iata:'OLB',flag:'🇮🇹',desc:'Sardegna · Costa Smeralda'},'Palermo':{iata:'PMO',flag:'🇮🇹',desc:'Sicilia · arabi-normanni'},'Palma di Maiorca':{iata:'PMI',flag:'🇪🇸',desc:'Cattedrale · Tramuntana'},'Porto':{iata:'OPO',flag:'🇵🇹',desc:'Ribeira · vino · azulejos'},'Praga':{iata:'PRG',flag:'🇨🇿',desc:'Ponte Carlo · città vecchia'},'Reggio Calabria':{iata:'REG',flag:'🇮🇹',desc:'Bronzi · Stretto · cibo'},'Rodi':{iata:'RHO',flag:'🇬🇷',desc:'Centro medievale · spiagge'},'Salonicco':{iata:'SKG',flag:'🇬🇷',desc:'Centro vivace · mare'},'Santander':{iata:'SDR',flag:'🇪🇸',desc:'Cantabria · spiagge · El Sardinero'},'Sharm El Sheikh':{iata:'SSH',flag:'🇪🇬',desc:'Mar Rosso · diving'},'Siviglia':{iata:'SVQ',flag:'🇪🇸',desc:'Alcázar · Giralda · flamenco'},'Sofia':{iata:'SOF',flag:'🇧🇬',desc:'Vitosha · centro · monasteri'},'Stoccolma':{iata:'ARN',flag:'🇸🇪',desc:'Gamla Stan · arcipelago'},'Tel Aviv':{iata:'TLV',flag:'🇮🇱',desc:'Spiaggia · vita notturna'},'Tenerife':{iata:'TFS',flag:'🇪🇸',desc:'Canarie · Teide · spiagge'},'Tirana':{iata:'TIA',flag:'🇦🇱',desc:'Centro vivace · prezzi bassi'},'Trapani':{iata:'TPS',flag:'🇮🇹',desc:'Sicilia · Erice · saline'},'Tunisi':{iata:'TUN',flag:'🇹🇳',desc:'Medina · suk · Cartagine'},'Valencia':{iata:'VLC',flag:'🇪🇸',desc:'Arti scienze · paella · spiaggia'},'Vienna':{iata:'VIE',flag:'🇦🇹',desc:'Schönbrunn · caffè · musei'},'Zadar':{iata:'ZAD',flag:'🇭🇷',desc:'Croazia · organo del mare'}};
 function cityInfo(c){return CITY_INFO[c]||{iata:'',flag:'🌍',desc:'Nuova rotta · info in arrivo',isNew:true};}
+
+/* ===== Haircut: da ore "lorde" gate-to-gate a ore "reali" sul posto =====
+   Tolgo transfer aeroporto-centro (andata+ritorno) + margine check-in pre-rientro.
+   Schengen: ~25' + ~50' + ~25' = 100'.  Extra-Schengen (controllo passaporti): check-in ~90' => 140'.
+   Fascia a 2 livelli: la varianza del singolo transfer (15-40') è rumore rispetto al gradino Schengen. */
+const XSCHENGEN = new Set(['Manchester','Edimburgo','Dublino','Istanbul','Casablanca','Fez','Marrakech','Marsa Alam','Sharm El Sheikh','Tunisi','Tel Aviv','Belgrado','Tirana','Chisinau']);
+const haircutMin = c => XSCHENGEN.has(c) ? 140 : 100;
 
 function skyLink(iata,date,pax){
   // Se non ho IATA (rotta nuova non ancora mappata), fallback a Skyscanner generico da BLQ
@@ -260,14 +377,17 @@ function bestComboForCity(city,iso,minH){
   const outF=DATA.d.filter(v=>v[0]===city&&freqOk(v[4],wd)&&inVal(iso,v[5]));
   const retF=DATA.a.filter(v=>v[0]===city&&freqOk(v[4],wd)&&inVal(iso,v[5]));
   if(!outF.length||!retF.length)return null;
+  const hcH=haircutMin(city)/60;
   let best=null;
   for(const o of outF)for(const r of retF){
     const arrC=t2m(o[3]),depC=t2m(r[2]),orePosto=(depC-arrC)/60;
-    if(orePosto<3)continue;
+    if(orePosto<=0)continue;
+    const oreReali=orePosto-hcH;
+    if(oreReali<=0)continue;
     const oreFuori=(t2m(r[3])-t2m(o[2]))/60;
-    if(!best||orePosto>best.orePosto)best={out:o,ret:r,orePosto,oreFuori};
+    if(!best||oreReali>best.oreReali)best={out:o,ret:r,orePosto,oreReali,oreFuori,haircut:haircutMin(city)};
   }
-  return best&&best.orePosto>=minH?best:null;
+  return best&&best.oreReali>=minH?best:null;
 }
 
 function findByDate(iso,minH){
@@ -294,7 +414,7 @@ function findByCity(city,minH,rangeOpt,weekdaysOk){
   const res=[];
   const cur=new Date(today);
   while(cur<=endDate){
-    const iso=cur.toISOString().slice(0,10);
+    const iso=fmtISO(cur);
     const wd=isoWd(iso);
     if(!weekdaysOk.length||weekdaysOk.includes(wd)){
       const b=bestComboForCity(city,iso,minH);
@@ -319,7 +439,7 @@ function computeDaycationCapableCities(){
     const cur=new Date(start);
     let found=false;
     while(cur<=end && !found){
-      const iso=cur.toISOString().slice(0,10);
+      const iso=fmtISO(cur);
       if(bestComboForCity(c, iso, 3)){found=true;break;}
       cur.setDate(cur.getDate()+1);
     }
@@ -344,7 +464,7 @@ function cardCityHTML(r){
   const fR=Math.round((t2m(r.ret[3])-t2m(r.ret[2]))/6)/10;
   const newBadge=ci.isNew?'<span class="new-badge">Rotta nuova</span>':'';
   const iataLabel=ci.iata||'—';
-  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}</div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.orePosto.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel} · ${fO}h</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ · ${fR}h</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div>${btnSkyHTML(ci, STATE.date, STATE.pax)}</div></div>`;
+  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}</div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel} · ${fO}h</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ · ${fR}h</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div>${btnSkyHTML(ci, STATE.date, STATE.pax)}</div></div>`;
 }
 
 function cardDateHTML(r){
@@ -354,7 +474,7 @@ function cardDateHTML(r){
   const isWeekend=wd===6||wd===7;
   const badge=isWeekend?'<span class="date-badge weekend">Weekend</span>':'';
   const iataLabel=ci.iata||'—';
-  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.date)} ${badge}</div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.orePosto.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div>${btnSkyHTML(ci, r.date, STATE.pax)}</div></div>`;
+  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.date)} ${badge}</div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div>${btnSkyHTML(ci, r.date, STATE.pax)}</div></div>`;
 }
 
 function render(){
@@ -374,14 +494,15 @@ function renderByDate(root){
   }
   const results=findByDate(STATE.date,STATE.minH);
   if(!results.length){
+    track('noresult_data');
     root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessuna daycation possibile</div><div class="state-msg">${DAYS[new Date(STATE.date).getDay()]}: nessun volo diretto da BLQ permette almeno ${STATE.minH}h sul posto.</div>${STATE.minH>3?'<div class="state-hint">💡 Prova a ridurre le ore minime a 3h o 5h per vedere più opzioni.</div>':''}</div>`;
     return;
   }
-  if(STATE.sort==='ore')results.sort((a,b)=>b.orePosto-a.orePosto);
+  if(STATE.sort==='ore')results.sort((a,b)=>b.oreReali-a.oreReali);
   else if(STATE.sort==='partenza')results.sort((a,b)=>a.out[2].localeCompare(b.out[2]));
   else if(STATE.sort==='rientro')results.sort((a,b)=>a.ret[3].localeCompare(b.ret[3]));
 
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} gite possibili</div><div class="result-day">${DAYS[new Date(STATE.date).getDay()]}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra prima</button></div>${results.map(cardCityHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Mostro solo voli <strong>diretti</strong> andata+ritorno nello stesso giorno secondo l'orario ufficiale BLQ. Per ogni città scelgo la combinazione che lascia più tempo sul posto.<br><br>Dataset BLQ: <strong>${DATA.meta.cities.length} città totali servite</strong>, di cui <strong>${DAYCATION_CITIES.length} davvero raggiungibili in giornata</strong>.</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} gite possibili</div><div class="result-day">${DAYS[new Date(STATE.date).getDay()]}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra prima</button></div>${results.map(cardCityHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Mostro solo voli <strong>diretti</strong> andata+ritorno nello stesso giorno secondo l'orario ufficiale BLQ. Per ogni città scelgo la combinazione che lascia più tempo sul posto.<br><br>Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer aeroporto-centro e check-in (~1h40, ~2h20 per voli extra-Schengen). Sotto ogni numero trovi anche il valore <strong>lordo</strong>.<br><br>Dataset BLQ: <strong>${DATA.meta.cities.length} città totali servite</strong>, di cui <strong>${DAYCATION_CITIES.length} davvero raggiungibili in giornata</strong>.</div>`;
 
   root.querySelectorAll('.sort-pill').forEach(b=>b.addEventListener('click',()=>{STATE.sort=b.dataset.s;render();}));
 }
@@ -393,6 +514,7 @@ function renderByDest(root){
   }
   const results=findByCity(STATE.city,STATE.minH,STATE.range,STATE.weekdays);
   if(!results.length){
+    track('noresult_dest',STATE.city);
     const ci=cityInfo(STATE.city);
     const rTxt=STATE.range==='all'?"in questa stagione":`nei prossimi ${STATE.range} giorni`;
     const wTxt=STATE.weekdays.length?" coi giorni filtrati":"";
@@ -409,11 +531,12 @@ function renderByDest(root){
   }
   const ci=cityInfo(STATE.city);
   const rTxt=STATE.range==='all'?"tutta la stagione":`prossimi ${STATE.range} giorni`;
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} date utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">Range: ${rTxt}${STATE.weekdays.length?' · giorni filtrati':''}</div>${results.map(cardDateHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per ogni data della stagione controllo se esiste un volo diretto andata+ritorno da BLQ a ${STATE.city} con almeno ${STATE.minH}h sul posto.</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} date utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">Range: ${rTxt}${STATE.weekdays.length?' · giorni filtrati':''}</div>${results.map(cardDateHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per ogni data della stagione controllo se esiste un volo diretto andata+ritorno da BLQ a ${STATE.city} con almeno ${STATE.minH}h sul posto.<br><br>Le ore sono <strong>reali</strong>: tolgo transfer aeroporto-centro e check-in (~1h40, ~2h20 extra-Schengen) dall'orario gate-to-gate.</div>`;
 }
 
 function switchMode(m){
   STATE.mode=m;
+  track(m==='dest'?'open_dest':'open_data');
   document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===m));
   document.getElementById('formData').style.display=m==='data'?'block':'none';
   document.getElementById('formDest').style.display=m==='dest'?'block':'none';
@@ -444,6 +567,7 @@ function setupCityDropdown(){
       el.addEventListener('click',()=>{
         const c=el.dataset.city;
         STATE.city=c;
+        track('city',c);
         const ci=cityInfo(c);
         label.innerHTML=`<span class="selected-flag">${ci.flag}</span><span>${c}</span>`;
         label.classList.remove('placeholder');
@@ -490,6 +614,9 @@ function setupCityDropdown(){
 }
 
 async function init(){
+  if(new URLSearchParams(location.search).get('stats')){renderStats();return;}
+  track('open');
+  track('open_data');
   STATE.date=todayPlus(7);
   const di=document.getElementById('dateInput');
   di.value=STATE.date;
@@ -531,6 +658,11 @@ async function init(){
     DATA=await resp.json();
     DAYCATION_CITIES=computeDaycationCapableCities();
     document.getElementById('metaInfo').textContent=`${DAYCATION_CITIES.length} destinazioni daycation · ${DATA.meta.season.replace('_',' ')}`;
+    if(DATA.meta&&DATA.meta.generated){
+      const g=new Date(DATA.meta.generated);
+      const fEl=document.getElementById('freshInfo');
+      if(fEl)fEl.textContent='Orari aggiornati il '+g.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+    }
     setupCityDropdown();
     render();
   }catch(e){
@@ -538,6 +670,10 @@ async function init(){
   }
 }
 
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
+(function(){const sg=document.getElementById('sigStats');if(sg)sg.addEventListener('click',function(){try{renderStats();window.scrollTo(0,0);}catch(e){location.search='?stats=1';}});})();
 init();
 </script>
 </body>
