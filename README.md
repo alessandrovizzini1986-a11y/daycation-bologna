@@ -47,16 +47,28 @@ inverno), la action prende il nuovo PDF automaticamente.
 
 Se vuoi forzare un aggiornamento subito: GitHub → Actions → Run workflow.
 
+## Weekend da Bologna
+
+Oltre alle gite in giornata c'è una seconda app, **`weekend.html`**: trova fughe
+di **1-2 notti** (partenza ven/sab, rientro domenica), calcolando le ore reali a
+destinazione. Usa lo stesso PDF ufficiale ma un dataset non filtrato
+(`weekend-data.json`), perché per i weekend servono anche i voli serali e del
+mattino presto che Daycation scarta. Le due app sono collegate tra loro nel
+footer.
+
 ## File
 
 ```
 .
-├── parse_blq.py              # Parser PDF → JSON
-├── public/
-│   ├── index.html            # App statica
-│   └── data.json             # Generato dal parser
+├── parse_blq.py              # Parser PDF → data.json + weekend-data.json
+├── index.html                # App "Daycation" (gite in giornata)
+├── data.json                 # Generato dal parser (subset daycation)
+├── weekend.html              # App "Weekend da Bologna" (1-2 notti)
+├── weekend-data.json         # Generato dal parser (orario completo)
+├── sw.js                     # Service worker (offline / PWA)
+├── manifest.json             # Manifest PWA
 ├── .github/workflows/
-│   └── update-data.yml       # Action giornaliera
+│   └── update-data.yml       # Action giornaliera (aggiorna entrambi i json)
 ├── netlify.toml              # Config Netlify
 └── README.md
 ```

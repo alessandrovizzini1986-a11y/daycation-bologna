@@ -8,6 +8,7 @@ import re, json, sys, os, subprocess, urllib.request, datetime, pathlib
 
 BASE_URL = "https://www.bologna-airport.it/System/pdf"
 OUTPUT_FILE = pathlib.Path(__file__).parent / "data.json"
+WEEKEND_FILE = pathlib.Path(__file__).parent / "weekend-data.json"
 TMP_PDF = "/tmp/blq_current.pdf"
 TMP_TXT = "/tmp/blq_current.txt"
 
@@ -203,6 +204,31 @@ def main():
     with open(OUTPUT_FILE, 'w') as f:
         json.dump(output, f, ensure_ascii=False, separators=(',', ':'))
     print(f"Scritto {OUTPUT_FILE} ({os.path.getsize(OUTPUT_FILE)} bytes)", file=sys.stderr)
+
+    # --- Dataset "Weekend da Bologna" ---
+    # Stesso orario, ma SENZA il filtro daycation (serve partenza ven sera /
+    # rientro dom mattina). Tengo tutti i voli delle città con A/R disponibile.
+    cities_full = set(v['city'] for v in deps) & set(v['city'] for v in arrs)
+    deps_full = [v for v in deps if v['city'] in cities_full]
+    arrs_full = [v for v in arrs if v['city'] in cities_full]
+    weekend = {
+        "meta": {
+            "source": "Aeroporto G. Marconi Bologna (BLQ)",
+            "season": season,
+            "url": f"{BASE_URL}/orario_voli_{season}.pdf",
+            "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "deps_total": len(deps_full),
+            "arrs_total": len(arrs_full),
+            "cities": sorted(cities_full),
+        },
+        "d": [compact(v) for v in deps_full],
+        "a": [compact(v) for v in arrs_full],
+    }
+    with open(WEEKEND_FILE, 'w') as f:
+        json.dump(weekend, f, ensure_ascii=False, separators=(',', ':'))
+    print(f"Scritto {WEEKEND_FILE} ({os.path.getsize(WEEKEND_FILE)} bytes) "
+          f"- {len(deps_full)} dep + {len(arrs_full)} arr, {len(cities_full)} città",
+          file=sys.stderr)
 
 
 if __name__ == '__main__':

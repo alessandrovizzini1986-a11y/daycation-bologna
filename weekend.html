@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A1628">
+<title>Weekend da Bologna · Fughe di 1-2 notti in aereo da BLQ</title>
+<meta name="description" content="Trova fughe di weekend (1-2 notti) in aereo da Bologna. Voli diretti andata e ritorno, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Weekend da Bologna">
+<meta property="og:title" content="Weekend da Bologna · Fughe di 1-2 notti da BLQ">
+<meta property="og:description" content="Fughe di weekend in aereo da Bologna. Voli diretti A/R, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
+<meta property="og:locale" content="it_IT">
+
+<!-- iOS Home Screen -->
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Weekend BLQ">
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F5F7FB;color:#0A1628;min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.4}
+button,input,select{font-family:inherit;color:inherit}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{display:none}
+.muted{color:#6B7785}
+.tiny{font-size:11px}
+
+header{background:#0A1628;padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.logo{width:34px;height:34px;background:#F5A623;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.h-title{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;line-height:1.2}
+.h-sub{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:1px}
+
+.mode-tabs{background:#0A1628;padding:0 16px 14px;display:flex;gap:6px}
+.mode-tab{flex:1;height:38px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
+.mode-tab.on{background:#F5A623;color:#0A1628;font-weight:700}
+
+.form-area{background:linear-gradient(165deg,#0A1628 0%,#152A4A 100%);padding:18px 16px 24px}
+.form-card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 12px 32px rgba(10,22,40,.16)}
+.lbl{font-size:10px;font-weight:700;color:#6B7785;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+input[type=date],input[type=text],select{width:100%;height:46px;border:1.5px solid #E1E6EE;border-radius:11px;padding:0 12px;font-size:15px;font-weight:600;color:#0A1628;outline:none;background:#fff;-webkit-appearance:none;appearance:none}
+input[type=date]:focus,input[type=text]:focus,select:focus{border-color:#0A1628}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.chip{flex:1;min-width:38px;height:42px;border:1.5px solid #E1E6EE;background:#fff;color:#94A3B8;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;padding:0 6px}
+.chip.on{border-color:#0A1628;background:#0A1628;color:#fff}
+.chip.sm{height:36px;font-size:11px}
+.range-row{display:flex;gap:6px;margin-top:6px}
+.range-btn{flex:1;height:38px;border:1.5px solid #E1E6EE;background:#fff;color:#94A3B8;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer}
+.range-btn.on{border-color:#0A1628;background:#0A1628;color:#fff}
+
+.dropdown{position:relative}
+.dropdown-input{display:flex;align-items:center;height:46px;border:1.5px solid #E1E6EE;border-radius:11px;padding:0 12px;background:#fff;cursor:pointer;font-size:15px;font-weight:600;justify-content:space-between}
+.dropdown-input.open{border-color:#0A1628}
+.dropdown-input .placeholder{color:#94A3B8;font-weight:500}
+.dropdown-input .caret{color:#94A3B8;font-size:11px;flex-shrink:0;margin-left:8px;transition:transform .15s}
+.dropdown-input.open .caret{transform:rotate(180deg)}
+.dropdown-input .selected-flag{margin-right:6px}
+.dropdown-input .clear-btn{background:#F5F7FB;border:none;border-radius:50%;width:22px;height:22px;color:#6B7785;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px;font-weight:700;line-height:1}
+.dropdown-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border-radius:12px;box-shadow:0 12px 40px rgba(10,22,40,.18);border:1px solid #E1E6EE;z-index:100;overflow:hidden;max-height:60vh;flex-direction:column}
+.dropdown-panel.open{display:flex}
+.dropdown-search{padding:10px 12px;border-bottom:1px solid #EAEEF5}
+.dropdown-search input{width:100%;height:38px;border:1px solid #E1E6EE;border-radius:9px;padding:0 12px;font-size:14px;outline:none;font-weight:500}
+.dropdown-search input:focus{border-color:#0A1628}
+.dropdown-list{overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:50vh}
+.dropdown-item{padding:11px 14px;border-bottom:1px solid #F5F7FB;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+.dropdown-item:active,.dropdown-item:hover{background:#F5F7FB}
+.dropdown-item .iata{font-size:11px;color:#6B7785;font-weight:500;margin-left:auto}
+.dropdown-item.no-results{color:#94A3B8;font-weight:500;font-style:italic;justify-content:center;cursor:default}
+.dropdown-item.new-route{font-size:10px;background:#FFF7E6;color:#8B5A0A;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+
+.card{background:#fff;border-radius:18px;margin-bottom:12px;overflow:hidden;border:1px solid #EAEEF5}
+.c-head{padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.c-title{font-size:19px;font-weight:800;letter-spacing:-.3px;line-height:1.2}
+.c-desc{font-size:11.5px;color:#6B7785;margin-top:3px}
+.c-hours{text-align:right;flex-shrink:0}
+.c-hours-big{font-size:22px;font-weight:800;color:#0A1628;letter-spacing:-.5px;line-height:1}
+.c-hours-lbl{font-size:10px;color:#6B7785;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.c-airline{margin:0 16px 10px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:6px;font-size:11px;font-weight:700}
+.al-dot{width:8px;height:8px;border-radius:50%}
+.new-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:700;background:#FFF7E6;color:#8B5A0A;margin-left:6px;text-transform:uppercase;letter-spacing:.4px;vertical-align:middle}
+.c-flights{margin:0 16px 12px;background:#F5F7FB;border-radius:12px;padding:11px 13px}
+.flt{display:flex;align-items:center;gap:10px}
+.flt+.flt{margin-top:8px;padding-top:8px;border-top:1px solid #E1E6EE}
+.flt-icon{font-size:13px;width:18px;flex-shrink:0}
+.flt-time{font-size:15px;font-weight:800;color:#0A1628;letter-spacing:-.2px}
+.flt-route{flex:1;font-size:11px;color:#6B7785}
+.c-foot{padding:11px 16px;border-top:1px solid #EAEEF5;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.foot-info{font-size:11px;color:#6B7785}
+.btn-sky{background:#0E4EAD;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(14,78,173,.25)}
+.btn-sky-fallback{background:#6B7785;color:#fff;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.foot-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn-share{background:#F5F7FB;border:1.5px solid #E1E6EE;color:#0A1628;width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;transition:background .15s,border-color .15s,color .15s}
+.btn-share:active{background:#EAEEF5}
+.btn-share svg{width:17px;height:17px}
+.btn-share.copied{background:#E6F9F3;border-color:#0A7A50;color:#0A7A50}
+
+.sort-bar{display:flex;gap:7px;padding-bottom:2px;margin-bottom:14px;overflow-x:auto}
+.sort-pill{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1.5px solid #E1E6EE;background:#fff;color:#6B7785;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.sort-pill.on{border-color:#0A1628;background:#0A1628;color:#fff}
+
+.state{text-align:center;padding:48px 24px}
+.state-icon{font-size:42px;margin-bottom:14px;opacity:.7}
+.state-title{font-size:18px;font-weight:800;margin-bottom:8px}
+.state-msg{font-size:13px;color:#6B7785;line-height:1.6;max-width:320px;margin:0 auto}
+.state-hint{margin-top:16px;padding:12px 16px;background:#FFF7E6;border-radius:10px;font-size:12px;color:#8B5A0A;max-width:320px;margin-left:auto;margin-right:auto;text-align:left;line-height:1.5}
+
+.loading{padding:60px 20px;text-align:center;color:#6B7785;font-size:13px}
+.spin{display:inline-block;width:22px;height:22px;border:2.5px solid #E1E6EE;border-top-color:#F5A623;border-radius:50%;animation:s 1s linear infinite;margin-bottom:10px}
+@keyframes s{to{transform:rotate(360deg)}}
+
+.result-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.result-count{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.result-day{font-size:11px;font-weight:700;color:#6B7785;background:#EAEEF5;padding:4px 11px;border-radius:50px}
+
+footer{padding:24px 16px 32px;text-align:center;color:#9AA5B5;font-size:10.5px;line-height:1.6}
+footer a{color:#6B7785;text-decoration:underline;text-decoration-color:#D1D7E2;text-underline-offset:2px}
+.sig{margin-top:8px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#B8C0CC}
+
+main{padding:18px 14px 0;max-width:600px;margin:0 auto}
+
+.date-card .c-title{font-size:17px}
+.date-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;background:#FFF7E6;color:#8B5A0A;margin-left:6px;text-transform:uppercase;letter-spacing:.3px}
+.date-badge.weekend{background:#E6F9F3;color:#0A7A50}
+
+.dropdown-backdrop{display:none;position:fixed;inset:0;background:rgba(10,22,40,.25);z-index:90}
+.dropdown-backdrop.on{display:block}
+</style>
+<style>
+/* Extra weekend-specific */
+.nights-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;background:#E6F0FF;color:#0E4EAD;margin-left:6px;text-transform:uppercase;letter-spacing:.3px;vertical-align:middle}
+.flt-date{font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.4px;width:54px;flex-shrink:0}
+.back-link{display:inline-flex;align-items:center;gap:5px;color:#6B7785;font-size:12px;font-weight:600;padding:10px 0}
+.cross-cta{margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:12.5px;color:#0A1628;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cross-cta a{color:#0E4EAD;font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🧳</div>
+  <div style="flex:1;min-width:0">
+    <div class="h-title">Weekend da Bologna</div>
+    <div class="h-sub" id="metaInfo">Fughe di 1-2 notti dall'aeroporto Marconi</div>
+  </div>
+</header>
+
+<div class="mode-tabs">
+  <button class="mode-tab on" data-mode="weekend">📅 Per weekend</button>
+  <button class="mode-tab" data-mode="dest">📍 Per destinazione</button>
+</div>
+
+<div class="form-area">
+  <div class="form-card" id="formWeekend">
+    <div class="lbl">Quale weekend?</div>
+    <select id="weekendSelect"></select>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <div style="flex:2.4">
+        <div class="lbl">Durata</div>
+        <div class="chip-row" id="nightsFilter">
+          <button class="chip" data-n="1">1 notte · Sab→Dom</button>
+          <button class="chip on" data-n="2">2 notti · Ven→Dom</button>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div class="lbl">Persone</div>
+        <select id="paxInput">
+          <option value="1">1</option><option value="2" selected>2</option>
+          <option value="3">3</option><option value="4">4</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card" id="formDest" style="display:none">
+    <div class="lbl">Dove vuoi andare?</div>
+    <div class="dropdown" id="cityDropdown">
+      <div class="dropdown-input" id="cityDropdownInput">
+        <span id="cityDropdownLabel" class="placeholder">Scegli una città…</span>
+        <span class="caret">▼</span>
+      </div>
+      <div class="dropdown-panel" id="cityDropdownPanel">
+        <div class="dropdown-search">
+          <input type="text" id="cityDropdownSearch" placeholder="Cerca città…" autocomplete="off" inputmode="search">
+        </div>
+        <div class="dropdown-list" id="cityDropdownList"></div>
+      </div>
+    </div>
+    <div class="tiny muted" style="margin-top:6px">Solo destinazioni raggiungibili per un weekend da Bologna</div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <div style="flex:2.4">
+        <div class="lbl">Durata</div>
+        <div class="chip-row" id="nightsFilter2">
+          <button class="chip" data-n="1">1 notte · Sab→Dom</button>
+          <button class="chip on" data-n="2">2 notti · Ven→Dom</button>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div class="lbl">Persone</div>
+        <select id="paxInput2">
+          <option value="1">1</option><option value="2" selected>2</option>
+          <option value="3">3</option><option value="4">4</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dropdown-backdrop" id="dropdownBackdrop"></div>
+
+<main>
+  <div id="content">
+    <div class="loading">
+      <div class="spin"></div>
+      <div>Carico orari ufficiali BLQ…</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div>Dati: <a href="https://www.bologna-airport.it" target="_blank" rel="noopener">Aeroporto G. Marconi Bologna</a> · prezzi reali su Skyscanner</div>
+  <div id="freshInfo" class="tiny muted" style="margin-top:4px"></div>
+  <div style="margin-top:8px"><a class="back-link" href="./">✈ Cerca gite in giornata (Daycation) →</a></div>
+</footer>
+
+<script>
+let DATA = null;
+let WEEKEND_CITIES = [];
+
+const t2m = t => parseInt(t)*60 + parseInt(t.slice(3));
+const freqOk = (bm, wd) => (bm >> (wd-1)) & 1;
+const inVal = (iso, vals) => { const md = iso.slice(5,7)+iso.slice(8,10); return vals.some(([f,t]) => f<=md && md<=t); };
+const fmtISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const MONTHS = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+const DAYS_S = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+const fmtDateShort = iso => { const d=new Date(iso+'T00:00:00'); return `${DAYS_S[d.getDay()]} ${parseInt(iso.slice(8))} ${MONTHS[parseInt(iso.slice(5,7))-1]}`; };
+const isoWd = iso => { const d = new Date(iso+'T00:00:00'); return d.getDay() === 0 ? 7 : d.getDay(); };
+const daysBetween = (a,b) => Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00'))/864e5);
+const normalize = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+const AIRLINES = {FR:{n:'Ryanair',c:'#0033A0'},W4:{n:'Wizz Air',c:'#C1167C'},W6:{n:'Wizz Air',c:'#C1167C'},VY:{n:'Vueling',c:'#FFCB05'},V7:{n:'Volotea',c:'#1B4FBB'},NO:{n:'Neos',c:'#E8002D'},TB:{n:'TUI',c:'#003087'},RK:{n:'Ryanair UK',c:'#0033A0'},D8:{n:'Norwegian',c:'#D81939'},BJ:{n:'Nouvelair',c:'#E5002B'},JU:{n:'Air Serbia',c:'#2B3990'},SN:{n:'Brussels Airlines',c:'#0033A0'},LG:{n:'Luxair',c:'#0062AE'},TU:{n:'Tunisair',c:'#CC0001'},OS:{n:'Austrian',c:'#CC0001'},AY:{n:'Finnair',c:'#003580'},SK:{n:'SAS',c:'#001B72'},IB:{n:'Iberia',c:'#CC0000'},TP:{n:'TAP Portugal',c:'#007749'},EN:{n:'Air Dolomiti',c:'#003189'},TK:{n:'Turkish Airlines',c:'#C8102E'},A3:{n:'Aegean',c:'#00529B'},KL:{n:'KLM',c:'#009DE0'},LH:{n:'Lufthansa',c:'#05164D'},EW:{n:'Eurowings',c:'#7B2D8B'},AZ:{n:'ITA Airways',c:'#0D2A5C'},EK:{n:'Emirates',c:'#D71921'},U2:{n:'easyJet',c:'#FF6600'},HV:{n:'Transavia',c:'#1DB954'},BA:{n:'British Airways',c:'#075AAA'},EI:{n:'Aer Lingus',c:'#00833E'},RO:{n:'TAROM',c:'#0033A0'},GP:{n:'APG',c:'#6B7785'}};
+function airline(fno){const p=fno.replace(/\d/g,'');return AIRLINES[p.slice(0,2)]||AIRLINES[p.slice(0,1)]||{n:fno.slice(0,3),c:'#6B7785'};}
+
+const CITY_INFO = {'Alghero':{iata:'AHO',flag:'🇮🇹',desc:'Sardegna · spiagge · centro catalano'},'Alicante':{iata:'ALC',flag:'🇪🇸',desc:'Costa Blanca · castello · spiagge'},'Amsterdam':{iata:'AMS',flag:'🇳🇱',desc:'Canali · musei · Vondelpark'},'Atene':{iata:'ATH',flag:'🇬🇷',desc:'Acropoli · Plaka'},'Barcellona':{iata:'BCN',flag:'🇪🇸',desc:'Gaudí · Ramblas · spiaggia'},'Bari':{iata:'BRI',flag:'🇮🇹',desc:'Puglia · centro storico · mare'},'Belgrado':{iata:'BEG',flag:'🇷🇸',desc:'Kalemegdan · centro · caffè'},'Berlino':{iata:'BER',flag:'🇩🇪',desc:'Muro · musei · Tiergarten'},'Brindisi':{iata:'BDS',flag:'🇮🇹',desc:'Puglia · Salento · mare'},'Bruxelles':{iata:'BRU',flag:'🇧🇪',desc:'Grand Place · cioccolato'},'Budapest':{iata:'BUD',flag:'🇭🇺',desc:'Terme · Parlamento · Danubio'},'Cagliari':{iata:'CAG',flag:'🇮🇹',desc:'Sardegna · Castello · Poetto'},'Casablanca':{iata:'CMN',flag:'🇲🇦',desc:'Marocco · moschea Hassan II'},'Catania':{iata:'CTA',flag:'🇮🇹',desc:'Sicilia · Etna · pasticceria'},'Chania':{iata:'CHQ',flag:'🇬🇷',desc:'Creta ovest · porto veneziano'},'Chisinau':{iata:'KIV',flag:'🇲🇩',desc:'Moldavia · vini · centro'},'Copenaghen':{iata:'CPH',flag:'🇩🇰',desc:'Nyhavn · Tivoli · design'},'Corfù':{iata:'CFU',flag:'🇬🇷',desc:'Isole Ionie · centro UNESCO'},'Cracovia':{iata:'KRK',flag:'🇵🇱',desc:'Centro UNESCO · Wawel'},'Crotone':{iata:'CRV',flag:'🇮🇹',desc:'Calabria · mare cristallino'},'Dublino':{iata:'DUB',flag:'🇮🇪',desc:'Guinness · Temple Bar · Trinity'},'Dusseldorf':{iata:'DUS',flag:'🇩🇪',desc:'Altstadt · Reno · birrerie'},'Edimburgo':{iata:'EDI',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',desc:'Castello · Royal Mile'},'Eindhoven':{iata:'EIN',flag:'🇳🇱',desc:'Design · Philips · Strijp-S'},'Fez':{iata:'FEZ',flag:'🇲🇦',desc:'Marocco · medina UNESCO'},'Francoforte':{iata:'FRA',flag:'🇩🇪',desc:'Skyline · Römer · musei'},'Fuerteventura':{iata:'FUE',flag:'🇪🇸',desc:'Canarie · dune · spiagge'},'Helsinki':{iata:'HEL',flag:'🇫🇮',desc:'Design · sauna · Suomenlinna'},'Heraklion':{iata:'HER',flag:'🇬🇷',desc:'Creta · Cnosso · spiagge'},'Ibiza':{iata:'IBZ',flag:'🇪🇸',desc:'Spiagge · Dalt Vila · vita notturna'},'Istanbul':{iata:'IST',flag:'🇹🇷',desc:'Bosforo · bazar · moschee'},'Karpathos':{iata:'AOK',flag:'🇬🇷',desc:'Dodecaneso · spiagge · tradizioni'},'Lamezia Terme':{iata:'SUF',flag:'🇮🇹',desc:'Calabria · Tropea vicina'},'Lanzarote':{iata:'ACE',flag:'🇪🇸',desc:'Canarie · vulcani · Timanfaya'},'Lisbona':{iata:'LIS',flag:'🇵🇹',desc:'Alfama · pastéis · tram 28'},'Lussemburgo':{iata:'LUX',flag:'🇱🇺',desc:'Centro UNESCO · vini'},'Madrid':{iata:'MAD',flag:'🇪🇸',desc:'Prado · Plaza Mayor · tapas'},'Mahon':{iata:'MAH',flag:'🇪🇸',desc:'Minorca · porto · spiagge'},'Malaga':{iata:'AGP',flag:'🇪🇸',desc:'Costa del Sol · Picasso'},'Malta':{iata:'MLA',flag:'🇲🇹',desc:'Valletta · Mdina · scogliere'},'Manchester':{iata:'MAN',flag:'🇬🇧',desc:'Musei · Old Trafford'},'Marrakech':{iata:'RAK',flag:'🇲🇦',desc:'Medina · suk · Atlas'},'Marsa Alam':{iata:'RMF',flag:'🇪🇬',desc:'Mar Rosso · diving'},'Marsiglia':{iata:'MRS',flag:'🇫🇷',desc:'Vieux Port · calanques'},'Mikonos':{iata:'JMK',flag:'🇬🇷',desc:'Cicladi · spiagge · vento'},'Monaco':{iata:'MUC',flag:'🇩🇪',desc:'Marienplatz · birrerie · BMW'},'Olbia':{iata:'OLB',flag:'🇮🇹',desc:'Sardegna · Costa Smeralda'},'Palermo':{iata:'PMO',flag:'🇮🇹',desc:'Sicilia · arabi-normanni'},'Palma di Maiorca':{iata:'PMI',flag:'🇪🇸',desc:'Cattedrale · Tramuntana'},'Porto':{iata:'OPO',flag:'🇵🇹',desc:'Ribeira · vino · azulejos'},'Praga':{iata:'PRG',flag:'🇨🇿',desc:'Ponte Carlo · città vecchia'},'Reggio Calabria':{iata:'REG',flag:'🇮🇹',desc:'Bronzi · Stretto · cibo'},'Rodi':{iata:'RHO',flag:'🇬🇷',desc:'Centro medievale · spiagge'},'Salonicco':{iata:'SKG',flag:'🇬🇷',desc:'Centro vivace · mare'},'Santander':{iata:'SDR',flag:'🇪🇸',desc:'Cantabria · spiagge · El Sardinero'},'Sharm El Sheikh':{iata:'SSH',flag:'🇪🇬',desc:'Mar Rosso · diving'},'Siviglia':{iata:'SVQ',flag:'🇪🇸',desc:'Alcázar · Giralda · flamenco'},'Sofia':{iata:'SOF',flag:'🇧🇬',desc:'Vitosha · centro · monasteri'},'Stoccolma':{iata:'ARN',flag:'🇸🇪',desc:'Gamla Stan · arcipelago'},'Tel Aviv':{iata:'TLV',flag:'🇮🇱',desc:'Spiaggia · vita notturna'},'Tenerife':{iata:'TFS',flag:'🇪🇸',desc:'Canarie · Teide · spiagge'},'Tirana':{iata:'TIA',flag:'🇦🇱',desc:'Centro vivace · prezzi bassi'},'Trapani':{iata:'TPS',flag:'🇮🇹',desc:'Sicilia · Erice · saline'},'Tunisi':{iata:'TUN',flag:'🇹🇳',desc:'Medina · suk · Cartagine'},'Valencia':{iata:'VLC',flag:'🇪🇸',desc:'Arti scienze · paella · spiaggia'},'Vienna':{iata:'VIE',flag:'🇦🇹',desc:'Schönbrunn · caffè · musei'},'Zadar':{iata:'ZAD',flag:'🇭🇷',desc:'Croazia · organo del mare'},'Amman':{iata:'AMM',flag:'🇯🇴',desc:'Giordania · cittadella · gateway Petra'},'Bacau':{iata:'BCM',flag:'🇷🇴',desc:'Romania · Moldavia rumena'},'Castellon de la Plana':{iata:'CDT',flag:'🇪🇸',desc:'Costa Azahar · spiagge'},'Cluj-Napoca':{iata:'CLJ',flag:'🇷🇴',desc:'Transilvania · centro storico'},'Comiso':{iata:'CIY',flag:'🇮🇹',desc:'Sicilia · Ragusa · barocco'},'Craiova':{iata:'CRA',flag:'🇷🇴',desc:'Romania · Oltenia'},'Djerba':{iata:'DJE',flag:'🇹🇳',desc:'Tunisia · isola · spiagge'},'Dubai':{iata:'DXB',flag:'🇦🇪',desc:'Grattacieli · deserto · shopping'},'Genova':{iata:'GOA',flag:'🇮🇹',desc:'Liguria · acquario · centro storico'},'Gran Canaria':{iata:'LPA',flag:'🇪🇸',desc:'Canarie · dune · spiagge'},'Iasi':{iata:'IAS',flag:'🇷🇴',desc:'Romania · Moldavia · università'},'Kos':{iata:'KGS',flag:'🇬🇷',desc:'Dodecaneso · spiagge · Asklepieion'},'Lampedusa':{iata:'LMP',flag:'🇮🇹',desc:'Pelagie · mare cristallino'},'Lione':{iata:'LYS',flag:'🇫🇷',desc:'Rodano · gastronomia · Vieux Lyon'},'Mersa Matruh':{iata:'MUH',flag:'🇪🇬',desc:'Egitto · Mediterraneo · spiagge'},'Monastir':{iata:'MIR',flag:'🇹🇳',desc:'Tunisia · ribat · spiagge'},'Pantelleria':{iata:'PNL',flag:'🇮🇹',desc:'Sicilia · isola nera · dammusi'},'Skopje':{iata:'SKP',flag:'🇲🇰',desc:'Macedonia del Nord · bazar'},'Suceava':{iata:'SCV',flag:'🇷🇴',desc:'Bucovina · monasteri dipinti'},'Timisoara':{iata:'TSR',flag:'🇷🇴',desc:'Banato · piazze · liberty'}};
+function cityInfo(c){return CITY_INFO[c]||{iata:'',flag:'🌍',desc:'Nuova rotta · info in arrivo',isNew:true};}
+
+/* Haircut: tolgo transfer aeroporto-centro + check-in pre-rientro (come Daycation). */
+const XSCHENGEN = new Set(['Manchester','Edimburgo','Dublino','Istanbul','Casablanca','Fez','Marrakech','Marsa Alam','Sharm El Sheikh','Tunisi','Tunisi','Djerba','Monastir','Mersa Matruh','Tel Aviv','Belgrado','Tirana','Chisinau','Skopje','Amman','Dubai','Bacau','Cluj-Napoca','Craiova','Iasi','Suceava','Timisoara']);
+const haircutMin = c => XSCHENGEN.has(c) ? 140 : 100;
+
+function skyLink(iata,outD,retD,pax){
+  if(!iata){
+    return `https://www.skyscanner.it/trasporti/voli-da/blq/?adults=${pax}&adultsv2=${pax}&cabinclass=economy&childrenv2=&preferdirects=true&rtn=1&locale=it-IT&currency=EUR`;
+  }
+  const o=outD.replace(/-/g,'').slice(2), r=retD.replace(/-/g,'').slice(2);
+  return `https://www.skyscanner.it/trasporti/voli/blq/${iata.toLowerCase()}/${o}/${r}/?adults=${pax}&locale=it-IT&currency=EUR&stops=0`;
+}
+
+/* Migliore combinazione A/R per un weekend (outISO -> retISO), massimizzando il tempo reale a destinazione. */
+function bestWeekend(city,outISO,retISO){
+  const wdO=isoWd(outISO),wdR=isoWd(retISO);
+  const outF=DATA.d.filter(v=>v[0]===city&&freqOk(v[4],wdO)&&inVal(outISO,v[5]));
+  const retF=DATA.a.filter(v=>v[0]===city&&freqOk(v[4],wdR)&&inVal(retISO,v[5]));
+  if(!outF.length||!retF.length)return null;
+  const days=daysBetween(outISO,retISO);
+  const hc=haircutMin(city);
+  let best=null;
+  for(const o of outF)for(const r of retF){
+    const arrAbs=t2m(o[3])+(t2m(o[3])<t2m(o[2])?1440:0);  // arrivo a dest (gestisce dopo-mezzanotte)
+    const retDepAbs=days*1440+t2m(r[2]);                  // partenza da dest il giorno di rientro
+    const orePosto=(retDepAbs-arrAbs)/60;
+    const oreReali=orePosto-hc/60;
+    if(oreReali<=0)continue;
+    if(!best||oreReali>best.oreReali)best={out:o,ret:r,nights:days,orePosto,oreReali,haircut:hc};
+  }
+  return best;
+}
+
+function outDateFor(sundayISO,nights){ const d=new Date(sundayISO+'T00:00:00'); d.setDate(d.getDate()-nights); return fmtISO(d); }
+
+function findByWeekend(sundayISO,nights){
+  const out=outDateFor(sundayISO,nights);
+  const cities=[...new Set(DATA.d.map(v=>v[0]))];
+  const res=[];
+  for(const c of cities){const b=bestWeekend(c,out,sundayISO);if(b)res.push({city:c,outISO:out,retISO:sundayISO,...b});}
+  return res;
+}
+
+function findWeekendsForCity(city,nights){
+  const res=[];
+  for(const s of WEEKENDS){
+    const out=outDateFor(s,nights);
+    const b=bestWeekend(city,out,s);
+    if(b)res.push({outISO:out,retISO:s,...b});
+  }
+  return res;
+}
+
+/* Prossimi weekend (domeniche) entro l'orizzonte; filtra quelli con la data di partenza già passata. */
+let WEEKENDS=[];
+function buildWeekends(){
+  const today=new Date();today.setHours(0,0,0,0);
+  let d=new Date(today);
+  do{ d.setDate(d.getDate()+1); }while(d.getDay()!==0);  // prima domenica successiva a oggi
+  const out=[];
+  for(let i=0;i<16;i++){ out.push(fmtISO(d)); d.setDate(d.getDate()+7); }
+  WEEKENDS=out;
+}
+
+function seasonRange(){
+  const all=DATA.d.flatMap(v=>v[5]).flat();
+  if(!all.length)return null;
+  return {min:all.reduce((a,b)=>a<b?a:b),max:all.reduce((a,b)=>a>b?a:b)};
+}
+
+function computeWeekendCapableCities(){
+  const cities=[...new Set(DATA.d.map(v=>v[0]))];
+  const capable=[];
+  for(const c of cities){
+    let ok=false;
+    for(const s of WEEKENDS){
+      if(bestWeekend(c,outDateFor(s,2),s)||bestWeekend(c,outDateFor(s,1),s)){ok=true;break;}
+    }
+    if(ok)capable.push(c);
+  }
+  return capable.sort();
+}
+
+const STATE = { mode:'weekend', sunday:null, nights:2, pax:2, city:null, sort:'ore' };
+
+/* ===== Condivisione (Web Share API + fallback clipboard) ===== */
+function buildShareData(city, r){
+  const ci=cityInfo(city);
+  const url=location.href.split('?')[0].split('#')[0];
+  const text=`🧳 Weekend da Bologna · ${ci.flag} ${city}\n📅 ${fmtDateShort(r.outISO)} → ${fmtDateShort(r.retISO)} (${r.nights} ${r.nights===1?'notte':'notti'})\n🛫 ${r.out[2]} → ${r.out[3]}  BLQ → ${ci.iata||'—'}\n🛬 ${r.ret[2]} → ${r.ret[3]}  ${ci.iata||'—'} → BLQ\n⏱ ~${r.oreReali.toFixed(0)}h a destinazione\n\n${url}`;
+  return {title:`Weekend a ${city} da Bologna`, text, url};
+}
+function btnShareHTML(shareObj){
+  const enc=encodeURIComponent(JSON.stringify(shareObj));
+  return `<button class="btn-share" data-share="${enc}" aria-label="Condividi" title="Condividi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></button>`;
+}
+async function doShare(el){
+  let obj; try{obj=JSON.parse(decodeURIComponent(el.dataset.share));}catch(e){return;}
+  if(navigator.share){ try{await navigator.share(obj);}catch(e){} return; }
+  const done=()=>{el.classList.add('copied');setTimeout(()=>el.classList.remove('copied'),1800);};
+  try{ await navigator.clipboard.writeText(obj.text); done(); }
+  catch(e){ try{prompt('Copia il testo del weekend:',obj.text);}catch(_){} }
+}
+function bindShareButtons(root){ root.querySelectorAll('.btn-share').forEach(b=>b.addEventListener('click',()=>doShare(b))); }
+
+function btnSkyHTML(ci, outD, retD, pax){
+  const sky=skyLink(ci.iata, outD, retD, pax);
+  if(!ci.iata) return `<a class="btn-sky-fallback" href="${sky}" target="_blank" rel="noopener">🔎 Cerca su Skyscanner</a>`;
+  return `<a class="btn-sky" href="${sky}" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>Cerca prezzi</a>`;
+}
+
+function nightsLabel(n){ return n===1?'1 notte':`${n} notti`; }
+
+function cardWeekendCity(r){
+  const ci=cityInfo(r.city);
+  const aO=airline(r.out[1]),aR=airline(r.ret[1]),same=aO.n===aR.n;
+  const newBadge=ci.isNew?'<span class="new-badge">Rotta nuova</span>':'';
+  const iataLabel=ci.iata||'—';
+  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}<span class="nights-badge">${nightsLabel(r.nights)}</span></div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(0)}h</div><div class="c-hours-lbl">A destinazione</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(0)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-date">${fmtDateShort(r.outISO).split(' ').slice(0,1)} ${parseInt(r.outISO.slice(8))}</span><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-date">${fmtDateShort(r.retISO).split(' ').slice(0,1)} ${parseInt(r.retISO.slice(8))}</span><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">${fmtDateShort(r.outISO)} → ${fmtDateShort(r.retISO)}</div><div class="foot-actions">${btnShareHTML(buildShareData(r.city, r))}${btnSkyHTML(ci, r.outISO, r.retISO, STATE.pax)}</div></div></div>`;
+}
+
+function cardWeekendDate(r){
+  const ci=cityInfo(STATE.city);
+  const aO=airline(r.out[1]),aR=airline(r.ret[1]),same=aO.n===aR.n;
+  const iataLabel=ci.iata||'—';
+  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.outISO)} → ${fmtDateShort(r.retISO)}<span class="nights-badge">${nightsLabel(r.nights)}</span></div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(0)}h</div><div class="c-hours-lbl">A destinazione</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">${nightsLabel(r.nights)} a ${STATE.city}</div><div class="foot-actions">${btnShareHTML(buildShareData(STATE.city, r))}${btnSkyHTML(ci, r.outISO, r.retISO, STATE.pax)}</div></div></div>`;
+}
+
+function render(){
+  if(!DATA)return;
+  const root=document.getElementById('content');
+  if(STATE.mode==='weekend')renderByWeekend(root);
+  else renderByDest(root);
+}
+
+function renderByWeekend(root){
+  const results=findByWeekend(STATE.sunday,STATE.nights);
+  if(!results.length){
+    const range=seasonRange();
+    const extra=range?`<div class="state-msg">Il dataset attuale (<strong>${DATA.meta.season.replace('_',' ')}</strong>) copre da ${range.min.slice(2)}/${range.min.slice(0,2)} a ${range.max.slice(2)}/${range.max.slice(0,2)}.</div>`:'';
+    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend possibile</div><div class="state-msg">Per ${fmtDateShort(outDateFor(STATE.sunday,STATE.nights))} → ${fmtDateShort(STATE.sunday)} non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div>${extra}<div class="state-hint">💡 Prova l'altra durata o scegli un altro weekend.</div></div>`;
+    return;
+  }
+  if(STATE.sort==='ore')results.sort((a,b)=>b.oreReali-a.oreReali);
+  else if(STATE.sort==='partenza')results.sort((a,b)=>a.out[2].localeCompare(b.out[2]));
+  else if(STATE.sort==='rientro')results.sort((a,b)=>b.ret[2].localeCompare(a.ret[2]));
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} mete possibili</div><div class="result-day">${fmtDateShort(STATE.sunday)}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra tardi</button></div>${results.map(cardWeekendCity).join('')}<div class="cross-cta">Cerchi solo una gita in giornata? <a href="./">Apri Daycation →</a></div><div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per il weekend scelto cerco la migliore combinazione di voli <strong>diretti</strong> A/R da BLQ: partenza il ${STATE.nights===2?'venerdì':'sabato'}, rientro la domenica. Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer e check-in (~1h40, ~2h20 extra-Schengen).</div>`;
+  root.querySelectorAll('.sort-pill').forEach(b=>b.addEventListener('click',()=>{STATE.sort=b.dataset.s;render();}));
+  bindShareButtons(root);
+}
+
+function renderByDest(root){
+  if(!STATE.city){
+    root.innerHTML=`<div class="state"><div class="state-icon">📍</div><div class="state-title">Scegli una destinazione</div><div class="state-msg">Tocca il campo qui sopra e scegli tra le <strong>${WEEKEND_CITIES.length} città</strong> raggiungibili per un weekend da Bologna.</div></div>`;
+    return;
+  }
+  const results=findWeekendsForCity(STATE.city,STATE.nights);
+  const ci=cityInfo(STATE.city);
+  if(!results.length){
+    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend per ${STATE.city}</div><div class="state-msg">${ci.flag} Nei prossimi weekend non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div><div class="state-hint">💡 Prova l'altra durata.</div></div>`;
+    return;
+  }
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} weekend utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">${nightsLabel(STATE.nights)} · prossimi weekend</div>${results.map(cardWeekendDate).join('')}<div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per ogni weekend dei prossimi mesi controllo se esiste un A/R diretto da BLQ a ${STATE.city} con ${nightsLabel(STATE.nights)}. Le ore sono <strong>reali</strong> (tolti transfer e check-in).</div>`;
+  bindShareButtons(root);
+}
+
+function switchMode(m){
+  STATE.mode=m;
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===m));
+  document.getElementById('formWeekend').style.display=m==='weekend'?'block':'none';
+  document.getElementById('formDest').style.display=m==='dest'?'block':'none';
+  render();
+}
+
+function syncNightsChips(){
+  document.querySelectorAll('#nightsFilter .chip').forEach(c=>c.classList.toggle('on',parseInt(c.dataset.n)===STATE.nights));
+  document.querySelectorAll('#nightsFilter2 .chip').forEach(c=>c.classList.toggle('on',parseInt(c.dataset.n)===STATE.nights));
+}
+
+function populateWeekendSelect(){
+  const sel=document.getElementById('weekendSelect');
+  sel.innerHTML=WEEKENDS.map(s=>{
+    const out=outDateFor(s,STATE.nights);
+    return `<option value="${s}">${fmtDateShort(out)} → ${fmtDateShort(s)}</option>`;
+  }).join('');
+  if(!STATE.sunday||!WEEKENDS.includes(STATE.sunday))STATE.sunday=WEEKENDS[0];
+  sel.value=STATE.sunday;
+}
+
+function setupCityDropdown(){
+  const input=document.getElementById('cityDropdownInput');
+  const panel=document.getElementById('cityDropdownPanel');
+  const search=document.getElementById('cityDropdownSearch');
+  const list=document.getElementById('cityDropdownList');
+  const label=document.getElementById('cityDropdownLabel');
+  const backdrop=document.getElementById('dropdownBackdrop');
+  function renderList(filter=''){
+    const q=normalize(filter.trim());
+    const filtered=WEEKEND_CITIES.filter(c=>!q||normalize(c).includes(q));
+    if(!filtered.length){ list.innerHTML='<div class="dropdown-item no-results">Nessuna città trovata</div>'; return; }
+    list.innerHTML=filtered.map(c=>{
+      const ci=cityInfo(c);
+      const newTag=ci.isNew?'<span class="new-route">Nuova</span>':'';
+      return `<div class="dropdown-item" data-city="${c}">${ci.flag} <span>${c}</span>${newTag}<span class="iata">${ci.iata||'—'}</span></div>`;
+    }).join('');
+    list.querySelectorAll('.dropdown-item[data-city]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const c=el.dataset.city; STATE.city=c;
+        const ci=cityInfo(c);
+        label.innerHTML=`<span class="selected-flag">${ci.flag}</span><span>${c}</span>`;
+        label.classList.remove('placeholder');
+        if(!input.querySelector('.clear-btn')){
+          const clr=document.createElement('button');
+          clr.className='clear-btn'; clr.textContent='×'; clr.setAttribute('aria-label','Cancella');
+          clr.addEventListener('click',e=>{ e.stopPropagation(); STATE.city=null; label.textContent='Scegli una città…'; label.classList.add('placeholder'); clr.remove(); render(); });
+          input.insertBefore(clr,input.querySelector('.caret'));
+        }
+        close(); render();
+      });
+    });
+  }
+  function open(){ panel.classList.add('open'); input.classList.add('open'); backdrop.classList.add('on'); search.value=''; renderList(); setTimeout(()=>search.focus(),50); }
+  function close(){ panel.classList.remove('open'); input.classList.remove('open'); backdrop.classList.remove('on'); }
+  input.addEventListener('click',e=>{ if(e.target.classList.contains('clear-btn'))return; if(panel.classList.contains('open'))close();else open(); });
+  search.addEventListener('input',e=>renderList(e.target.value));
+  backdrop.addEventListener('click',close);
+}
+
+async function init(){
+  buildWeekends();
+  document.getElementById('weekendSelect').addEventListener('change',e=>{STATE.sunday=e.target.value;render();});
+  document.getElementById('paxInput').addEventListener('change',e=>{STATE.pax=parseInt(e.target.value);document.getElementById('paxInput2').value=e.target.value;render();});
+  document.getElementById('paxInput2').addEventListener('change',e=>{STATE.pax=parseInt(e.target.value);document.getElementById('paxInput').value=e.target.value;render();});
+  document.querySelectorAll('#nightsFilter .chip, #nightsFilter2 .chip').forEach(b=>b.addEventListener('click',()=>{
+    STATE.nights=parseInt(b.dataset.n); syncNightsChips(); populateWeekendSelect(); render();
+  }));
+  document.querySelectorAll('.mode-tab').forEach(t=>t.addEventListener('click',()=>switchMode(t.dataset.mode)));
+
+  try{
+    const resp=await fetch('weekend-data.json',{cache:'no-cache'});
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    DATA=await resp.json();
+    WEEKEND_CITIES=computeWeekendCapableCities();
+    document.getElementById('metaInfo').textContent=`${WEEKEND_CITIES.length} mete weekend · ${DATA.meta.season.replace('_',' ')}`;
+    if(DATA.meta&&DATA.meta.generated){
+      const g=new Date(DATA.meta.generated);
+      const fEl=document.getElementById('freshInfo');
+      if(fEl)fEl.textContent='Orari aggiornati il '+g.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+    }
+    populateWeekendSelect();
+    setupCityDropdown();
+    render();
+  }catch(e){
+    document.getElementById('content').innerHTML=`<div class="state"><div class="state-icon">⚠️</div><div class="state-title">Errore di caricamento</div><div class="state-msg">Non riesco a caricare gli orari.<br><br><span class="tiny muted">${e.message}</span></div></div>`;
+  }
+}
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});}); }
+init();
+</script>
+</body>
+</html>
