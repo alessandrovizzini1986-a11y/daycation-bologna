@@ -4,13 +4,18 @@
      => niente "versione vecchia bloccata" quando aggiorni index.html dall'app GitHub
    - icone / og / manifest: cache-first (cambiano di rado, caricano subito)
    Per forzare un refresh totale della cache, cambia il numero in CACHE. */
-const CACHE = 'dcb-v4';
+const CACHE = 'dcb-v5';
 const ASSETS = [
   './',
   './index.html',
   './data.json',
   './weekend.html',
   './weekend-data.json',
+  './weekend.webmanifest',
+  './weekend-og.png',
+  './weekend-icon-192.png',
+  './weekend-icon-512.png',
+  './weekend-apple-touch.png',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

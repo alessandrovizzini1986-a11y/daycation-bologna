@@ -4,19 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0A1628">
-<title>Weekend da Bologna · Fughe di 1-2 notti in aereo da BLQ</title>
-<meta name="description" content="Trova fughe di weekend (1-2 notti) in aereo da Bologna. Voli diretti andata e ritorno, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
+<title>Weekend da Bologna · Fughe di 1-3 notti in aereo da BLQ</title>
+<meta name="description" content="Trova fughe di weekend (1, 2 notti o ponte di 3) in aereo da Bologna. Voli diretti andata e ritorno, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
 
-<!-- Open Graph -->
+<!-- Open Graph (Facebook, WhatsApp, Telegram, LinkedIn) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Weekend da Bologna">
-<meta property="og:title" content="Weekend da Bologna · Fughe di 1-2 notti da BLQ">
-<meta property="og:description" content="Fughe di weekend in aereo da Bologna. Voli diretti A/R, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
+<meta property="og:title" content="Weekend da Bologna · Fughe di 1-3 notti da BLQ">
+<meta property="og:description" content="Fughe di weekend (1, 2 notti o ponte) in aereo da Bologna. Voli diretti A/R, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
+<meta property="og:url" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/weekend.html">
+<meta property="og:image" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/weekend-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Weekend da Bologna - fughe di 1-3 notti da BLQ">
 <meta property="og:locale" content="it_IT">
 
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Weekend da Bologna · Fughe di 1-3 notti da BLQ">
+<meta name="twitter:description" content="Fughe di weekend in aereo da Bologna. Voli diretti A/R, orari ufficiali, prezzi live su Skyscanner.">
+<meta name="twitter:image" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/weekend-og.png">
+
+<!-- PWA -->
+<link rel="manifest" href="weekend.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="weekend-icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="weekend-icon-512.png">
+
 <!-- iOS Home Screen -->
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="weekend-apple-touch.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Weekend BLQ">
@@ -132,6 +147,8 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
 </style>
 <style>
 /* Extra weekend-specific */
+.dur-lab{display:block;line-height:1.12}
+.dur-lab small{display:block;font-size:9px;opacity:.62;font-weight:700;margin-top:1px}
 .nights-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;background:#E6F0FF;color:#0E4EAD;margin-left:6px;text-transform:uppercase;letter-spacing:.3px;vertical-align:middle}
 .flt-date{font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.4px;width:54px;flex-shrink:0}
 .back-link{display:inline-flex;align-items:center;gap:5px;color:#6B7785;font-size:12px;font-weight:600;padding:10px 0}
@@ -162,8 +179,9 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
       <div style="flex:2.4">
         <div class="lbl">Durata</div>
         <div class="chip-row" id="nightsFilter">
-          <button class="chip" data-n="1">1 notte · Sab→Dom</button>
-          <button class="chip on" data-n="2">2 notti · Ven→Dom</button>
+          <button class="chip" data-n="1"><span class="dur-lab">1 notte<small>Sab→Dom</small></span></button>
+          <button class="chip on" data-n="2"><span class="dur-lab">2 notti<small>Ven→Dom</small></span></button>
+          <button class="chip" data-n="3"><span class="dur-lab">3 notti<small>Ven→Lun</small></span></button>
         </div>
       </div>
       <div style="flex:1">
@@ -195,8 +213,9 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
       <div style="flex:2.4">
         <div class="lbl">Durata</div>
         <div class="chip-row" id="nightsFilter2">
-          <button class="chip" data-n="1">1 notte · Sab→Dom</button>
-          <button class="chip on" data-n="2">2 notti · Ven→Dom</button>
+          <button class="chip" data-n="1"><span class="dur-lab">1 notte<small>Sab→Dom</small></span></button>
+          <button class="chip on" data-n="2"><span class="dur-lab">2 notti<small>Ven→Dom</small></span></button>
+          <button class="chip" data-n="3"><span class="dur-lab">3 notti<small>Ven→Lun</small></span></button>
         </div>
       </div>
       <div style="flex:1">
@@ -280,22 +299,30 @@ function bestWeekend(city,outISO,retISO){
   return best;
 }
 
-function outDateFor(sundayISO,nights){ const d=new Date(sundayISO+'T00:00:00'); d.setDate(d.getDate()-nights); return fmtISO(d); }
+/* Durate: offset (rispetto alla domenica del weekend) per partenza e rientro. */
+const DUR={
+  1:{outOff:-1,retOff:0,nights:1,short:'1 notte',range:'Sab→Dom',phrase:'sabato, rientro la domenica'},
+  2:{outOff:-2,retOff:0,nights:2,short:'2 notti',range:'Ven→Dom',phrase:'venerdì, rientro la domenica'},
+  3:{outOff:-2,retOff:1,nights:3,short:'3 notti',range:'Ven→Lun',phrase:'venerdì, rientro il lunedì (ponte)'}
+};
+function shiftISO(iso,off){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+off); return fmtISO(d); }
+function outDateFor(sundayISO,dur){ return shiftISO(sundayISO,DUR[dur].outOff); }
+function retDateFor(sundayISO,dur){ return shiftISO(sundayISO,DUR[dur].retOff); }
 
-function findByWeekend(sundayISO,nights){
-  const out=outDateFor(sundayISO,nights);
+function findByWeekend(sundayISO,dur){
+  const out=outDateFor(sundayISO,dur), ret=retDateFor(sundayISO,dur);
   const cities=[...new Set(DATA.d.map(v=>v[0]))];
   const res=[];
-  for(const c of cities){const b=bestWeekend(c,out,sundayISO);if(b)res.push({city:c,outISO:out,retISO:sundayISO,...b});}
+  for(const c of cities){const b=bestWeekend(c,out,ret);if(b)res.push({city:c,outISO:out,retISO:ret,...b});}
   return res;
 }
 
-function findWeekendsForCity(city,nights){
+function findWeekendsForCity(city,dur){
   const res=[];
   for(const s of WEEKENDS){
-    const out=outDateFor(s,nights);
-    const b=bestWeekend(city,out,s);
-    if(b)res.push({outISO:out,retISO:s,...b});
+    const out=outDateFor(s,dur), ret=retDateFor(s,dur);
+    const b=bestWeekend(city,out,ret);
+    if(b)res.push({outISO:out,retISO:ret,...b});
   }
   return res;
 }
@@ -323,7 +350,7 @@ function computeWeekendCapableCities(){
   for(const c of cities){
     let ok=false;
     for(const s of WEEKENDS){
-      if(bestWeekend(c,outDateFor(s,2),s)||bestWeekend(c,outDateFor(s,1),s)){ok=true;break;}
+      if(bestWeekend(c,outDateFor(s,1),retDateFor(s,1))||bestWeekend(c,outDateFor(s,2),retDateFor(s,2))||bestWeekend(c,outDateFor(s,3),retDateFor(s,3))){ok=true;break;}
     }
     if(ok)capable.push(c);
   }
@@ -331,6 +358,46 @@ function computeWeekendCapableCities(){
 }
 
 const STATE = { mode:'weekend', sunday:null, nights:2, pax:2, city:null, sort:'ore' };
+
+/* ===== Memoria impostazioni (solo questo dispositivo, localStorage) ===== */
+const PREFS_KEY='wkb_prefs_v1';
+function savePrefs(){
+  try{ localStorage.setItem(PREFS_KEY, JSON.stringify({mode:STATE.mode,nights:STATE.nights,pax:STATE.pax,city:STATE.city,sunday:STATE.sunday})); }catch(e){}
+}
+function loadPrefs(){
+  try{
+    const p=JSON.parse(localStorage.getItem(PREFS_KEY)||'null'); if(!p)return;
+    if([1,2,3].includes(p.nights))STATE.nights=p.nights;
+    if([1,2,3,4].includes(p.pax))STATE.pax=p.pax;
+    if(p.mode==='weekend'||p.mode==='dest')STATE.mode=p.mode;
+    if(typeof p.city==='string')STATE.city=p.city;
+    if(typeof p.sunday==='string')STATE.sunday=p.sunday;
+  }catch(e){}
+}
+function applyCityToInput(c){
+  const input=document.getElementById('cityDropdownInput');
+  const label=document.getElementById('cityDropdownLabel');
+  const ci=cityInfo(c);
+  label.innerHTML=`<span class="selected-flag">${ci.flag}</span><span>${c}</span>`;
+  label.classList.remove('placeholder');
+  if(!input.querySelector('.clear-btn')){
+    const clr=document.createElement('button');
+    clr.className='clear-btn'; clr.textContent='×'; clr.setAttribute('aria-label','Cancella');
+    clr.addEventListener('click',e=>{ e.stopPropagation(); STATE.city=null; label.textContent='Scegli una città…'; label.classList.add('placeholder'); clr.remove(); savePrefs(); render(); });
+    input.insertBefore(clr,input.querySelector('.caret'));
+  }
+}
+function applyPrefsToUI(){
+  document.getElementById('paxInput').value=STATE.pax;
+  document.getElementById('paxInput2').value=STATE.pax;
+  syncNightsChips();
+  const sel=document.getElementById('weekendSelect');
+  if([...sel.options].some(o=>o.value===STATE.sunday))sel.value=STATE.sunday; else STATE.sunday=sel.value;
+  if(STATE.city && WEEKEND_CITIES.includes(STATE.city))applyCityToInput(STATE.city); else STATE.city=null;
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===STATE.mode));
+  document.getElementById('formWeekend').style.display=STATE.mode==='weekend'?'block':'none';
+  document.getElementById('formDest').style.display=STATE.mode==='dest'?'block':'none';
+}
 
 /* ===== Condivisione (Web Share API + fallback clipboard) ===== */
 function buildShareData(city, r){
@@ -383,17 +450,18 @@ function render(){
 }
 
 function renderByWeekend(root){
+  const out=outDateFor(STATE.sunday,STATE.nights), ret=retDateFor(STATE.sunday,STATE.nights);
   const results=findByWeekend(STATE.sunday,STATE.nights);
   if(!results.length){
     const range=seasonRange();
     const extra=range?`<div class="state-msg">Il dataset attuale (<strong>${DATA.meta.season.replace('_',' ')}</strong>) copre da ${range.min.slice(2)}/${range.min.slice(0,2)} a ${range.max.slice(2)}/${range.max.slice(0,2)}.</div>`:'';
-    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend possibile</div><div class="state-msg">Per ${fmtDateShort(outDateFor(STATE.sunday,STATE.nights))} → ${fmtDateShort(STATE.sunday)} non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div>${extra}<div class="state-hint">💡 Prova l'altra durata o scegli un altro weekend.</div></div>`;
+    root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend possibile</div><div class="state-msg">Per ${fmtDateShort(out)} → ${fmtDateShort(ret)} non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div>${extra}<div class="state-hint">💡 Prova un'altra durata o un altro weekend.</div></div>`;
     return;
   }
   if(STATE.sort==='ore')results.sort((a,b)=>b.oreReali-a.oreReali);
   else if(STATE.sort==='partenza')results.sort((a,b)=>a.out[2].localeCompare(b.out[2]));
   else if(STATE.sort==='rientro')results.sort((a,b)=>b.ret[2].localeCompare(a.ret[2]));
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} mete possibili</div><div class="result-day">${fmtDateShort(STATE.sunday)}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra tardi</button></div>${results.map(cardWeekendCity).join('')}<div class="cross-cta">Cerchi solo una gita in giornata? <a href="./">Apri Daycation →</a></div><div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per il weekend scelto cerco la migliore combinazione di voli <strong>diretti</strong> A/R da BLQ: partenza il ${STATE.nights===2?'venerdì':'sabato'}, rientro la domenica. Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer e check-in (~1h40, ~2h20 extra-Schengen).</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} mete possibili</div><div class="result-day">${fmtDateShort(out)} → ${fmtDateShort(ret)}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra tardi</button></div>${results.map(cardWeekendCity).join('')}<div class="cross-cta">Cerchi solo una gita in giornata? <a href="./">Apri Daycation →</a></div><div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per il weekend scelto cerco la migliore combinazione di voli <strong>diretti</strong> A/R da BLQ: partenza ${DUR[STATE.nights].phrase}. Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer e check-in (~1h40, ~2h20 extra-Schengen).</div>`;
   root.querySelectorAll('.sort-pill').forEach(b=>b.addEventListener('click',()=>{STATE.sort=b.dataset.s;render();}));
   bindShareButtons(root);
 }
@@ -415,6 +483,7 @@ function renderByDest(root){
 
 function switchMode(m){
   STATE.mode=m;
+  savePrefs();
   document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===m));
   document.getElementById('formWeekend').style.display=m==='weekend'?'block':'none';
   document.getElementById('formDest').style.display=m==='dest'?'block':'none';
@@ -429,8 +498,8 @@ function syncNightsChips(){
 function populateWeekendSelect(){
   const sel=document.getElementById('weekendSelect');
   sel.innerHTML=WEEKENDS.map(s=>{
-    const out=outDateFor(s,STATE.nights);
-    return `<option value="${s}">${fmtDateShort(out)} → ${fmtDateShort(s)}</option>`;
+    const out=outDateFor(s,STATE.nights), ret=retDateFor(s,STATE.nights);
+    return `<option value="${s}">${fmtDateShort(out)} → ${fmtDateShort(ret)}</option>`;
   }).join('');
   if(!STATE.sunday||!WEEKENDS.includes(STATE.sunday))STATE.sunday=WEEKENDS[0];
   sel.value=STATE.sunday;
@@ -454,16 +523,9 @@ function setupCityDropdown(){
     }).join('');
     list.querySelectorAll('.dropdown-item[data-city]').forEach(el=>{
       el.addEventListener('click',()=>{
-        const c=el.dataset.city; STATE.city=c;
-        const ci=cityInfo(c);
-        label.innerHTML=`<span class="selected-flag">${ci.flag}</span><span>${c}</span>`;
-        label.classList.remove('placeholder');
-        if(!input.querySelector('.clear-btn')){
-          const clr=document.createElement('button');
-          clr.className='clear-btn'; clr.textContent='×'; clr.setAttribute('aria-label','Cancella');
-          clr.addEventListener('click',e=>{ e.stopPropagation(); STATE.city=null; label.textContent='Scegli una città…'; label.classList.add('placeholder'); clr.remove(); render(); });
-          input.insertBefore(clr,input.querySelector('.caret'));
-        }
+        STATE.city=el.dataset.city;
+        applyCityToInput(STATE.city);
+        savePrefs();
         close(); render();
       });
     });
@@ -477,11 +539,12 @@ function setupCityDropdown(){
 
 async function init(){
   buildWeekends();
-  document.getElementById('weekendSelect').addEventListener('change',e=>{STATE.sunday=e.target.value;render();});
-  document.getElementById('paxInput').addEventListener('change',e=>{STATE.pax=parseInt(e.target.value);document.getElementById('paxInput2').value=e.target.value;render();});
-  document.getElementById('paxInput2').addEventListener('change',e=>{STATE.pax=parseInt(e.target.value);document.getElementById('paxInput').value=e.target.value;render();});
+  loadPrefs();
+  document.getElementById('weekendSelect').addEventListener('change',e=>{STATE.sunday=e.target.value;savePrefs();render();});
+  document.getElementById('paxInput').addEventListener('change',e=>{STATE.pax=parseInt(e.target.value);document.getElementById('paxInput2').value=e.target.value;savePrefs();render();});
+  document.getElementById('paxInput2').addEventListener('change',e=>{STATE.pax=parseInt(e.target.value);document.getElementById('paxInput').value=e.target.value;savePrefs();render();});
   document.querySelectorAll('#nightsFilter .chip, #nightsFilter2 .chip').forEach(b=>b.addEventListener('click',()=>{
-    STATE.nights=parseInt(b.dataset.n); syncNightsChips(); populateWeekendSelect(); render();
+    STATE.nights=parseInt(b.dataset.n); syncNightsChips(); populateWeekendSelect(); savePrefs(); render();
   }));
   document.querySelectorAll('.mode-tab').forEach(t=>t.addEventListener('click',()=>switchMode(t.dataset.mode)));
 
@@ -498,6 +561,7 @@ async function init(){
     }
     populateWeekendSelect();
     setupCityDropdown();
+    applyPrefsToUI();
     render();
   }catch(e){
     document.getElementById('content').innerHTML=`<div class="state"><div class="state-icon">⚠️</div><div class="state-title">Errore di caricamento</div><div class="state-msg">Non riesco a caricare gli orari.<br><br><span class="tiny muted">${e.message}</span></div></div>`;
