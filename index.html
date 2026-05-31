@@ -51,6 +51,10 @@ header{background:#0A1628;padding:14px 18px;display:flex;align-items:center;gap:
 .h-title{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;line-height:1.2}
 .h-sub{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:1px}
 
+.prod-switch{background:#0A1628;padding:0 16px 12px;display:flex;gap:6px}
+.prod-switch a{flex:1;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;background:rgba(255,255,255,.07);color:rgba(255,255,255,.66)}
+.prod-switch a.on{background:#fff;color:#0A1628;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+
 .mode-tabs{background:#0A1628;padding:0 16px 14px;display:flex;gap:6px}
 .mode-tab{flex:1;height:38px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
 .mode-tab.on{background:#F5A623;color:#0A1628;font-weight:700}
@@ -155,6 +159,11 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
     <div class="h-sub" id="metaInfo">Voli diretti dall'aeroporto Marconi</div>
   </div>
 </header>
+
+<nav class="prod-switch" aria-label="Tipo di viaggio">
+  <a class="on" aria-current="page">✈️ In giornata</a>
+  <a href="weekend.html">🧳 Weekend</a>
+</nav>
 
 <div class="mode-tabs">
   <button class="mode-tab on" data-mode="data">📅 Per data</button>
