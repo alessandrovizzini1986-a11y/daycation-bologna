@@ -108,6 +108,11 @@ input[type=date]:focus,input[type=text]:focus,select:focus{border-color:#0A1628}
 .foot-info{font-size:11px;color:#6B7785}
 .btn-sky{background:#0E4EAD;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(14,78,173,.25)}
 .btn-sky-fallback{background:#6B7785;color:#fff;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.foot-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn-share{background:#F5F7FB;border:1.5px solid #E1E6EE;color:#0A1628;width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;transition:background .15s,border-color .15s,color .15s}
+.btn-share:active{background:#EAEEF5}
+.btn-share svg{width:17px;height:17px}
+.btn-share.copied{background:#E6F9F3;border-color:#0A7A50;color:#0A7A50}
 
 .sort-bar{display:flex;gap:7px;padding-bottom:2px;margin-bottom:14px;overflow-x:auto}
 .sort-pill{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1.5px solid #E1E6EE;background:#fff;color:#6B7785;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
@@ -457,6 +462,39 @@ function btnSkyHTML(ci, date, pax){
   return `<a class="btn-sky" href="${sky}" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>Cerca prezzi</a>`;
 }
 
+function buildShareData(city, date, r){
+  const ci=cityInfo(city);
+  const code=ci.iata||'BLQ?';
+  const url=location.href.split('?')[0].split('#')[0];
+  const text=`✈️ Daycation da Bologna · ${ci.flag} ${city}\n📅 ${fmtDate(date)}\n🛫 ${r.out[2]} → ${r.out[3]}  BLQ → ${ci.iata||'—'}\n🛬 ${r.ret[2]} → ${r.ret[3]}  ${ci.iata||'—'} → BLQ\n⏱ ${r.oreReali.toFixed(1)}h sul posto · giro totale ${r.oreFuori.toFixed(1)}h\n\n${url}`;
+  return {title:`Daycation: ${city} in giornata da Bologna`, text, url};
+}
+
+function btnShareHTML(shareObj){
+  const enc=encodeURIComponent(JSON.stringify(shareObj));
+  return `<button class="btn-share" data-share="${enc}" aria-label="Condividi questa gita" title="Condividi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></button>`;
+}
+
+async function doShare(el){
+  let obj; try{obj=JSON.parse(decodeURIComponent(el.dataset.share));}catch(e){return;}
+  track('share');
+  if(navigator.share){
+    try{await navigator.share(obj);}catch(e){/* annullato dall'utente: ignoro */}
+    return;
+  }
+  // Fallback desktop: copia negli appunti con feedback visivo
+  const done=()=>{el.classList.add('copied');setTimeout(()=>el.classList.remove('copied'),1800);};
+  try{
+    await navigator.clipboard.writeText(obj.text);done();
+  }catch(e){
+    try{prompt('Copia il testo della gita:',obj.text);}catch(_){}
+  }
+}
+
+function bindShareButtons(root){
+  root.querySelectorAll('.btn-share').forEach(b=>b.addEventListener('click',()=>doShare(b)));
+}
+
 function cardCityHTML(r){
   const ci=cityInfo(r.city);
   const aO=airline(r.out[1]),aR=airline(r.ret[1]),same=aO.n===aR.n;
@@ -464,7 +502,7 @@ function cardCityHTML(r){
   const fR=Math.round((t2m(r.ret[3])-t2m(r.ret[2]))/6)/10;
   const newBadge=ci.isNew?'<span class="new-badge">Rotta nuova</span>':'';
   const iataLabel=ci.iata||'—';
-  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}</div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel} · ${fO}h</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ · ${fR}h</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div>${btnSkyHTML(ci, STATE.date, STATE.pax)}</div></div>`;
+  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}</div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel} · ${fO}h</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ · ${fR}h</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div><div class="foot-actions">${btnShareHTML(buildShareData(r.city, STATE.date, r))}${btnSkyHTML(ci, STATE.date, STATE.pax)}</div></div></div>`;
 }
 
 function cardDateHTML(r){
@@ -474,7 +512,7 @@ function cardDateHTML(r){
   const isWeekend=wd===6||wd===7;
   const badge=isWeekend?'<span class="date-badge weekend">Weekend</span>':'';
   const iataLabel=ci.iata||'—';
-  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.date)} ${badge}</div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div>${btnSkyHTML(ci, r.date, STATE.pax)}</div></div>`;
+  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.date)} ${badge}</div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div><div class="foot-actions">${btnShareHTML(buildShareData(STATE.city, r.date, r))}${btnSkyHTML(ci, r.date, STATE.pax)}</div></div></div>`;
 }
 
 function render(){
@@ -505,6 +543,7 @@ function renderByDate(root){
   root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} gite possibili</div><div class="result-day">${DAYS[new Date(STATE.date).getDay()]}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra prima</button></div>${results.map(cardCityHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Mostro solo voli <strong>diretti</strong> andata+ritorno nello stesso giorno secondo l'orario ufficiale BLQ. Per ogni città scelgo la combinazione che lascia più tempo sul posto.<br><br>Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer aeroporto-centro e check-in (~1h40, ~2h20 per voli extra-Schengen). Sotto ogni numero trovi anche il valore <strong>lordo</strong>.<br><br>Dataset BLQ: <strong>${DATA.meta.cities.length} città totali servite</strong>, di cui <strong>${DAYCATION_CITIES.length} davvero raggiungibili in giornata</strong>.</div>`;
 
   root.querySelectorAll('.sort-pill').forEach(b=>b.addEventListener('click',()=>{STATE.sort=b.dataset.s;render();}));
+  bindShareButtons(root);
 }
 
 function renderByDest(root){
@@ -532,6 +571,7 @@ function renderByDest(root){
   const ci=cityInfo(STATE.city);
   const rTxt=STATE.range==='all'?"tutta la stagione":`prossimi ${STATE.range} giorni`;
   root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} date utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">Range: ${rTxt}${STATE.weekdays.length?' · giorni filtrati':''}</div>${results.map(cardDateHTML).join('')}<div style="margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per ogni data della stagione controllo se esiste un volo diretto andata+ritorno da BLQ a ${STATE.city} con almeno ${STATE.minH}h sul posto.<br><br>Le ore sono <strong>reali</strong>: tolgo transfer aeroporto-centro e check-in (~1h40, ~2h20 extra-Schengen) dall'orario gate-to-gate.</div>`;
+  bindShareButtons(root);
 }
 
 function switchMode(m){
