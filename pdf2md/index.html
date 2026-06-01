@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PDF → Markdown · convertitore offline</title>
+<meta name="description" content="Converti un PDF in Markdown direttamente nel browser. Niente upload, niente server: il file resta sul tuo dispositivo.">
+<meta name="theme-color" content="#0f1115">
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --txt:#e7eaf0; --muted:#9aa3b2; --accent:#4f8cff; --accent2:#1db954;
+    --danger:#ff5a5f; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--txt);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px 16px 60px}
+  header h1{font-size:1.35rem;margin:.2rem 0}
+  header p{color:var(--muted);margin:.2rem 0 1rem}
+  .drop{border:2px dashed var(--line);border-radius:var(--radius);padding:32px 18px;
+    text-align:center;background:var(--panel);transition:.15s;cursor:pointer}
+  .drop.over{border-color:var(--accent);background:var(--panel2)}
+  .drop .big{font-size:2rem}
+  .drop small{color:var(--muted);display:block;margin-top:6px}
+  input[type=file]{display:none}
+  .opts{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:14px 0;
+    color:var(--muted);font-size:.92rem}
+  .opts label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+  button{font:inherit;border:1px solid var(--line);background:var(--panel2);color:var(--txt);
+    padding:9px 14px;border-radius:10px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  button.ok{background:var(--accent2);border-color:var(--accent2);color:#04210f;font-weight:600}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .status{color:var(--muted);min-height:1.4em;margin:6px 0;font-size:.92rem}
+  .status.err{color:var(--danger)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:780px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;display:flex;flex-direction:column;min-height:340px}
+  .card h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+    margin:0;padding:10px 14px;border-bottom:1px solid var(--line)}
+  textarea{flex:1;width:100%;border:0;resize:vertical;min-height:300px;background:transparent;
+    color:var(--txt);padding:14px;font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  textarea:focus{outline:none}
+  .preview{padding:14px 16px;overflow:auto}
+  .preview h1,.preview h2,.preview h3{line-height:1.25;margin:.8em 0 .4em}
+  .preview h1{font-size:1.5rem;border-bottom:1px solid var(--line);padding-bottom:.2em}
+  .preview h2{font-size:1.25rem}
+  .preview h3{font-size:1.08rem}
+  .preview ul{padding-left:1.2em}
+  .preview p{margin:.5em 0}
+  .preview hr{border:0;border-top:1px solid var(--line);margin:1.2em 0}
+  .preview code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-size:.9em}
+  footer{color:var(--muted);font-size:.82rem;margin-top:26px;line-height:1.6}
+  footer code{background:var(--panel2);padding:1px 5px;border-radius:5px}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📄→📝 PDF in Markdown</h1>
+    <p>Conversione <strong>nel tuo browser</strong>. Il PDF non viene mai caricato su un server: resta sul tuo dispositivo.</p>
+  </header>
+
+  <label class="drop" id="drop">
+    <div class="big">📥</div>
+    <div><strong>Trascina qui un PDF</strong> oppure tocca per sceglierlo</div>
+    <small>Funziona con PDF di testo. I PDF scansionati (immagini) non hanno testo selezionabile e non sono convertibili senza OCR.</small>
+    <input type="file" id="file" accept="application/pdf,.pdf">
+  </label>
+
+  <div class="opts">
+    <label><input type="checkbox" id="optHeadings" checked> Rileva titoli (in base alla dimensione del testo)</label>
+    <label><input type="checkbox" id="optLists" checked> Rileva elenchi puntati</label>
+    <label><input type="checkbox" id="optPageBreak"> Separatore tra le pagine (<code>---</code>)</label>
+  </div>
+
+  <div class="status" id="status">Nessun file selezionato.</div>
+
+  <div class="bar">
+    <button class="ok" id="copy" disabled>📋 Copia Markdown</button>
+    <button class="primary" id="download" disabled>⬇️ Scarica .md</button>
+    <button id="reconvert" disabled>🔁 Riconverti con queste opzioni</button>
+    <button id="clear" disabled>🗑️ Pulisci</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Markdown (modificabile)</h2>
+      <textarea id="md" placeholder="Il Markdown apparirà qui…" spellcheck="false"></textarea>
+    </div>
+    <div class="card">
+      <h2>Anteprima</h2>
+      <div class="preview" id="preview"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>🔒 <strong>Privacy:</strong> nessun upload. L'estrazione avviene interamente in locale con
+      <code>PDF.js</code> (caricato da CDN solo come libreria, non riceve il tuo file).</p>
+    <p>⚙️ La conversione è euristica: titoli stimati dalla dimensione dei caratteri, elenchi dai
+      simboli di inizio riga. Rivedi sempre il risultato nel riquadro a sinistra (è modificabile)
+      prima di copiarlo.</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+"use strict";
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+const $ = id => document.getElementById(id);
+const drop = $('drop'), fileInput = $('file'), statusEl = $('status');
+const mdEl = $('md'), previewEl = $('preview');
+const btnCopy = $('copy'), btnDl = $('download'), btnRe = $('reconvert'), btnClear = $('clear');
+
+let lastFileName = '';
+let lastPages = null;   // testo strutturato per pagina, per riconvertire senza rileggere il PDF
+
+function setStatus(msg, err=false){ statusEl.textContent = msg; statusEl.classList.toggle('err', err); }
+function setBusy(busy){ [btnCopy,btnDl,btnRe,btnClear].forEach(b=>b.disabled = busy || !lastPages); }
+
+/* ---- lettura PDF: estrae righe con dimensione font, raggruppando per coordinata y ---- */
+async function readPdf(arrayBuffer){
+  const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+  const pages = [];
+  for (let p = 1; p <= pdf.numPages; p++){
+    setStatus(`Estrazione testo… pagina ${p} di ${pdf.numPages}`);
+    const page = await pdf.getPage(p);
+    const tc = await page.getTextContent();
+    const rows = {};
+    for (const it of tc.items){
+      const str = it.str;
+      if (!str) continue;
+      const y = Math.round(it.transform[5]);
+      const x = it.transform[4];
+      const size = it.height || Math.hypot(it.transform[2], it.transform[3]) || 10;
+      let key = null, best = 3;                 // tolleranza verticale per stessa riga
+      for (const k in rows){ const d = Math.abs(+k - y); if (d <= best){ best = d; key = k; } }
+      if (key === null) key = String(y);
+      (rows[key] = rows[key] || []).push({x, str, size});
+    }
+    const lines = Object.keys(rows)
+      .sort((a,b)=> b - a)                       // y alto = più in alto nella pagina
+      .map(k=>{
+        const items = rows[k].sort((a,b)=> a.x - b.x);
+        let text = '';
+        for (let i=0;i<items.length;i++){
+          if (i>0){ const gap = items[i].x - (items[i-1].x); if (gap > items[i-1].str.length*0+8) text += ' '; }
+          text += items[i].str;
+        }
+        const size = Math.max(...items.map(i=>i.size));
+        return { text: text.replace(/\s+/g,' ').trim(), size };
+      })
+      .filter(l=> l.text.length);
+    pages.push(lines);
+  }
+  return pages;
+}
+
+/* ---- conversione righe -> Markdown ---- */
+function toMarkdown(pages, opts){
+  const all = pages.flat().map(l=>l.size).filter(Boolean).sort((a,b)=>a-b);
+  const median = all.length ? all[Math.floor(all.length/2)] : 10;
+  const BULLET = /^[•‣◦⁃∙•▪◦·*\-–—]\s+/;
+  const NUM = /^(\d+[.)])\s+/;
+
+  const out = [];
+  pages.forEach((lines, pi)=>{
+    if (opts.pageBreak && pi>0) out.push('', '---', '');
+    let prevBlank = true;
+    for (const l of lines){
+      let t = l.text;
+
+      if (opts.lists && BULLET.test(t)){
+        out.push('- ' + t.replace(BULLET,'')); prevBlank=false; continue;
+      }
+      if (opts.lists && NUM.test(t)){
+        out.push(t); prevBlank=false; continue;
+      }
+      if (opts.headings && t.length <= 90){
+        const r = l.size / median;
+        let h = 0;
+        if (r >= 1.8) h = 1; else if (r >= 1.45) h = 2; else if (r >= 1.2) h = 3;
+        if (h){
+          if (!prevBlank) out.push('');
+          out.push('#'.repeat(h) + ' ' + t);
+          out.push(''); prevBlank=true; continue;
+        }
+      }
+      out.push(t); prevBlank=false;
+    }
+  });
+
+  // compatta righe vuote multiple e unisci paragrafi spezzati banali
+  return out.join('\n').replace(/\n{3,}/g,'\n\n').trim() + '\n';
+}
+
+/* ---- mini-render Markdown per l'anteprima (sottoinsieme: titoli, liste, hr, inline) ---- */
+function renderPreview(md){
+  const esc = s => s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const inline = s => esc(s)
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>');
+  const lines = md.split('\n');
+  let html = '', inUl = false;
+  const closeUl = ()=>{ if(inUl){ html+='</ul>'; inUl=false; } };
+  for (const line of lines){
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h){ closeUl(); html += `<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`; continue; }
+    if (/^---+$/.test(line.trim())){ closeUl(); html += '<hr>'; continue; }
+    if (/^-\s+/.test(line)){ if(!inUl){html+='<ul>';inUl=true;} html += `<li>${inline(line.replace(/^-\s+/,''))}</li>`; continue; }
+    if (line.trim()===''){ closeUl(); continue; }
+    closeUl(); html += `<p>${inline(line)}</p>`;
+  }
+  closeUl();
+  previewEl.innerHTML = html;
+}
+
+function options(){
+  return { headings:$('optHeadings').checked, lists:$('optLists').checked, pageBreak:$('optPageBreak').checked };
+}
+
+function emit(){
+  if (!lastPages) return;
+  const md = toMarkdown(lastPages, options());
+  mdEl.value = md;
+  renderPreview(md);
+  setBusy(false);
+}
+
+async function handleFile(file){
+  if (!file){ return; }
+  if (file.type && file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)){
+    setStatus('Per favore scegli un file PDF.', true); return;
+  }
+  if (!window.pdfjsLib){ setStatus('Libreria PDF.js non caricata (sei offline?). Riprova online.', true); return; }
+  lastFileName = file.name.replace(/\.pdf$/i,'') || 'documento';
+  [btnCopy,btnDl,btnRe,btnClear].forEach(b=>b.disabled=true);
+  setStatus(`Lettura di “${file.name}”…`);
+  try {
+    const buf = await file.arrayBuffer();
+    lastPages = await readPdf(buf);
+    const nLines = lastPages.reduce((s,p)=>s+p.length,0);
+    if (!nLines){
+      setStatus('Nessun testo trovato. Probabilmente è un PDF scansionato (immagini): servirebbe l’OCR.', true);
+      lastPages = null; return;
+    }
+    emit();
+    setStatus(`Fatto: ${lastPages.length} pagine, ${nLines} righe di testo. Rivedi e modifica a sinistra se serve.`);
+  } catch(e){
+    console.error(e);
+    setStatus('Errore nella lettura del PDF: ' + (e && e.message || e), true);
+    lastPages = null;
+  }
+}
+
+/* ---- eventi ---- */
+fileInput.addEventListener('change', e=> handleFile(e.target.files[0]));
+['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e=>{ const f = e.dataTransfer.files && e.dataTransfer.files[0]; handleFile(f); });
+
+mdEl.addEventListener('input', ()=> renderPreview(mdEl.value));
+btnRe.addEventListener('click', emit);
+['optHeadings','optLists','optPageBreak'].forEach(id=> $(id).addEventListener('change', ()=>{ if(lastPages) emit(); }));
+
+btnCopy.addEventListener('click', ()=>{
+  navigator.clipboard.writeText(mdEl.value).then(()=>{
+    const o = btnCopy.textContent; btnCopy.textContent = '✓ Copiato'; setTimeout(()=>btnCopy.textContent=o, 1600);
+  }).catch(()=> setStatus('Copia non riuscita: seleziona il testo manualmente.', true));
+});
+
+btnDl.addEventListener('click', ()=>{
+  const blob = new Blob([mdEl.value], {type:'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = lastFileName + '.md';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+});
+
+btnClear.addEventListener('click', ()=>{
+  lastPages = null; lastFileName=''; mdEl.value=''; previewEl.innerHTML=''; fileInput.value='';
+  setStatus('Nessun file selezionato.'); setBusy(true);
+});
+</script>
+</body>
+</html>
