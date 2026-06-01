@@ -36,6 +36,21 @@ body { padding-bottom: 80px; } /* spazio per la tab bar mobile */
 
 a { color: var(--blue); text-decoration: none; }
 
+/* ---------- Product switcher (collega le app del progetto) ---------- */
+.prod-switch {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 10px 16px 0;
+}
+.prod-switch a {
+  flex: 1 1 130px; height: 40px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: 10px;
+  font-size: 13px; font-weight: 700; text-decoration: none;
+  background: var(--card); color: var(--muted);
+}
+.prod-switch a:hover { border-color: var(--blue); color: var(--text); }
+.prod-switch a.on { background: #fff; color: #0c1116; border-color: #fff; }
+
 /* ---------- Header ---------- */
 header.app-header {
   position: sticky;
