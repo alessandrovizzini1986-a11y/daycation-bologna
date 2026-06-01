@@ -56,6 +56,12 @@
   .preview code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-size:.9em}
   footer{color:var(--muted);font-size:.82rem;margin-top:26px;line-height:1.6}
   footer code{background:var(--panel2);padding:1px 5px;border-radius:5px}
+  .prod-switch{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+  .prod-switch a{flex:1 1 130px;height:42px;border:1px solid var(--line);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;
+    background:var(--panel);color:var(--muted);text-decoration:none}
+  .prod-switch a:hover{border-color:var(--accent);color:var(--txt)}
+  .prod-switch a.on{background:#fff;color:#0f1115;border-color:#fff}
   .hide{display:none!important}
 </style>
 </head>
@@ -66,10 +72,17 @@
     <p>Conversione <strong>nel tuo browser</strong>. Il PDF non viene mai caricato su un server: resta sul tuo dispositivo.</p>
   </header>
 
+  <nav class="prod-switch" aria-label="App">
+    <a href="../">✈️ In giornata</a>
+    <a href="../weekend.html">🧳 Weekend</a>
+    <a href="../pronostici/">⚽ Pronostici</a>
+    <a class="on" aria-current="page">📄 PDF→MD</a>
+  </nav>
+
   <label class="drop" id="drop">
     <div class="big">📥</div>
     <div><strong>Trascina qui un PDF</strong> oppure tocca per sceglierlo</div>
-    <small>Funziona con PDF di testo. I PDF scansionati (immagini) non hanno testo selezionabile e non sono convertibili senza OCR.</small>
+    <small>PDF di testo: conversione immediata. PDF scansionati (immagini): attiva l’opzione <strong>OCR</strong> qui sotto.</small>
     <input type="file" id="file" accept="application/pdf,.pdf">
   </label>
 
@@ -77,6 +90,7 @@
     <label><input type="checkbox" id="optHeadings" checked> Rileva titoli (in base alla dimensione del testo)</label>
     <label><input type="checkbox" id="optLists" checked> Rileva elenchi puntati</label>
     <label><input type="checkbox" id="optPageBreak"> Separatore tra le pagine (<code>---</code>)</label>
+    <label><input type="checkbox" id="optOcr"> 🔍 OCR per pagine scansionate (ita+eng, più lento)</label>
   </div>
 
   <div class="status" id="status">Nessun file selezionato.</div>
@@ -100,8 +114,10 @@
   </div>
 
   <footer>
-    <p>🔒 <strong>Privacy:</strong> nessun upload. L'estrazione avviene interamente in locale con
-      <code>PDF.js</code> (caricato da CDN solo come libreria, non riceve il tuo file).</p>
+    <p>🔒 <strong>Privacy:</strong> nessun upload. Estrazione e OCR avvengono interamente in locale con
+      <code>PDF.js</code> e <code>Tesseract.js</code> (caricati da CDN solo come librerie, non ricevono il tuo file).</p>
+    <p>🔍 <strong>OCR:</strong> attivalo per i PDF scansionati. La prima esecuzione scarica i dati lingua
+      (ita+eng, qualche MB) ed è più lenta; viene applicato solo alle pagine prive di testo.</p>
     <p>⚙️ La conversione è euristica: titoli stimati dalla dimensione dei caratteri, elenchi dai
       simboli di inizio riga. Rivedi sempre il risultato nel riquadro a sinistra (è modificabile)
       prima di copiarlo.</p>
@@ -122,14 +138,14 @@ const mdEl = $('md'), previewEl = $('preview');
 const btnCopy = $('copy'), btnDl = $('download'), btnRe = $('reconvert'), btnClear = $('clear');
 
 let lastFileName = '';
+let lastFile = null;    // File originale, per riprocessare (es. quando si attiva/disattiva l'OCR)
 let lastPages = null;   // testo strutturato per pagina, per riconvertire senza rileggere il PDF
 
 function setStatus(msg, err=false){ statusEl.textContent = msg; statusEl.classList.toggle('err', err); }
 function setBusy(busy){ [btnCopy,btnDl,btnRe,btnClear].forEach(b=>b.disabled = busy || !lastPages); }
 
-/* ---- lettura PDF: estrae righe con dimensione font, raggruppando per coordinata y ---- */
-async function readPdf(arrayBuffer){
-  const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+/* ---- estrazione testo: righe con dimensione font, raggruppate per coordinata y ---- */
+async function extractText(pdf){
   const pages = [];
   for (let p = 1; p <= pdf.numPages; p++){
     setStatus(`Estrazione testo… pagina ${p} di ${pdf.numPages}`);
@@ -153,7 +169,7 @@ async function readPdf(arrayBuffer){
         const items = rows[k].sort((a,b)=> a.x - b.x);
         let text = '';
         for (let i=0;i<items.length;i++){
-          if (i>0){ const gap = items[i].x - (items[i-1].x); if (gap > items[i-1].str.length*0+8) text += ' '; }
+          if (i>0 && items[i].x - items[i-1].x > 8) text += ' ';
           text += items[i].str;
         }
         const size = Math.max(...items.map(i=>i.size));
@@ -163,6 +179,50 @@ async function readPdf(arrayBuffer){
     pages.push(lines);
   }
   return pages;
+}
+
+/* ---- OCR: Tesseract.js caricato in modo lazy (solo quando una pagina è scansionata) ---- */
+let tesseractLoading;
+function ensureTesseract(){
+  if (window.Tesseract) return Promise.resolve();
+  if (!tesseractLoading) tesseractLoading = new Promise((res, rej)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload = res;
+    s.onerror = ()=> rej(new Error('Impossibile caricare Tesseract.js (sei offline?)'));
+    document.head.appendChild(s);
+  });
+  return tesseractLoading;
+}
+
+// Renderizza le pagine indicate (numeri 1-based) su canvas e ne legge il testo con OCR.
+async function ocrPages(pdf, indices){
+  await ensureTesseract();
+  setStatus('OCR: preparazione (la prima volta scarico i dati lingua ita+eng)…');
+  let cur = 0;
+  const worker = await Tesseract.createWorker('ita+eng', 1, {
+    logger: m => { if (m.status === 'recognizing text')
+      setStatus(`OCR pagina ${cur} (${indices.length} da elaborare): ${Math.round(m.progress*100)}%`); }
+  });
+  const result = {};
+  try {
+    for (const p of indices){
+      cur = p;
+      const page = await pdf.getPage(p);
+      const viewport = page.getViewport({scale: 2});         // 2x = OCR più accurato
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width; canvas.height = viewport.height;
+      await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+      const { data } = await worker.recognize(canvas);
+      result[p] = (data.text || '').split('\n')
+        .map(t=> t.replace(/\s+/g,' ').trim())
+        .filter(Boolean)
+        .map(text=> ({text, size: 0}));   // size 0 => trattate come corpo testo (no titoli)
+    }
+  } finally {
+    await worker.terminate();
+  }
+  return result;
 }
 
 /* ---- conversione righe -> Markdown ---- */
@@ -185,7 +245,7 @@ function toMarkdown(pages, opts){
       if (opts.lists && NUM.test(t)){
         out.push(t); prevBlank=false; continue;
       }
-      if (opts.headings && t.length <= 90){
+      if (opts.headings && l.size > 0 && t.length <= 90){
         const r = l.size / median;
         let h = 0;
         if (r >= 1.8) h = 1; else if (r >= 1.45) h = 2; else if (r >= 1.2) h = 3;
@@ -237,25 +297,49 @@ function emit(){
   setBusy(false);
 }
 
-async function handleFile(file){
-  if (!file){ return; }
+function handleFile(file){
+  if (!file) return;
   if (file.type && file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)){
     setStatus('Per favore scegli un file PDF.', true); return;
   }
+  process(file);
+}
+
+async function process(file){
   if (!window.pdfjsLib){ setStatus('Libreria PDF.js non caricata (sei offline?). Riprova online.', true); return; }
+  lastFile = file;
   lastFileName = file.name.replace(/\.pdf$/i,'') || 'documento';
   [btnCopy,btnDl,btnRe,btnClear].forEach(b=>b.disabled=true);
   setStatus(`Lettura di “${file.name}”…`);
   try {
     const buf = await file.arrayBuffer();
-    lastPages = await readPdf(buf);
-    const nLines = lastPages.reduce((s,p)=>s+p.length,0);
-    if (!nLines){
-      setStatus('Nessun testo trovato. Probabilmente è un PDF scansionato (immagini): servirebbe l’OCR.', true);
-      lastPages = null; return;
+    const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+    let pages = await extractText(pdf);
+
+    // pagine senza (quasi) testo => candidate all'OCR
+    const empties = pages
+      .map((lns,i)=> ({i, len: lns.reduce((s,l)=>s+l.text.length,0)}))
+      .filter(o=> o.len < 10)
+      .map(o=> o.i + 1);                          // numeri pagina 1-based
+
+    if ($('optOcr').checked && empties.length){
+      const ocr = await ocrPages(pdf, empties);
+      for (const p in ocr) pages[p-1] = ocr[p];
     }
+
+    const nLines = pages.reduce((s,p)=>s+p.length,0);
+    if (!nLines){
+      lastPages = null;
+      if (empties.length && !$('optOcr').checked)
+        setStatus('Nessun testo: sembra un PDF scansionato. Attiva “OCR” qui sopra e riprova.', true);
+      else
+        setStatus('Nessun testo trovato nel PDF.', true);
+      return;
+    }
+    lastPages = pages;
     emit();
-    setStatus(`Fatto: ${lastPages.length} pagine, ${nLines} righe di testo. Rivedi e modifica a sinistra se serve.`);
+    const ocrNote = ($('optOcr').checked && empties.length) ? `, di cui ${empties.length} via OCR` : '';
+    setStatus(`Fatto: ${pages.length} pagine${ocrNote}, ${nLines} righe. Rivedi/modifica a sinistra se serve.`);
   } catch(e){
     console.error(e);
     setStatus('Errore nella lettura del PDF: ' + (e && e.message || e), true);
@@ -272,6 +356,7 @@ drop.addEventListener('drop', e=>{ const f = e.dataTransfer.files && e.dataTrans
 mdEl.addEventListener('input', ()=> renderPreview(mdEl.value));
 btnRe.addEventListener('click', emit);
 ['optHeadings','optLists','optPageBreak'].forEach(id=> $(id).addEventListener('change', ()=>{ if(lastPages) emit(); }));
+$('optOcr').addEventListener('change', ()=>{ if(lastFile) process(lastFile); });   // l'OCR richiede di rileggere il PDF
 
 btnCopy.addEventListener('click', ()=>{
   navigator.clipboard.writeText(mdEl.value).then(()=>{
@@ -289,7 +374,7 @@ btnDl.addEventListener('click', ()=>{
 });
 
 btnClear.addEventListener('click', ()=>{
-  lastPages = null; lastFileName=''; mdEl.value=''; previewEl.innerHTML=''; fileInput.value='';
+  lastPages = null; lastFile = null; lastFileName=''; mdEl.value=''; previewEl.innerHTML=''; fileInput.value='';
   setStatus('Nessun file selezionato.'); setBusy(true);
 });
 </script>
