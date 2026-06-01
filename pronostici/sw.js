@@ -1,5 +1,5 @@
 /* Service worker — cache offline dell'app (non delle quote live) */
-const CACHE = 'pronostici-v1';
+const CACHE = 'pronostici-v2';
 const ASSETS = [
   './',
   './index.html',

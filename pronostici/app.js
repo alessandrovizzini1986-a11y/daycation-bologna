@@ -600,6 +600,20 @@ function switchView(name) {
 
 function renderAll() { renderDash(); renderBets(); }
 
+// "Link magico": se l'URL contiene #key=... o ?key=... salva la chiave e pulisce l'indirizzo.
+// Così la chiave non finisce mai nel codice pubblico, solo nel link personale.
+function applyKeyFromUrl() {
+  const src = (location.hash || '') + '&' + (location.search || '');
+  const m = src.match(/[#?&]key=([A-Za-z0-9]{8,})/);
+  if (m && m[1]) {
+    state.settings.apiKey = m[1];
+    save();
+    history.replaceState(null, '', location.pathname); // rimuove la chiave dall'URL
+    return true;
+  }
+  return false;
+}
+
 /* ============================================================
    INIT
    ============================================================ */
@@ -607,10 +621,12 @@ function init() {
   // default data oggi nel form registro
   $('#bDate').value = new Date().toISOString().slice(0, 10);
 
+  const keyJustSet = applyKeyFromUrl();
   hydrateSettings();
   renderAll();
   fillSportFilter();
   $('#liveNoKey').hidden = !!state.settings.apiKey;
+  if (keyJustSet) { switchView('live'); setTimeout(() => toast('Chiave API inserita ✅'), 300); }
 
   // navigazione
   $$('nav.tabbar button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
