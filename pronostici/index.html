@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pronostici — scommetti con la testa</title>
+  <meta name="description" content="Strumento personale di value betting: trova le quote di valore, calcola lo stake con Kelly, tieni il registro delle giocate. Calcio e Tennis." />
+  <meta name="theme-color" content="#0c1116" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <img class="logo" src="icon.svg" alt="" />
+    <h1>Pronostici <small>scommetti con la testa</small></h1>
+    <div class="bankroll-chip">
+      Bankroll
+      <b id="hdrBankroll">—</b>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ CRUSCOTTO ============ -->
+    <section id="view-dash" class="view active">
+      <h2 class="section-title">Cruscotto</h2>
+      <div class="stats" id="dashStats"></div>
+
+      <div class="card">
+        <h3>Andamento bankroll</h3>
+        <canvas id="bankrollChart" width="700" height="160"></canvas>
+        <p class="hint" id="chartHint" style="margin-top:10px;margin-bottom:0"></p>
+      </div>
+
+      <div class="card">
+        <h3>Giocate aperte</h3>
+        <div id="openBets"></div>
+      </div>
+    </section>
+
+    <!-- ============ LIVE / TROVA VALUE ============ -->
+    <section id="view-live" class="view">
+      <h2 class="section-title">Trova value (quote live)</h2>
+      <p class="hint">
+        Confronto le quote di tutti i bookmaker, tolgo il margine, calcolo la
+        probabilità "vera" di consenso e segnalo dove un bookmaker paga
+        <b>più del giusto</b>. Quello è il value. Serve la chiave API gratuita
+        (Impostazioni).
+      </p>
+      <div id="liveNoKey" class="note-warn" hidden>
+        Nessuna chiave API impostata. Vai in <b>Impostazioni</b> e incolla la tua
+        chiave gratuita di The Odds API per usare i dati live.
+      </div>
+
+      <div class="card">
+        <div class="filter-row">
+          <select id="liveSportFilter">
+            <option value="">Tutti gli sport disponibili</option>
+          </select>
+          <button class="btn small secondary" id="btnLoadSports" type="button">Aggiorna lista</button>
+        </div>
+        <label class="field" style="margin-bottom:8px">
+          <span>Edge minimo per segnalare (%)</span>
+          <input type="number" id="liveMinEdge" value="2" step="0.5" min="0" />
+        </label>
+        <button class="btn" id="btnScan" type="button">Cerca scommesse di valore</button>
+        <p class="hint" id="liveQuota" style="margin:10px 0 0"></p>
+      </div>
+
+      <div id="liveResults"></div>
+    </section>
+
+    <!-- ============ CALCOLATORE ============ -->
+    <section id="view-calc" class="view">
+      <h2 class="section-title">Calcolatore</h2>
+
+      <div class="card">
+        <h3>① Value &amp; stake (Kelly)</h3>
+        <p class="hint">
+          Inserisci la quota del bookmaker e la <b>tua</b> probabilità stimata.
+          Ti dico se c'è valore e quanto puntare.
+        </p>
+        <div class="row">
+          <label class="field"><span>Quota (decimale)</span>
+            <input type="number" id="vQuota" placeholder="es. 2.10" step="0.01" min="1.01" /></label>
+          <label class="field"><span>Tua probabilità (%)</span>
+            <input type="number" id="vProb" placeholder="es. 55" step="0.5" min="0" max="100" /></label>
+        </div>
+        <button class="btn" id="btnValue" type="button">Calcola value</button>
+        <div id="valueResult"></div>
+      </div>
+
+      <div class="card">
+        <h3>② Probabilità "vere" (rimuovi il margine)</h3>
+        <p class="hint">
+          Incolla le quote di un mercato (2 per il tennis, 3 per 1X2 nel calcio).
+          Ti do le probabilità senza il margine del bookmaker.
+        </p>
+        <div class="row-3">
+          <label class="field"><span>Quota 1</span>
+            <input type="number" id="nv1" placeholder="1 / casa" step="0.01" min="1.01" /></label>
+          <label class="field"><span>Quota 2 (X)</span>
+            <input type="number" id="nv2" placeholder="X / —" step="0.01" min="1.01" /></label>
+          <label class="field"><span>Quota 3</span>
+            <input type="number" id="nv3" placeholder="2 / trasf." step="0.01" min="1.01" /></label>
+        </div>
+        <button class="btn secondary" id="btnNoVig" type="button">Calcola probabilità vere</button>
+        <div id="noVigResult"></div>
+      </div>
+    </section>
+
+    <!-- ============ REGISTRO ============ -->
+    <section id="view-bets" class="view">
+      <h2 class="section-title">Registro scommesse</h2>
+
+      <div class="card">
+        <h3>Aggiungi giocata</h3>
+        <div class="row">
+          <label class="field"><span>Data</span><input type="date" id="bDate" /></label>
+          <label class="field"><span>Sport</span>
+            <select id="bSport">
+              <option>Calcio</option><option>Tennis</option><option>Basket</option><option>Altro</option>
+            </select></label>
+        </div>
+        <label class="field"><span>Evento</span>
+          <input type="text" id="bEvent" placeholder="es. Inter - Milan" /></label>
+        <div class="row">
+          <label class="field"><span>Mercato / selezione</span>
+            <input type="text" id="bSelection" placeholder="es. Over 2.5 / 1 / Sinner" /></label>
+          <label class="field"><span>Quota</span>
+            <input type="number" id="bOdds" placeholder="2.00" step="0.01" min="1.01" /></label>
+        </div>
+        <label class="field"><span>Stake (€)</span>
+          <input type="number" id="bStake" placeholder="10" step="0.5" min="0" /></label>
+        <button class="btn" id="btnAddBet" type="button">Aggiungi al registro</button>
+      </div>
+
+      <div class="filter-row">
+        <select id="filterSport"><option value="">Tutti gli sport</option><option>Calcio</option><option>Tennis</option><option>Basket</option><option>Altro</option></select>
+        <select id="filterResult"><option value="">Tutti gli esiti</option><option value="pending">Aperte</option><option value="win">Vinte</option><option value="loss">Perse</option><option value="void">Void</option></select>
+      </div>
+      <div class="btn-row" style="margin-bottom:14px">
+        <button class="btn ghost small" id="btnExport" type="button">Esporta JSON</button>
+        <button class="btn ghost small" id="btnImport" type="button">Importa JSON</button>
+        <input type="file" id="importFile" accept="application/json" hidden />
+      </div>
+
+      <div id="betList"></div>
+    </section>
+
+    <!-- ============ IMPOSTAZIONI ============ -->
+    <section id="view-set" class="view">
+      <h2 class="section-title">Impostazioni</h2>
+
+      <div class="card">
+        <h3>Bankroll &amp; rischio</h3>
+        <label class="field"><span>Bankroll iniziale (€)</span>
+          <input type="number" id="setBankroll" step="1" min="0" /></label>
+        <label class="field"><span>Frazione di Kelly (gestione rischio)</span>
+          <select id="setKelly">
+            <option value="1">Kelly pieno (aggressivo)</option>
+            <option value="0.5">½ Kelly</option>
+            <option value="0.25" selected>¼ Kelly (consigliato)</option>
+            <option value="0.1">1/10 Kelly (prudente)</option>
+          </select></label>
+        <p class="hint">Kelly frazionato riduce la varianza: meglio puntare meno e dormire la notte. ¼ è lo standard dei professionisti.</p>
+      </div>
+
+      <div class="card">
+        <h3>Dati live — The Odds API</h3>
+        <label class="field"><span>Chiave API</span>
+          <input type="text" id="setApiKey" placeholder="incolla qui la tua API key" autocomplete="off" /></label>
+        <p class="hint">
+          Registrati gratis su <a href="https://the-odds-api.com/" target="_blank" rel="noopener">the-odds-api.com</a>
+          (piano gratuito 500 richieste/mese), copia la chiave e incollala qui.
+          Resta salvata solo sul tuo dispositivo.
+        </p>
+        <button class="btn" id="btnSaveSettings" type="button">Salva impostazioni</button>
+      </div>
+
+      <div class="card">
+        <h3>Dati</h3>
+        <p class="hint">Tutto è salvato in locale sul tuo dispositivo (niente server, niente account).</p>
+        <button class="btn ghost small" id="btnReset" type="button">Azzera tutto (registro + impostazioni)</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button data-view="dash" class="active"><span class="ic">📊</span>Cruscotto</button>
+    <button data-view="live"><span class="ic">📡</span>Live</button>
+    <button data-view="calc"><span class="ic">🧮</span>Calcola</button>
+    <button data-view="bets"><span class="ic">🧾</span>Registro</button>
+    <button data-view="set"><span class="ic">⚙️</span>Imposta</button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
