@@ -123,6 +123,7 @@ input[type=date]:focus,input[type=text]:focus,select:focus{border-color:#0A1628}
 .sort-bar{display:flex;gap:7px;padding-bottom:2px;margin-bottom:14px;overflow-x:auto}
 .sort-pill{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1.5px solid #E1E6EE;background:#fff;color:#6B7785;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
 .sort-pill.on{border-color:#0A1628;background:#0A1628;color:#fff}
+.price-note{font-size:11px;color:#6B7785;line-height:1.5;margin:-2px 0 12px;padding:8px 12px;background:#F5F7FB;border-radius:10px}
 
 .state{text-align:center;padding:48px 24px}
 .state-icon{font-size:42px;margin-bottom:14px;opacity:.7}
@@ -368,7 +369,8 @@ function computeWeekendCapableCities(){
   return capable.sort();
 }
 
-const STATE = { mode:'weekend', sunday:null, nights:2, pax:2, city:null, sort:'ore' };
+const STATE = { mode:'weekend', sunday:null, nights:2, pax:2, city:null, sort:'prezzo' };
+const PRICE_NOTE = '<div class="price-note">💶 Prezzi <strong>indicativi</strong> "da €": miglior prezzo A/R diretto visto di recente (cache, aggiornata ogni notte). Quello del giorno esatto può variare — conferma con “Cerca prezzi”.</div>';
 
 /* ===== Memoria impostazioni (solo questo dispositivo, localStorage) ===== */
 const PREFS_KEY='wkb_prefs_v1';
@@ -477,10 +479,12 @@ function renderByWeekend(root){
     root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend possibile</div><div class="state-msg">Per ${fmtDateShort(out)} → ${fmtDateShort(ret)} non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div>${extra}<div class="state-hint">💡 Prova un'altra durata o un altro weekend.</div></div>`;
     return;
   }
-  if(STATE.sort==='ore')results.sort((a,b)=>b.oreReali-a.oreReali);
+  const pxOf=c=>{const ci=cityInfo(c),p=ci.iata&&DATA.meta.prices?DATA.meta.prices[ci.iata]:null;return p?p.eur:Infinity;};
+  if(STATE.sort==='prezzo')results.sort((a,b)=>pxOf(a.city)-pxOf(b.city)||b.oreReali-a.oreReali);
+  else if(STATE.sort==='ore')results.sort((a,b)=>b.oreReali-a.oreReali);
   else if(STATE.sort==='partenza')results.sort((a,b)=>a.out[2].localeCompare(b.out[2]));
   else if(STATE.sort==='rientro')results.sort((a,b)=>b.ret[2].localeCompare(a.ret[2]));
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} mete possibili</div><div class="result-day">${fmtDateShort(out)} → ${fmtDateShort(ret)}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra tardi</button></div>${results.map(cardWeekendCity).join('')}<div class="cross-cta">Cerchi solo una gita in giornata? <a href="./">Apri Daycation →</a></div><div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per il weekend scelto cerco la migliore combinazione di voli <strong>diretti</strong> A/R da BLQ: partenza ${DUR[STATE.nights].phrase}. Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer e check-in (~1h40, ~2h20 extra-Schengen).</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} mete possibili</div><div class="result-day">${fmtDateShort(out)} → ${fmtDateShort(ret)}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra tardi</button></div>${PRICE_NOTE}${results.map(cardWeekendCity).join('')}<div class="cross-cta">Cerchi solo una gita in giornata? <a href="./">Apri Daycation →</a></div><div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per il weekend scelto cerco la migliore combinazione di voli <strong>diretti</strong> A/R da BLQ: partenza ${DUR[STATE.nights].phrase}. Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer e check-in (~1h40, ~2h20 extra-Schengen).</div>`;
   root.querySelectorAll('.sort-pill').forEach(b=>b.addEventListener('click',()=>{STATE.sort=b.dataset.s;render();}));
   bindShareButtons(root);
 }
@@ -496,7 +500,7 @@ function renderByDest(root){
     root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend per ${STATE.city}</div><div class="state-msg">${ci.flag} Nei prossimi weekend non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div><div class="state-hint">💡 Prova l'altra durata.</div></div>`;
     return;
   }
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} weekend utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">${nightsLabel(STATE.nights)} · prossimi weekend</div>${results.map(cardWeekendDate).join('')}<div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per ogni weekend dei prossimi mesi controllo se esiste un A/R diretto da BLQ a ${STATE.city} con ${nightsLabel(STATE.nights)}. Le ore sono <strong>reali</strong> (tolti transfer e check-in).</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} weekend utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">${nightsLabel(STATE.nights)} · prossimi weekend</div>${PRICE_NOTE}${results.map(cardWeekendDate).join('')}<div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per ogni weekend dei prossimi mesi controllo se esiste un A/R diretto da BLQ a ${STATE.city} con ${nightsLabel(STATE.nights)}. Le ore sono <strong>reali</strong> (tolti transfer e check-in).</div>`;
   bindShareButtons(root);
 }
 
