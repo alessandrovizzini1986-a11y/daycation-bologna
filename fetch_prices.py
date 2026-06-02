@@ -2,23 +2,26 @@
 """
 Daycation Bologna - Prezzi A/R via Travelpayouts (Aviasales Data API)
 
-Gira DOPO parse_blq.py: legge data.json, per ogni città daycation chiede il
-prezzo più basso andata+ritorno DIRETTO da BLQ (dalla cache Aviasales) e lo
-salva in data.json sotto meta.prices, indicizzato per codice IATA.
+Gira DOPO parse_blq.py: per ogni città chiede il prezzo più basso andata+ritorno
+DIRETTO da BLQ (dalla cache Aviasales) e lo salva in meta.prices (indicizzato per
+IATA) sia in data.json (Daycation) sia in weekend-data.json (Weekend).
+
+Le città comuni alle due app vengono chieste all'API una volta sola (cache).
 
 Fail-soft per design:
-  - senza TRAVELPAYOUTS_TOKEN esce subito senza toccare data.json;
+  - senza TRAVELPAYOUTS_TOKEN esce subito senza toccare i JSON;
   - un errore sul singolo volo non blocca gli altri né la pipeline.
 
 La doc Travelpayouts dice esplicitamente che questi prezzi vengono dalla cache
 (ricerche reali delle ultime 48h) e sono pensati per generare pagine statiche:
-è esattamente l'uso qui (snapshot notturno nel JSON).
+è esattamente l'uso qui (snapshot notturno nei JSON).
 """
 import os, re, sys, json, time, datetime, pathlib, urllib.parse, urllib.request
 
 ROOT = pathlib.Path(__file__).parent
 DATA_FILE = ROOT / "data.json"
-INDEX_FILE = ROOT / "index.html"
+WEEKEND_FILE = ROOT / "weekend-data.json"
+HTML_FILES = [ROOT / "index.html", ROOT / "weekend.html"]
 API = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
 
 TOKEN = os.environ.get("TRAVELPAYOUTS_TOKEN", "").strip()
@@ -26,9 +29,13 @@ MARKER = os.environ.get("TRAVELPAYOUTS_MARKER", "").strip()
 
 
 def city_to_iata():
-    """Estrae la mappa città→IATA da CITY_INFO in index.html (unica fonte)."""
-    html = INDEX_FILE.read_text(encoding="utf-8")
-    return {c: iata for c, iata in re.findall(r"'([^']+)':\{iata:'([A-Z]{0,3})'", html)}
+    """Mappa città→IATA da CITY_INFO di index.html + weekend.html (uniche fonti)."""
+    mapping = {}
+    for f in HTML_FILES:
+        html = f.read_text(encoding="utf-8")
+        for c, iata in re.findall(r"'([^']+)':\{iata:'([A-Z]{0,3})'", html):
+            mapping[c] = iata
+    return mapping
 
 
 def booking_link(path):
@@ -59,47 +66,57 @@ def cheapest_roundtrip(iata, month):
             "on": (r.get("departure_at") or "")[:10]}
 
 
-def main():
-    if not TOKEN:
-        print("TRAVELPAYOUTS_TOKEN assente: salto i prezzi (data.json invariato).",
-              file=sys.stderr)
-        return
+def fetch_best(iata, months, today):
+    """Prezzo più basso tra i mesi indicati. None se la cache non ha dati."""
+    best = None
+    for m in months:
+        try:
+            p = cheapest_roundtrip(iata, m)
+        except Exception as e:
+            print(f"   {iata} {m}: errore {e}", file=sys.stderr)
+            continue
+        if p and (best is None or p["eur"] < best["eur"]):
+            best = p
+        time.sleep(0.15)  # gentile con l'API
+    if best:
+        best["upd"] = today.isoformat()
+    return best
 
-    data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
-    iata_map = city_to_iata()
-    cities = data.get("meta", {}).get("cities", [])
 
-    # Cerco nei prossimi 2 mesi e tengo il più basso: la cache è più ricca su orizzonti vicini.
-    today = datetime.date.today()
-    months = sorted({today.strftime("%Y-%m"),
-                     (today.replace(day=1) + datetime.timedelta(days=32)).strftime("%Y-%m")})
-
-    prices, ok, miss = {}, 0, 0
-    for city in cities:
+def annotate(path, iata_map, months, cache, today):
+    """Aggiunge meta.prices al JSON dato, riusando la cache tra i file."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    prices = {}
+    for city in data.get("meta", {}).get("cities", []):
         iata = iata_map.get(city)
         if not iata:
             continue
-        best = None
-        for m in months:
-            try:
-                p = cheapest_roundtrip(iata, m)
-            except Exception as e:
-                print(f"   {city} ({iata}) {m}: errore {e}", file=sys.stderr)
-                continue
-            if p and (best is None or p["eur"] < best["eur"]):
-                best = p
-            time.sleep(0.15)  # gentile con l'API
-        if best:
-            best["upd"] = today.isoformat()
-            prices[iata] = best
-            ok += 1
-        else:
-            miss += 1
-
+        if iata not in cache:
+            cache[iata] = fetch_best(iata, months, today)
+        if cache[iata]:
+            prices[iata] = cache[iata]
     data.setdefault("meta", {})["prices"] = prices
-    DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")),
-                         encoding="utf-8")
-    print(f"Prezzi: {ok} trovati, {miss} senza dati in cache.", file=sys.stderr)
+    path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")),
+                    encoding="utf-8")
+    print(f"{path.name}: {len(prices)} prezzi su {len(data['meta'].get('cities', []))} città.",
+          file=sys.stderr)
+
+
+def main():
+    if not TOKEN:
+        print("TRAVELPAYOUTS_TOKEN assente: salto i prezzi (JSON invariati).", file=sys.stderr)
+        return
+
+    iata_map = city_to_iata()
+    today = datetime.date.today()
+    # Prossimi 2 mesi, tengo il più basso: la cache è più ricca su orizzonti vicini.
+    months = sorted({today.strftime("%Y-%m"),
+                     (today.replace(day=1) + datetime.timedelta(days=32)).strftime("%Y-%m")})
+
+    cache = {}
+    for path in (DATA_FILE, WEEKEND_FILE):
+        annotate(path, iata_map, months, cache, today)
+    print(f"Totale rotte interrogate: {len(cache)}.", file=sys.stderr)
 
 
 if __name__ == "__main__":
