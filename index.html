@@ -112,6 +112,8 @@ input[type=date]:focus,input[type=text]:focus,select:focus{border-color:#0A1628}
 .foot-info{font-size:11px;color:#6B7785}
 .btn-sky{background:#0E4EAD;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(14,78,173,.25)}
 .btn-sky-fallback{background:#6B7785;color:#fff;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.btn-price{background:#E7F6EF;color:#067A52;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:800;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.btn-price small{font-size:10px;font-weight:600;opacity:.75}
 .foot-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .btn-share{background:#F5F7FB;border:1.5px solid #E1E6EE;color:#0A1628;width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;transition:background .15s,border-color .15s,color .15s}
 .btn-share:active{background:#EAEEF5}
@@ -463,6 +465,14 @@ function computeDaycationCapableCities(){
   return capable.sort();
 }
 
+function priceBadgeHTML(ci){
+  const p = ci.iata && DATA.meta.prices ? DATA.meta.prices[ci.iata] : null;
+  if(!p) return '';
+  const tip = `Prezzo più basso A/R diretto trovato di recente (cache Aviasales) · aggiornato ${p.upd}. Il prezzo del giorno esatto può variare.`;
+  const href = p.link || skyLink('', '', 1);
+  return `<a class="btn-price" href="${href}" target="_blank" rel="noopener" title="${tip}">da €${p.eur} <small>A/R</small></a>`;
+}
+
 function btnSkyHTML(ci, date, pax){
   const sky=skyLink(ci.iata, date, pax);
   if(!ci.iata){
@@ -512,7 +522,7 @@ function cardCityHTML(r){
   const fR=Math.round((t2m(r.ret[3])-t2m(r.ret[2]))/6)/10;
   const newBadge=ci.isNew?'<span class="new-badge">Rotta nuova</span>':'';
   const iataLabel=ci.iata||'—';
-  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}</div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel} · ${fO}h</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ · ${fR}h</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div><div class="foot-actions">${btnShareHTML(buildShareData(r.city, STATE.date, r))}${btnSkyHTML(ci, STATE.date, STATE.pax)}</div></div></div>`;
+  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}</div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel} · ${fO}h</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ · ${fR}h</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div><div class="foot-actions">${btnShareHTML(buildShareData(r.city, STATE.date, r))}${priceBadgeHTML(ci)}${btnSkyHTML(ci, STATE.date, STATE.pax)}</div></div></div>`;
 }
 
 function cardDateHTML(r){
@@ -522,7 +532,7 @@ function cardDateHTML(r){
   const isWeekend=wd===6||wd===7;
   const badge=isWeekend?'<span class="date-badge weekend">Weekend</span>':'';
   const iataLabel=ci.iata||'—';
-  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.date)} ${badge}</div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div><div class="foot-actions">${btnShareHTML(buildShareData(STATE.city, r.date, r))}${btnSkyHTML(ci, r.date, STATE.pax)}</div></div></div>`;
+  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.date)} ${badge}</div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(1)}h</div><div class="c-hours-lbl">Sul posto</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(1)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">Giro totale: <strong>${r.oreFuori.toFixed(1)}h</strong></div><div class="foot-actions">${btnShareHTML(buildShareData(STATE.city, r.date, r))}${priceBadgeHTML(ci)}${btnSkyHTML(ci, r.date, STATE.pax)}</div></div></div>`;
 }
 
 function render(){
