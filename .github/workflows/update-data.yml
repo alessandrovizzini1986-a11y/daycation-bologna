@@ -2,7 +2,10 @@ name: Update BLQ flight data
 
 on:
   schedule:
-    - cron: '0 4 * * *'
+    # Orari UTC (GitHub non gestisce l'ora legale): commenti in ora italiana estiva.
+    - cron: '0 4 * * *'    # notte (esistente)
+    - cron: '0 3 * * *'    # ~05:00 mattina
+    - cron: '0 14 * * *'   # ~16:00 pomeriggio
   workflow_dispatch:
 
 jobs:

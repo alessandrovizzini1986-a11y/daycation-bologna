@@ -7,10 +7,10 @@ ufficiali aggiornati automaticamente.
 
 - **Dati**: il parser scarica il PDF ufficiale degli orari da `bologna-airport.it`
   e lo trasforma in JSON.
-- **Aggiornamento**: una GitHub Action gira ogni notte alle 04:00 UTC, scarica
-  il PDF corrente (rileva da sola se è stagione `summer_YYYY` o
-  `winter_YYYY_YYYY+1`), riparsa tutto, e fa commit del nuovo `data.json` se è
-  cambiato qualcosa. Netlify ribuilda automaticamente.
+- **Aggiornamento**: una GitHub Action gira 3 volte al giorno (notte, mattina e
+  pomeriggio, ora italiana), scarica il PDF corrente (rileva da sola se è stagione
+  `summer_YYYY` o `winter_YYYY_YYYY+1`), riparsa tutto, aggiorna i prezzi e fa
+  commit dei JSON se è cambiato qualcosa. Netlify ribuilda automaticamente.
 - **App**: HTML statico (`public/index.html`) che fa `fetch('data.json')` al
   caricamento e mostra le daycation possibili per la data scelta.
 
@@ -44,7 +44,9 @@ freschi.
 L'app può mostrare un badge **"da €XX A/R"** su ogni destinazione, con il prezzo
 più basso andata+ritorno diretto preso dalla cache di Aviasales (ricerche reali
 recenti). I prezzi vengono scaricati **ogni notte** dalla stessa GitHub Action e
-salvati dentro `data.json`: nessun costo a runtime, funziona anche offline.
+salvati dentro `data.json` e `weekend-data.json`: nessun costo a runtime,
+funziona anche offline. L'aggiornamento gira 3 volte al giorno (notte, mattina,
+pomeriggio).
 
 Per attivarli serve un token gratuito Travelpayouts (vale anche come affiliato:
 le prenotazioni dal badge ti riconoscono una commissione):
