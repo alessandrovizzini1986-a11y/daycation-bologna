@@ -112,6 +112,8 @@ input[type=date]:focus,input[type=text]:focus,select:focus{border-color:#0A1628}
 .foot-info{font-size:11px;color:#6B7785}
 .btn-sky{background:#0E4EAD;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(14,78,173,.25)}
 .btn-sky-fallback{background:#6B7785;color:#fff;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.btn-price{background:#E7F6EF;color:#067A52;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:800;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.btn-price small{font-size:10px;font-weight:600;opacity:.75}
 .foot-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .btn-share{background:#F5F7FB;border:1.5px solid #E1E6EE;color:#0A1628;width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;transition:background .15s,border-color .15s,color .15s}
 .btn-share:active{background:#EAEEF5}
@@ -428,6 +430,14 @@ async function doShare(el){
 }
 function bindShareButtons(root){ root.querySelectorAll('.btn-share').forEach(b=>b.addEventListener('click',()=>doShare(b))); }
 
+function priceBadgeHTML(ci){
+  const p = ci.iata && DATA.meta.prices ? DATA.meta.prices[ci.iata] : null;
+  if(!p) return '';
+  const tip = `Prezzo più basso A/R diretto trovato di recente (cache Aviasales) · aggiornato ${p.upd}. Il prezzo del giorno esatto può variare.`;
+  const href = p.link || skyLink('', '', '', 1);
+  return `<a class="btn-price" href="${href}" target="_blank" rel="noopener" title="${tip}">da €${p.eur} <small>A/R</small></a>`;
+}
+
 function btnSkyHTML(ci, outD, retD, pax){
   const sky=skyLink(ci.iata, outD, retD, pax);
   if(!ci.iata) return `<a class="btn-sky-fallback" href="${sky}" target="_blank" rel="noopener">🔎 Cerca su Skyscanner</a>`;
@@ -441,14 +451,14 @@ function cardWeekendCity(r){
   const aO=airline(r.out[1]),aR=airline(r.ret[1]),same=aO.n===aR.n;
   const newBadge=ci.isNew?'<span class="new-badge">Rotta nuova</span>':'';
   const iataLabel=ci.iata||'—';
-  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}<span class="nights-badge">${nightsLabel(r.nights)}</span></div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(0)}h</div><div class="c-hours-lbl">A destinazione</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(0)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-date">${fmtDateShort(r.outISO).split(' ').slice(0,1)} ${parseInt(r.outISO.slice(8))}</span><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-date">${fmtDateShort(r.retISO).split(' ').slice(0,1)} ${parseInt(r.retISO.slice(8))}</span><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">${fmtDateShort(r.outISO)} → ${fmtDateShort(r.retISO)}</div><div class="foot-actions">${btnShareHTML(buildShareData(r.city, r))}${btnSkyHTML(ci, r.outISO, r.retISO, STATE.pax)}</div></div></div>`;
+  return `<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${ci.flag} ${r.city}${newBadge}<span class="nights-badge">${nightsLabel(r.nights)}</span></div><div class="c-desc">${ci.iata?ci.iata+' · ':''}${ci.desc}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(0)}h</div><div class="c-hours-lbl">A destinazione</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;white-space:nowrap">${r.orePosto.toFixed(0)}h lordi · −${r.haircut}′</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-date">${fmtDateShort(r.outISO).split(' ').slice(0,1)} ${parseInt(r.outISO.slice(8))}</span><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-date">${fmtDateShort(r.retISO).split(' ').slice(0,1)} ${parseInt(r.retISO.slice(8))}</span><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">${fmtDateShort(r.outISO)} → ${fmtDateShort(r.retISO)}</div><div class="foot-actions">${btnShareHTML(buildShareData(r.city, r))}${priceBadgeHTML(ci)}${btnSkyHTML(ci, r.outISO, r.retISO, STATE.pax)}</div></div></div>`;
 }
 
 function cardWeekendDate(r){
   const ci=cityInfo(STATE.city);
   const aO=airline(r.out[1]),aR=airline(r.ret[1]),same=aO.n===aR.n;
   const iataLabel=ci.iata||'—';
-  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.outISO)} → ${fmtDateShort(r.retISO)}<span class="nights-badge">${nightsLabel(r.nights)}</span></div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(0)}h</div><div class="c-hours-lbl">A destinazione</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">${nightsLabel(r.nights)} a ${STATE.city}</div><div class="foot-actions">${btnShareHTML(buildShareData(STATE.city, r))}${btnSkyHTML(ci, r.outISO, r.retISO, STATE.pax)}</div></div></div>`;
+  return `<div class="card date-card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-title">${fmtDateShort(r.outISO)} → ${fmtDateShort(r.retISO)}<span class="nights-badge">${nightsLabel(r.nights)}</span></div><div class="c-desc">${ci.flag} ${STATE.city}${ci.iata?' · '+ci.iata:''}</div></div><div class="c-hours"><div class="c-hours-big">${r.oreReali.toFixed(0)}h</div><div class="c-hours-lbl">A destinazione</div></div></div><div class="c-airline" style="background:${aO.c}14;color:${aO.c}"><span class="al-dot" style="background:${aO.c}"></span>${aO.n}${!same?' / '+aR.n:''}</div><div class="c-flights"><div class="flt"><span class="flt-icon">🛫</span><span class="flt-time">${r.out[2]} → ${r.out[3]}</span><span class="flt-route">BLQ → ${iataLabel}</span></div><div class="flt"><span class="flt-icon">🛬</span><span class="flt-time">${r.ret[2]} → ${r.ret[3]}</span><span class="flt-route">${iataLabel} → BLQ</span></div></div><div class="c-foot"><div class="foot-info">${nightsLabel(r.nights)} a ${STATE.city}</div><div class="foot-actions">${btnShareHTML(buildShareData(STATE.city, r))}${priceBadgeHTML(ci)}${btnSkyHTML(ci, r.outISO, r.retISO, STATE.pax)}</div></div></div>`;
 }
 
 function render(){
