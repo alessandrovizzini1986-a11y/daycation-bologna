@@ -715,6 +715,7 @@ function setupCityDropdown(){
   const list=document.getElementById('cityDropdownList');
   const label=document.getElementById('cityDropdownLabel');
   const backdrop=document.getElementById('dropdownBackdrop');
+  const area=input.closest('.form-area');
   function renderList(filter=''){
     const q=normalize(filter.trim());
     const filtered=WEEKEND_CITIES.filter(c=>!q||normalize(c).includes(q));
@@ -733,8 +734,8 @@ function setupCityDropdown(){
       });
     });
   }
-  function open(){ panel.classList.add('open'); input.classList.add('open'); backdrop.classList.add('on'); search.value=''; renderList(); setTimeout(()=>search.focus(),50); }
-  function close(){ panel.classList.remove('open'); input.classList.remove('open'); backdrop.classList.remove('on'); }
+  function open(){ panel.classList.add('open'); input.classList.add('open'); backdrop.classList.add('on'); if(area)area.style.zIndex='95'; search.value=''; renderList(); setTimeout(()=>search.focus(),50); }
+  function close(){ panel.classList.remove('open'); input.classList.remove('open'); backdrop.classList.remove('on'); if(area)area.style.zIndex=''; }
   input.addEventListener('click',e=>{ if(e.target.classList.contains('clear-btn'))return; if(panel.classList.contains('open'))close();else open(); });
   search.addEventListener('input',e=>renderList(e.target.value));
   backdrop.addEventListener('click',close);
