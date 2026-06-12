@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0A1628">
+<meta name="theme-color" content="#2C5FB0">
 <title>Weekend da Bologna · Fughe di 1-3 notti in aereo da BLQ</title>
 <meta name="description" content="Trova fughe di weekend (1, 2 notti o ponte di 3) in aereo da Bologna. Voli diretti andata e ritorno, orari ufficiali aeroporto Marconi, prezzi live su Skyscanner.">
 
@@ -35,6 +35,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Weekend BLQ">
+
+<!-- Font del restyle: Bricolage (display/numeri) + Hanken (UI) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -162,15 +167,189 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
 .cross-cta{margin-top:14px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:12.5px;color:#0A1628;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .cross-cta a{color:#0E4EAD;font-weight:700}
 </style>
+
+<!-- ════════════════════════════════════════════════════════════
+     RESTYLE "DI DOMANI" · sovrascrive lo stile originale.
+     Token CSS · light, dark automatico (prefers-color-scheme) + toggle.
+     ════════════════════════════════════════════════════════════ -->
+<style id="restyle">
+:root{
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-sans:'Hanken Grotesk',-apple-system,system-ui,sans-serif;
+  --r-sm:10px; --r-md:14px; --r-lg:20px; --r-xl:28px; --r-2xl:34px; --r-full:999px;
+  --bg:oklch(98.5% 0.006 240); --surface:oklch(100% 0 0); --surface-2:oklch(96.5% 0.008 235);
+  --ink:oklch(27% 0.035 252); --ink-soft:oklch(52% 0.028 250); --ink-faint:oklch(66% 0.022 248);
+  --line:oklch(92% 0.012 245);
+  --sky:oklch(60% 0.135 240); --sky-deep:oklch(44% 0.115 250); --sky-tint:oklch(95% 0.03 235);
+  --sunset:oklch(70% 0.155 45); --sunset-tint:oklch(95% 0.04 60);
+  --price:oklch(56% 0.12 162); --price-tint:oklch(95% 0.04 162);
+  --grad-dawn:linear-gradient(164deg, oklch(52% 0.13 252) 0%, oklch(60% 0.12 230) 44%, oklch(78% 0.095 58) 100%);
+  --grad-sky:linear-gradient(135deg, oklch(62% 0.14 242), oklch(50% 0.13 256));
+  --grad-sunset:linear-gradient(135deg, oklch(74% 0.15 55), oklch(67% 0.16 30));
+  --glass:oklch(100% 0 0 / .72); --glass-line:oklch(100% 0 0 / .55);
+  --shadow-sm:0 1px 2px oklch(45% 0.04 250 / .06), 0 2px 6px oklch(45% 0.06 250 / .05);
+  --shadow-md:0 4px 12px oklch(45% 0.06 250 / .08), 0 12px 28px oklch(45% 0.08 250 / .08);
+  --shadow-lg:0 8px 24px oklch(40% 0.07 250 / .12), 0 24px 56px oklch(40% 0.09 250 / .14);
+  --shadow-key:0 10px 30px oklch(55% 0.14 245 / .28);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:oklch(20% 0.028 256); --surface:oklch(25.5% 0.03 255); --surface-2:oklch(29.5% 0.032 256);
+  --ink:oklch(97% 0.006 240); --ink-soft:oklch(76% 0.022 248); --ink-faint:oklch(62% 0.025 250);
+  --line:oklch(34% 0.03 255);
+  --sky:oklch(73% 0.13 240); --sky-deep:oklch(60% 0.13 245); --sky-tint:oklch(33% 0.05 245);
+  --sunset:oklch(77% 0.15 50); --sunset-tint:oklch(36% 0.06 50);
+  --price:oklch(75% 0.13 162); --price-tint:oklch(34% 0.05 162);
+  --grad-dawn:linear-gradient(164deg, oklch(34% 0.08 256) 0%, oklch(30% 0.06 250) 46%, oklch(36% 0.065 38) 100%);
+  --grad-sky:linear-gradient(135deg, oklch(60% 0.14 242), oklch(46% 0.12 256));
+  --glass:oklch(28% 0.03 255 / .6); --glass-line:oklch(100% 0 0 / .08);
+  --shadow-sm:0 1px 2px oklch(0% 0 0 / .3); --shadow-md:0 6px 16px oklch(0% 0 0 / .38);
+  --shadow-lg:0 16px 40px oklch(0% 0 0 / .5); --shadow-key:0 10px 30px oklch(60% 0.13 240 / .42);
+}}
+:root[data-theme="dark"]{
+  --bg:oklch(20% 0.028 256); --surface:oklch(25.5% 0.03 255); --surface-2:oklch(29.5% 0.032 256);
+  --ink:oklch(97% 0.006 240); --ink-soft:oklch(76% 0.022 248); --ink-faint:oklch(62% 0.025 250);
+  --line:oklch(34% 0.03 255);
+  --sky:oklch(73% 0.13 240); --sky-deep:oklch(60% 0.13 245); --sky-tint:oklch(33% 0.05 245);
+  --sunset:oklch(77% 0.15 50); --sunset-tint:oklch(36% 0.06 50);
+  --price:oklch(75% 0.13 162); --price-tint:oklch(34% 0.05 162);
+  --grad-dawn:linear-gradient(164deg, oklch(34% 0.08 256) 0%, oklch(30% 0.06 250) 46%, oklch(36% 0.065 38) 100%);
+  --grad-sky:linear-gradient(135deg, oklch(60% 0.14 242), oklch(46% 0.12 256));
+  --glass:oklch(28% 0.03 255 / .6); --glass-line:oklch(100% 0 0 / .08);
+  --shadow-sm:0 1px 2px oklch(0% 0 0 / .3); --shadow-md:0 6px 16px oklch(0% 0 0 / .38);
+  --shadow-lg:0 16px 40px oklch(0% 0 0 / .5); --shadow-key:0 10px 30px oklch(60% 0.13 240 / .42);
+}
+
+body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-height:1.45;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-soft)} .tiny{font-size:11px}
+
+.app-hero{position:relative;background:var(--grad-dawn);padding:8px 0 24px}
+.app-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46px;background:linear-gradient(transparent,var(--bg));pointer-events:none;z-index:1}
+header{position:static;background:none;display:flex;align-items:center;gap:12px;padding:8px 20px 16px}
+.logo{width:44px;height:44px;border-radius:14px;background:var(--grad-sunset);display:grid;place-items:center;font-size:20px;box-shadow:0 6px 16px oklch(60% 0.16 40 / .4), inset 0 1px 0 rgba(255,255,255,.4)}
+.h-title{font-family:var(--font-display);font-size:18px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1.1}
+.h-sub{font-size:12px;color:rgba(255,255,255,.88);margin-top:2px;font-weight:500}
+.theme-btn{flex-shrink:0;width:44px;height:44px;border-radius:var(--r-md);background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:18px;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ic-sun{display:none} .ic-moon{display:inline}
+:root[data-theme="dark"] .ic-sun{display:inline} :root[data-theme="dark"] .ic-moon{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ic-sun{display:inline} :root:not([data-theme="light"]) .ic-moon{display:none}}
+
+.prod-switch{margin:0 20px;padding:5px;display:flex;gap:5px;background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r-full);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow-sm)}
+.prod-switch a{flex:1;height:46px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:700;background:none;color:rgba(255,255,255,.92)}
+.prod-switch a.on{background:#fff;color:#13243f;box-shadow:var(--shadow-md)}
+
+.mode-tabs{margin:12px 20px 0;padding:5px;display:flex;gap:6px;background:rgba(255,255,255,.14);border-radius:var(--r-full)}
+.mode-tab{flex:1;height:42px;border:none;border-radius:var(--r-full);font-size:13.5px;font-weight:700;background:none;color:rgba(255,255,255,.92)}
+.mode-tab.on{background:#fff;color:#13243f;font-weight:700}
+
+.form-area{position:relative;z-index:2;background:none;padding:16px 20px 0}
+.form-card{position:relative;z-index:2;background:var(--surface);border-radius:var(--r-xl);padding:20px;box-shadow:var(--shadow-lg);border:1px solid var(--line)}
+.lbl{font-size:11px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+input[type=date],input[type=text],select{height:52px;border:1.5px solid var(--line);border-radius:var(--r-md);padding:0 16px;font-size:16px;font-weight:600;color:var(--ink);background:var(--surface-2)}
+input[type=date]:focus,input[type=text]:focus,select:focus{border-color:var(--sky);box-shadow:0 0 0 4px oklch(60% 0.135 240 / .14);background:var(--surface)}
+.chip-row{display:flex;gap:8px;flex-wrap:nowrap}
+.chip{flex:1;min-width:42px;height:48px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink-soft);border-radius:var(--r-md);font-size:14px;font-weight:700;padding:0}
+.chip.on{border-color:transparent;background:var(--ink);color:var(--surface)}
+.chip.sm{height:42px;font-size:13px;min-width:0}
+.dur-lab{display:block;line-height:1.12}
+.dur-lab small{display:block;font-size:9.5px;opacity:.62;font-weight:700;margin-top:1px}
+.range-row{display:flex;gap:8px;margin-top:6px}
+.range-btn{flex:1;height:46px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink-soft);border-radius:var(--r-md);font-size:13.5px;font-weight:700}
+.range-btn.on{border-color:transparent;background:var(--ink);color:var(--surface)}
+
+.dropdown-input{height:52px;border:1.5px solid var(--line);border-radius:var(--r-md);padding:0 16px;background:var(--surface-2);font-size:16px;font-weight:600}
+.dropdown-input.open{border-color:var(--sky);box-shadow:0 0 0 4px oklch(60% 0.135 240 / .14)}
+.dropdown-input .placeholder{color:var(--ink-faint);font-weight:500}
+.dropdown-input .caret{color:var(--ink-faint)}
+.dropdown-input .clear-btn{background:var(--line);color:var(--ink-soft);width:24px;height:24px}
+.dropdown-panel{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);border:1px solid var(--line)}
+.dropdown-search{padding:12px;border-bottom:1px solid var(--line)}
+.dropdown-search input{height:44px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink)}
+.dropdown-item{padding:13px 16px;border-bottom:1px solid var(--line);font-size:15px;font-weight:600;color:var(--ink)}
+.dropdown-item:active,.dropdown-item:hover{background:var(--surface-2)}
+.dropdown-item .iata{font-size:12px;color:var(--ink-faint);font-weight:600}
+.dropdown-item.no-results{color:var(--ink-faint)}
+.dropdown-item.new-route{font-size:9.5px;background:var(--sunset-tint);color:var(--sunset);padding:2px 7px;border-radius:var(--r-full)}
+.dropdown-backdrop{background:oklch(20% 0.03 256 / .4)}
+
+main{padding:20px 16px 0;max-width:600px;margin:0 auto}
+.result-head{margin-bottom:12px}
+.result-count{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-.5px}
+.result-day{font-size:12px;font-weight:700;color:var(--sky-deep);background:var(--sky-tint);padding:6px 13px;border-radius:var(--r-full)}
+
+.sort-bar{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
+.sort-pill{padding:10px 16px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:13px;font-weight:700}
+.sort-pill.on{border-color:transparent;background:var(--ink);color:var(--surface)}
+.price-note{font-size:12px;color:var(--ink-soft);line-height:1.55;margin:0 0 16px;padding:12px 14px;background:var(--surface-2);border-radius:var(--r-md);border:1px solid var(--line)}
+.price-note strong{color:var(--ink)}
+
+.card{background:var(--surface);border-radius:var(--r-xl);margin-bottom:12px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow-md);transition:transform .18s cubic-bezier(.2,.7,.3,1),box-shadow .18s}
+@media (hover:hover){.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}}
+.c-head{padding:20px 20px 12px;gap:16px}
+.c-title{font-family:var(--font-display);font-size:21px;font-weight:700;letter-spacing:-.4px;line-height:1.12;color:var(--ink)}
+.c-desc{font-size:12.5px;color:var(--ink-soft);margin-top:5px;font-weight:500}
+.c-hours-big{font-family:var(--font-display);font-size:52px;font-weight:800;line-height:.85;letter-spacing:-2px;background:var(--grad-sky);-webkit-background-clip:text;background-clip:text;color:transparent}
+.c-hours-lbl{font-size:10px;color:var(--ink-soft);font-weight:800;text-transform:uppercase;letter-spacing:.7px;margin-top:7px}
+.c-airline{margin:0 20px 12px;gap:7px;padding:6px 12px;border-radius:var(--r-full);font-size:12px;font-weight:700}
+.new-badge{background:var(--sunset-tint);color:var(--sunset);border-radius:var(--r-full);padding:3px 9px;font-size:9.5px;font-weight:800}
+.nights-badge{display:inline-flex;align-items:center;background:var(--sky-tint);color:var(--sky-deep);border-radius:var(--r-full);padding:3px 9px;font-size:9.5px;font-weight:800;margin-left:6px;text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
+.c-flights{margin:0 20px 16px;background:var(--surface-2);border-radius:var(--r-lg);padding:12px 16px;border:1px solid var(--line)}
+.flt{gap:12px}
+.flt+.flt{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.flt-icon{font-size:14px;width:20px;text-align:center}
+.flt-date{font-size:10px;color:var(--ink-faint);font-weight:800;text-transform:uppercase;letter-spacing:.4px;width:50px;flex-shrink:0}
+.flt-time{font-size:16px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+.flt-route{flex:1;font-size:11.5px;color:var(--ink-soft);text-align:right;font-weight:600}
+.c-foot{padding:12px 20px 16px;border-top:1px solid var(--line);gap:12px;flex-wrap:wrap;row-gap:12px}
+.foot-info{font-size:11.5px;color:var(--ink-soft);font-weight:600;flex:1 1 auto;min-width:90px}
+.foot-info strong{color:var(--ink);font-weight:800}
+.foot-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
+.btn-share{background:var(--surface-2);border:1.5px solid var(--line);color:var(--ink);width:44px;height:44px;border-radius:var(--r-md)}
+.btn-share svg{width:18px;height:18px}
+.btn-share.copied{background:var(--price-tint);border-color:transparent;color:var(--price)}
+.btn-price{background:var(--price-tint);color:var(--price);padding:0 14px;height:44px;border-radius:var(--r-md);font-size:14px;font-weight:800;gap:5px}
+.btn-price small{font-size:10px;font-weight:700;opacity:.7}
+.btn-sky{background:var(--grad-sky);color:#fff;padding:0 18px;height:44px;border-radius:var(--r-md);font-size:13.5px;font-weight:700;gap:7px;box-shadow:var(--shadow-key)}
+.btn-sky-fallback{background:var(--surface-2);border:1.5px solid var(--line);color:var(--ink-soft);padding:0 14px;height:44px;border-radius:var(--r-md);font-size:12.5px;font-weight:700}
+.date-card .c-title{font-size:19px}
+.date-badge{background:var(--sunset-tint);color:var(--sunset);border-radius:var(--r-full);padding:3px 9px;font-size:9.5px;font-weight:800}
+.date-badge.weekend{background:var(--price-tint);color:var(--price)}
+
+.back-link{display:inline-flex;align-items:center;gap:5px;color:var(--ink-soft);font-size:12px;font-weight:700;padding:10px 0}
+.cross-cta{margin-top:16px;padding:16px;background:var(--surface);border-radius:var(--r-lg);border:1px solid var(--line);font-size:12.5px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cross-cta a{color:var(--sky-deep);font-weight:800}
+
+.state{padding:56px 24px}
+.state-icon{width:88px;height:88px;margin:0 auto 20px;border-radius:var(--r-2xl);display:grid;place-items:center;font-size:40px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-md);opacity:1}
+.state-title{font-family:var(--font-display);font-size:21px;font-weight:700;letter-spacing:-.4px;margin-bottom:8px}
+.state-msg{font-size:14px;color:var(--ink-soft);line-height:1.6;max-width:320px;margin:0 auto;font-weight:500}
+.state-msg strong{color:var(--ink)}
+.state-hint{margin:20px auto 0;max-width:330px;padding:14px 16px;background:var(--sunset-tint);border-radius:var(--r-md);font-size:12.5px;color:var(--sunset);text-align:left;line-height:1.55;font-weight:600}
+
+.how{margin-top:16px;padding:16px 20px;background:var(--surface);border-radius:var(--r-lg);border:1px solid var(--line);font-size:12px;color:var(--ink-soft);line-height:1.6}
+.how strong{color:var(--ink)}
+
+.loading{padding:64px 20px;color:var(--ink-soft);font-size:13.5px;font-weight:600}
+.spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--sunset);margin:0 auto 12px}
+
+footer{padding:24px 20px 32px;color:var(--ink-faint);font-size:11px;line-height:1.7}
+footer a{color:var(--ink-soft);text-decoration-color:var(--line)}
+.sig{margin-top:16px;font-size:10px;letter-spacing:1.8px;color:var(--ink-faint)}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
 </head>
 <body>
 
+<div class="app-hero">
 <header>
   <div class="logo">🧳</div>
   <div style="flex:1;min-width:0">
     <div class="h-title">Weekend da Bologna</div>
     <div class="h-sub" id="metaInfo">Fughe di 1-3 notti dall'aeroporto Marconi</div>
   </div>
+  <button class="theme-btn" id="themeBtn" aria-label="Cambia tema chiaro/scuro" title="Tema chiaro/scuro">
+    <span class="ic-sun">☀︎</span><span class="ic-moon">☾︎</span>
+  </button>
 </header>
 
 <nav class="prod-switch" aria-label="Tipo di viaggio">
@@ -240,6 +419,7 @@ main{padding:18px 14px 0;max-width:600px;margin:0 auto}
     </div>
   </div>
 </div>
+</div><!-- /.app-hero -->
 
 <div class="dropdown-backdrop" id="dropdownBackdrop"></div>
 
@@ -484,7 +664,7 @@ function renderByWeekend(root){
   else if(STATE.sort==='ore')results.sort((a,b)=>b.oreReali-a.oreReali);
   else if(STATE.sort==='partenza')results.sort((a,b)=>a.out[2].localeCompare(b.out[2]));
   else if(STATE.sort==='rientro')results.sort((a,b)=>b.ret[2].localeCompare(a.ret[2]));
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} mete possibili</div><div class="result-day">${fmtDateShort(out)} → ${fmtDateShort(ret)}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra tardi</button></div>${PRICE_NOTE}${results.map(cardWeekendCity).join('')}<div class="cross-cta">Cerchi solo una gita in giornata? <a href="./">Apri Daycation →</a></div><div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per il weekend scelto cerco la migliore combinazione di voli <strong>diretti</strong> A/R da BLQ: partenza ${DUR[STATE.nights].phrase}. Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer e check-in (~1h40, ~2h20 extra-Schengen).</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} mete possibili</div><div class="result-day">${fmtDateShort(out)} → ${fmtDateShort(ret)}</div></div><div class="sort-bar"><button class="sort-pill ${STATE.sort==='ore'?'on':''}" data-s="ore">⏱ Più tempo</button><button class="sort-pill ${STATE.sort==='partenza'?'on':''}" data-s="partenza">🌅 Parte prima</button><button class="sort-pill ${STATE.sort==='rientro'?'on':''}" data-s="rientro">🌙 Rientra tardi</button></div>${PRICE_NOTE}${results.map(cardWeekendCity).join('')}<div class="cross-cta">Cerchi solo una gita in giornata? <a href="./">Apri Daycation →</a></div><div class="how"><strong>Come funziona</strong><br>Per il weekend scelto cerco la migliore combinazione di voli <strong>diretti</strong> A/R da BLQ: partenza ${DUR[STATE.nights].phrase}. Le ore sono <strong>reali</strong>: dall'orario gate-to-gate tolgo transfer e check-in (~1h40, ~2h20 extra-Schengen).</div>`;
   root.querySelectorAll('.sort-pill').forEach(b=>b.addEventListener('click',()=>{STATE.sort=b.dataset.s;render();}));
   bindShareButtons(root);
 }
@@ -500,7 +680,7 @@ function renderByDest(root){
     root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend per ${STATE.city}</div><div class="state-msg">${ci.flag} Nei prossimi weekend non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div><div class="state-hint">💡 Prova l'altra durata.</div></div>`;
     return;
   }
-  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} weekend utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">${nightsLabel(STATE.nights)} · prossimi weekend</div>${PRICE_NOTE}${results.map(cardWeekendDate).join('')}<div style="margin-top:12px;padding:14px 16px;background:#fff;border-radius:14px;border:1px solid #EAEEF5;font-size:11.5px;color:#6B7785;line-height:1.6"><strong style="color:#0A1628">Come funziona</strong><br>Per ogni weekend dei prossimi mesi controllo se esiste un A/R diretto da BLQ a ${STATE.city} con ${nightsLabel(STATE.nights)}. Le ore sono <strong>reali</strong> (tolti transfer e check-in).</div>`;
+  root.innerHTML=`<div class="result-head"><div class="result-count">${results.length} weekend utili</div><div class="result-day">${ci.flag} ${STATE.city}</div></div><div class="tiny muted" style="margin-bottom:14px">${nightsLabel(STATE.nights)} · prossimi weekend</div>${PRICE_NOTE}${results.map(cardWeekendDate).join('')}<div class="how"><strong>Come funziona</strong><br>Per ogni weekend dei prossimi mesi controllo se esiste un A/R diretto da BLQ a ${STATE.city} con ${nightsLabel(STATE.nights)}. Le ore sono <strong>reali</strong> (tolti transfer e check-in).</div>`;
   bindShareButtons(root);
 }
 
@@ -593,6 +773,20 @@ async function init(){
 
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});}); }
 init();
+</script>
+<script>
+/* ===== Toggle tema chiaro/scuro (default: preferenza di sistema) ===== */
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function cur(){ var s=root.getAttribute('data-theme'); if(s) return s; return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'; }
+  try{ var saved=localStorage.getItem('dc_theme'); if(saved) root.setAttribute('data-theme',saved); }catch(e){}
+  if(btn) btn.addEventListener('click',function(){
+    var next=cur()==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+    try{ localStorage.setItem('dc_theme',next); }catch(e){}
+    var tc=document.querySelector('meta[name=theme-color]'); if(tc) tc.setAttribute('content', next==='dark'?'#1a2740':'#2C5FB0');
+  });
+})();
 </script>
 </body>
 </html>
