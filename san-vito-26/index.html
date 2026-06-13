@@ -325,6 +325,11 @@ section:first-of-type .sec-title{margin-top:0}
 .pl-del{flex-shrink:0;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft);width:30px;height:30px;border-radius:8px;cursor:pointer;font-family:inherit}
 .time-est{display:flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--ink);border-radius:var(--r-lg);padding:11px 14px;font-size:13.5px;font-weight:600;margin:0 0 14px}
 .time-est b{font-weight:800}
+.car-prog{margin:0 0 10px}
+.car-prog-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:7px}
+.car-prog-top b{font-family:var(--font-display);font-size:15px;color:var(--ink)}
+.cbar{height:10px;border-radius:var(--r-full);background:var(--surface-2);overflow:hidden}
+.cbar-fill{height:100%;border-radius:var(--r-full);background:var(--accent-fill);transition:width .3s ease}
 #dmgSvg{cursor:crosshair}
 .xmark text{fill:var(--alert);font-size:20px;font-weight:900;font-family:-apple-system,system-ui,sans-serif}
 .xbg{fill:var(--surface);opacity:.85}
@@ -855,6 +860,8 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     const svg=`<svg class="carsvg" viewBox="0 0 240 380">`+
       CAR_BODY+dots+`</svg>`;
     const taken=POS.filter(p=>data['ph:'+ph+':'+p.id]);
+    const miss=POS.length-taken.length;
+    const prog=`<div class="car-prog"><div class="car-prog-top"><span>📸 Foto auto · ${ph}</span><b>${miss===0?'✅ complete':('mancano '+miss)}</b></div><div class="cbar"><div class="cbar-fill" style="width:${Math.round(taken.length/POS.length*100)}%"></div></div></div>`;
     const strip=`<div class="poslist">`+POS.map((p,i)=>{ const d=data['ph:'+ph+':'+p.id], done=!!d;
       return `<div class="pl${done?' ok':''}" data-act="pos" data-phase="${ph}" data-pos="${p.id}"><span class="pl-n">${done?'✓':(i+1)}</span><span class="pl-t">${p.label}${p.hint?`<small>${p.hint}</small>`:''}</span>${done?`<img class="pl-th" src="${d.dataURL}" loading="lazy" decoding="async" alt=""><button class="del pl-del" data-del="ph:${ph}:${p.id}" type="button" aria-label="Rimuovi">✕</button>`:`<span class="pl-cam">📷</span>`}</div>`;
     }).join('')+`</div>`;
@@ -862,7 +869,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
       `<div class="phasetoggle"><button class="ph-b${ph==='ritiro'?' on':''}" data-act="phase" data-ph="ritiro" type="button">Ritiro</button>`+
       `<button class="ph-b${ph==='riconsegna'?' on':''}" data-act="phase" data-ph="riconsegna" type="button">Riconsegna</button></div>`+
       `<div class="carmap-hint tiny muted">Tocca un punto sulla mappa o una riga sotto per scattare · ✓ = fatto</div>`+
-      svg+
+      prog+svg+
       `<div class="meta-wrap"><div class="meta-lbl">Km + carburante · ${ph==='ritiro'?'ritiro':'riconsegna'}</div>${metaBox(ph)}</div>`+
       strip;
     document.getElementById('carShotCnt').textContent=taken.length+' / '+POS.length;
