@@ -728,25 +728,50 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
 
   let data={};
 
-  /* ── ridimensiona + comprimi (rispettando l'orientamento EXIF) ── */
-  /* decodifica iOS-safe: object URL + <img> + ridimensiono + toBlob (niente createImageBitmap) */
-  function toDataURL(file){
-    return new Promise((res,rej)=>{
-      const url=URL.createObjectURL(file);
-      const img=new Image();
-      img.onload=()=>{
-        try{
-          const max=1280; let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
-          if(!w||!h){ URL.revokeObjectURL(url); rej(new Error('dimensioni nulle')); return; }
-          const sc=Math.min(1, max/Math.max(w,h)); w=Math.max(1,Math.round(w*sc)); h=Math.max(1,Math.round(h*sc));
-          const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
-          cv.getContext('2d').drawImage(img,0,0,w,h);
-          URL.revokeObjectURL(url);
-          const done=durl=>{ cv.width=cv.height=0; res(durl); };
-          if(cv.toBlob){ cv.toBlob(b=>{ if(!b){ try{done(cv.toDataURL('image/jpeg',.7));}catch(e){rej(e);} return; } const fr=new FileReader(); fr.onload=()=>done(fr.result); fr.onerror=()=>rej(fr.error); fr.readAsDataURL(b); }, 'image/jpeg', .7); }
-          else done(cv.toDataURL('image/jpeg',.7));
-        }catch(e){ URL.revokeObjectURL(url); rej(e); }
-      };
+  /* ── decodifica a basso consumo di memoria (foto fotocamera anche 50MP) ──
+     1) leggo le dimensioni dal header JPEG (senza decodificare i pixel)
+     2) createImageBitmap con resize -> il browser downscala IN decodifica (picco basso)
+     3) fallback <img> se serve. Output JPEG ~1100px. */
+  const PH_MAX=1100, PH_Q=0.6;
+  function blobToDataURL(b){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=()=>rej(fr.error); fr.readAsDataURL(b); }); }
+  function jpegSize(buf){
+    try{ const d=new DataView(buf); if(d.getUint16(0)!==0xFFD8) return null;
+      let o=2; const len=d.byteLength;
+      while(o+9<len){
+        if(d.getUint8(o)!==0xFF){ o++; continue; }
+        const m=d.getUint8(o+1);
+        if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC) return {h:d.getUint16(o+5), w:d.getUint16(o+7)};
+        if(m===0xD8||m===0xD9||(m>=0xD0&&m<=0xD7)){ o+=2; continue; }
+        o+=2+d.getUint16(o+2);
+      }
+    }catch(e){}
+    return null;
+  }
+  function fit(w,h){ const sc=Math.min(1, PH_MAX/Math.max(w,h)); return {w:Math.max(1,Math.round(w*sc)), h:Math.max(1,Math.round(h*sc))}; }
+  function canvasJPEG(cv){ return new Promise((res,rej)=>{ const done=u=>{cv.width=cv.height=0;res(u);};
+    if(cv.toBlob) cv.toBlob(b=>{ if(b) blobToDataURL(b).then(done,rej); else { try{done(cv.toDataURL('image/jpeg',PH_Q));}catch(e){rej(e);} } }, 'image/jpeg', PH_Q);
+    else done(cv.toDataURL('image/jpeg',PH_Q)); }); }
+  async function toDataURL(file){
+    let dim=null;
+    try{ dim=jpegSize(await file.slice(0, Math.min(file.size, 1<<20)).arrayBuffer()); }catch(e){}
+    if(self.createImageBitmap && dim){
+      try{
+        const t=fit(dim.w,dim.h);
+        const bmp=await createImageBitmap(file,{resizeWidth:t.w,resizeHeight:t.h,resizeQuality:'medium'});
+        const cv=document.createElement('canvas'); cv.width=t.w; cv.height=t.h;
+        cv.getContext('2d').drawImage(bmp,0,0,t.w,t.h); if(bmp.close)bmp.close();
+        return await canvasJPEG(cv);
+      }catch(e){ /* fallback */ }
+    }
+    return await new Promise((res,rej)=>{
+      const url=URL.createObjectURL(file); const img=new Image();
+      img.onload=()=>{ try{
+        const w0=img.naturalWidth||img.width, h0=img.naturalHeight||img.height;
+        if(!w0||!h0){ URL.revokeObjectURL(url); rej(new Error('dimensioni nulle')); return; }
+        const t=fit(w0,h0); const cv=document.createElement('canvas'); cv.width=t.w; cv.height=t.h;
+        cv.getContext('2d').drawImage(img,0,0,t.w,t.h); URL.revokeObjectURL(url);
+        canvasJPEG(cv).then(res,rej);
+      }catch(e){ URL.revokeObjectURL(url); rej(e); } };
       img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('decodifica fallita')); };
       img.src=url;
     });
@@ -755,14 +780,14 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   /* ── render ── */
   function renderContract(){
     const keys=Object.keys(data).filter(k=>k.startsWith('doc:')).sort();
-    let html=keys.map(k=>`<div class="shot docs"><img src="${data[k].dataURL}" alt=""><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
+    let html=keys.map(k=>`<div class="shot docs"><img src="${data[k].dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
     html+=`<div class="shot docs empty add-tile" data-act="add" data-group="doc"><span class="ph-ico">＋</span><span class="ph-lbl">Aggiungi pagina</span></div>`;
     document.getElementById('carContract').innerHTML=html;
     document.getElementById('carDocCnt').textContent=keys.length+' foto';
   }
   function tile(phase,pos){
     const key='ph:'+phase+':'+pos, d=data[key];
-    if(d) return `<div class="shot" data-act="pos" data-phase="${phase}" data-pos="${pos}"><img src="${d.dataURL}" alt=""><button class="del" data-del="${key}" type="button" aria-label="Rimuovi foto">✕</button></div>`;
+    if(d) return `<div class="shot" data-act="pos" data-phase="${phase}" data-pos="${pos}"><img src="${d.dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="${key}" type="button" aria-label="Rimuovi foto">✕</button></div>`;
     return `<div class="shot empty" data-act="pos" data-phase="${phase}" data-pos="${pos}"><span class="ph-plus">+</span><span class="ph-ico">📷</span></div>`;
   }
   function metaBox(phase){
@@ -789,7 +814,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   }
   function renderDamageCol(phase,mount){
     const keys=Object.keys(data).filter(k=>k.startsWith('dmg:'+phase+':')).sort();
-    let html=keys.map(k=>`<div class="shot"><img src="${data[k].dataURL}" alt=""><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
+    let html=keys.map(k=>`<div class="shot"><img src="${data[k].dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
     html+=`<div class="shot empty add-tile" data-act="add" data-group="dmg:${phase}"><span class="ph-ico">＋</span><span class="ph-lbl">Aggiungi</span></div>`;
     document.getElementById(mount).innerHTML=html;
     return keys.length;
