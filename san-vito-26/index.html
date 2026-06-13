@@ -714,20 +714,27 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   let data={};
 
   /* ── ridimensiona + comprimi (rispettando l'orientamento EXIF) ── */
-  function viaImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
-  function loadBmp(file){
-    if('createImageBitmap' in window){
-      return createImageBitmap(file,{imageOrientation:'from-image'}).catch(()=>createImageBitmap(file)).catch(()=>viaImg(file));
-    }
-    return viaImg(file);
-  }
-  async function toDataURL(file){
-    const bmp=await loadBmp(file);
-    const max=1080,q=.75; let w=bmp.width,h=bmp.height;
-    const sc=Math.min(1,max/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
-    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
-    cv.getContext('2d').drawImage(bmp,0,0,w,h); if(bmp.close)bmp.close();
-    return cv.toDataURL('image/jpeg',q);
+  /* decodifica iOS-safe: object URL + <img> + ridimensiono + toBlob (niente createImageBitmap) */
+  function toDataURL(file){
+    return new Promise((res,rej)=>{
+      const url=URL.createObjectURL(file);
+      const img=new Image();
+      img.onload=()=>{
+        try{
+          const max=1280; let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+          if(!w||!h){ URL.revokeObjectURL(url); rej(new Error('dimensioni nulle')); return; }
+          const sc=Math.min(1, max/Math.max(w,h)); w=Math.max(1,Math.round(w*sc)); h=Math.max(1,Math.round(h*sc));
+          const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+          cv.getContext('2d').drawImage(img,0,0,w,h);
+          URL.revokeObjectURL(url);
+          const done=durl=>{ cv.width=cv.height=0; res(durl); };
+          if(cv.toBlob){ cv.toBlob(b=>{ if(!b){ try{done(cv.toDataURL('image/jpeg',.7));}catch(e){rej(e);} return; } const fr=new FileReader(); fr.onload=()=>done(fr.result); fr.onerror=()=>rej(fr.error); fr.readAsDataURL(b); }, 'image/jpeg', .7); }
+          else done(cv.toDataURL('image/jpeg',.7));
+        }catch(e){ URL.revokeObjectURL(url); rej(e); }
+      };
+      img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('decodifica fallita')); };
+      img.src=url;
+    });
   }
 
   /* ── render ── */
@@ -789,16 +796,17 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     document.body.appendChild(inp);
     inp.addEventListener('change',async()=>{
       const files=[...inp.files]; inp.remove(); if(!files.length) return;
-      let n=0;
+      let n=0, okN=0, failN=0;
       for(const f of files){
         try{
           const url=await toDataURL(f);
           const key=target.single ? target.key : (target.prefix+':'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+(n++));
-          data[key]={dataURL:url,ts:Date.now()+n}; await dbSet(key,data[key]);
+          data[key]={dataURL:url,ts:Date.now()+n}; await dbSet(key,data[key]); okN++;
           if(target.single) break;
-        }catch(err){ console.warn('foto non caricata',err); }
+        }catch(err){ failN++; console.warn('foto non caricata',err); }
       }
       renderAll();
+      if(failN) showReport('⚠️ '+failN+' foto non caricata. Se compare un errore di memoria scattando, scatta con l\'app Fotocamera e poi usa «Carica da galleria».');
     });
     inp.click();
   }
