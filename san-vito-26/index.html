@@ -276,8 +276,6 @@ section:first-of-type .sec-title{margin-top:0}
 .pickmode .pm-lbl{font-size:12px;font-weight:700;color:var(--ink-soft)}
 .pm-b{height:40px;padding:0 14px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
 .pm-b.on{border-color:transparent;background:var(--accent-fill);color:var(--on-fill);box-shadow:var(--shadow-sm)}
-.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));z-index:120;height:54px;padding:0 20px;border:0;border-radius:var(--r-full);background:var(--accent-fill);color:var(--on-fill);font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:var(--shadow-lg);display:inline-flex;align-items:center;gap:8px}
-.fab:active{transform:scale(.96)}
 .viewnav{display:flex;gap:8px;margin:0 0 20px}
 .vn{flex:1;height:46px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
 .vn.on{border-color:transparent;background:var(--accent-fill);color:var(--on-fill);box-shadow:var(--shadow-sm)}
@@ -312,6 +310,15 @@ section:first-of-type .sec-title{margin-top:0}
 .meta-lbl{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
 .thumbs{display:flex;flex-wrap:wrap;gap:8px}
 .shot.sm{width:66px;height:66px}
+#dmgSvg{cursor:crosshair}
+.xmark text{fill:var(--alert);font-size:20px;font-weight:900;font-family:-apple-system,system-ui,sans-serif}
+.xbg{fill:var(--surface);opacity:.85}
+.dmg-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.dmg-thumb,.dmg-foto{width:54px;height:54px;border-radius:10px;flex-shrink:0;object-fit:cover;cursor:pointer}
+.dmg-foto{border:1.5px dashed var(--line);background:var(--surface-2);color:var(--ink-soft);font-size:22px}
+.dmg-fields{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.dmg-field{width:100%;height:38px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;padding:0 8px;font-family:inherit}
+.dmg-del{flex-shrink:0;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft);width:34px;height:34px;border-radius:10px;cursor:pointer;font-family:inherit}
 .leg{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:4px 11px;border-radius:var(--r-full)}
 .leg-rit{background:var(--accent-soft);color:var(--accent)}
 .leg-ric{background:var(--warn-soft);color:var(--warn)}
@@ -444,11 +451,8 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <div class="car-sub" style="margin-top:26px"><span>📸 Stato auto</span><span class="cnt" id="carShotCnt">0 / 9</span></div>
     <div id="carPositions"></div>
 
-    <div class="car-sub" style="margin-top:26px"><span>⚠️ Segnalazione danni</span><span class="cnt" id="carDmgCnt">0 foto</span></div>
-    <div class="dmg-cols">
-      <div class="dmg-col"><div class="cell-lbl rit">Ritiro</div><div class="shot-grid" id="carDmgRitiro"></div></div>
-      <div class="dmg-col"><div class="cell-lbl ric">Riconsegna</div><div class="shot-grid" id="carDmgRiconsegna"></div></div>
-    </div>
+    <div class="car-sub" style="margin-top:26px"><span>⚠️ Danni</span><span class="cnt" id="carDmgCnt">0 danni</span></div>
+    <div id="carDamage"></div>
 
     <div class="car-actions">
       <button class="btn-verify" id="carVerify" type="button"><span class="vlbl">🔎 Verifica ritiro (contratto + stato)</span></button>
@@ -459,8 +463,6 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <div class="report" id="carReport"></div>
   </section>
 </main>
-<button id="goPhotos" class="fab" type="button">📷 Foto noleggio</button>
-
 <script>
 /* ════════ Istanti chiave (Europe/Rome · CEST = +02:00) ════════ */
 const DEP = new Date('2026-06-14T07:00:00+02:00');  // partenza BLQ
@@ -843,17 +845,38 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
       strip;
     document.getElementById('carShotCnt').textContent=taken.length+' / '+POS.length;
   }
-  function renderDamageCol(phase,mount){
-    const keys=Object.keys(data).filter(k=>k.startsWith('dmg:'+phase+':')).sort();
-    let html=keys.map(k=>`<div class="shot"><img src="${data[k].dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
-    html+=`<div class="shot empty add-tile" data-act="add" data-group="dmg:${phase}"><span class="ph-ico">＋</span><span class="ph-lbl">Aggiungi</span></div>`;
-    document.getElementById(mount).innerHTML=html;
-    return keys.length;
+  /* zone e tipi danno — terminologia Autovia (dal loro modulo) + estensioni */
+  const ZONES=['Paraurti ant. sx','Paraurti ant. dx','Paraurti ant. centro','Cofano','Parabrezza','Tetto','Parafango ant. sx','Parafango ant. dx','Portiera ant. sx','Portiera ant. dx','Specchietto sx','Specchietto dx','Portiera post. sx','Portiera post. dx','Minigonna sx','Minigonna dx','Parafango post. sx','Parafango post. dx','Cerchio ant. sx','Cerchio ant. dx','Cerchio post. sx','Cerchio post. dx','Lunotto','Portellone / baule','Paraurti post. sx','Paraurti post. dx','Paraurti post. centro','Faro / fanale','Vetro laterale','Interni'];
+  const TYPES=['Graffio / Scratch','Ammaccatura / Dent','Rottura / Break','Graffio profondo','Vernice scrostata','Crepa / fessura','Vetro scheggiato','Vetro rotto','Cerchio graffiato','Pneumatico danneggiato','Specchietto rotto / calotta','Faro / fanale rotto','Ruggine','Pezzo mancante','Altro'];
+  function zoneGuess(x,y){ const s=x<92?'sx':(x>148?'dx':'centro');
+    if(y<70) return 'Paraurti ant. '+s;
+    if(y<128) return s==='centro'?'Cofano':'Parafango ant. '+s;
+    if(y<200) return s==='centro'?'Parabrezza':'Portiera ant. '+s;
+    if(y<266) return s==='centro'?'Tetto':'Portiera post. '+s;
+    if(y<320) return s==='centro'?'Lunotto':'Parafango post. '+s;
+    return 'Paraurti post. '+s; }
+  function addDamage(x,y){
+    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5), k='dmg:'+carPhase+':'+id;
+    data[k]={x:Math.round(x),y:Math.round(y),zone:zoneGuess(x,y),type:TYPES[0],ts:Date.now()};
+    dbSet(k,data[k]); renderDamage();
   }
   function renderDamage(){
-    const a=renderDamageCol('ritiro','carDmgRitiro');
-    const b=renderDamageCol('riconsegna','carDmgRiconsegna');
-    document.getElementById('carDmgCnt').textContent=(a+b)+' foto';
+    const ph=carPhase;
+    const keys=Object.keys(data).filter(k=>k.startsWith('dmg:'+ph+':')).sort();
+    const marks=keys.map(k=>{const d=data[k];return `<g class="xmark" pointer-events="none" transform="translate(${d.x||120},${d.y||190})"><circle class="xbg" r="13"></circle><text text-anchor="middle" dy="6">✕</text></g>`;}).join('');
+    const svg=`<svg id="dmgSvg" class="carsvg" data-act="dmgadd" viewBox="0 0 240 380">`+
+      `<rect class="car-body" x="50" y="28" width="140" height="324" rx="46"/><rect class="car-roof" x="76" y="118" width="88" height="172" rx="26"/>`+
+      `<path class="car-line" d="M72 96 q48 -20 96 0"/><path class="car-line" d="M74 312 q46 16 92 0"/>`+marks+`</svg>`;
+    const rows=keys.map(k=>{ const d=data[k];
+      const thumb=d.dataURL?`<img class="dmg-thumb" data-act="dmgfoto" data-key="${k}" src="${d.dataURL}" loading="lazy" decoding="async" alt="">`:`<button class="dmg-foto" data-act="dmgfoto" data-key="${k}" type="button">📷</button>`;
+      const zopt=ZONES.map(z=>`<option${d.zone===z?' selected':''}>${z}</option>`).join('');
+      const topt=TYPES.map(t=>`<option${d.type===t?' selected':''}>${t}</option>`).join('');
+      return `<div class="dmg-row">${thumb}<div class="dmg-fields"><select class="dmg-field" data-key="${k}" data-f="zone">${zopt}</select><select class="dmg-field" data-key="${k}" data-f="type">${topt}</select></div><button class="del dmg-del" data-del="${k}" type="button" aria-label="Elimina danno">✕</button></div>`;
+    }).join('');
+    document.getElementById('carDamage').innerHTML=
+      `<div class="carmap-hint tiny muted">Tocca la zona del danno → compare la ✕ → scatta la foto e scegli zona/tipo</div>`+svg+
+      (rows||`<div class="tiny muted" style="text-align:center;padding:8px 0">Nessun danno segnalato (${ph})</div>`);
+    document.getElementById('carDmgCnt').textContent=Object.keys(data).filter(k=>k.startsWith('dmg:')).length+' danni';
   }
   function hasPhase(phase){ return Object.keys(data).some(k=>k.startsWith('ph:'+phase+':')||k.startsWith('dmg:'+phase+':')); }
   function refreshCompareBtn(){ document.getElementById('carCompare').disabled=!hasPhase('riconsegna'); }
@@ -872,7 +895,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
         try{
           const url=await toDataURL(f);
           const key=target.single ? target.key : (target.prefix+':'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+(n++));
-          data[key]={dataURL:url,ts:Date.now()+n}; await dbSet(key,data[key]); okN++;
+          data[key]=Object.assign({}, data[key], {dataURL:url, ts:Date.now()+n}); await dbSet(key,data[key]); okN++;
           if(target.single) break;
         }catch(err){ failN++; console.warn('foto non caricata',err); }
       }
@@ -1021,7 +1044,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     const it=[]; let n=1;
     Object.keys(data).filter(k=>k.startsWith('doc:')).sort().forEach(k=>it.push({dataURL:data[k].dataURL,label:'CONTRATTO · pagina '+(n++)}));
     POS.forEach(p=>{ if(data['ph:ritiro:'+p.id]) it.push({dataURL:data['ph:ritiro:'+p.id].dataURL,label:'RITIRO · '+p.label}); });
-    Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort().forEach((k,i)=>it.push({dataURL:data[k].dataURL,label:'RITIRO · danno '+(i+1)}));
+    Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')&&data[k].dataURL).sort().forEach(k=>it.push({dataURL:data[k].dataURL,label:'RITIRO · danno — '+(data[k].zone||'?')+(data[k].type?' · '+data[k].type:'')}));
     return it;
   }
   function fullItems(){
@@ -1031,8 +1054,8 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
       if(data['ph:ritiro:'+p.id]) it.push({dataURL:data['ph:ritiro:'+p.id].dataURL,label:'RITIRO · '+p.label});
       if(data['ph:riconsegna:'+p.id]) it.push({dataURL:data['ph:riconsegna:'+p.id].dataURL,label:'RICONSEGNA · '+p.label});
     });
-    Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort().forEach((k,i)=>it.push({dataURL:data[k].dataURL,label:'RITIRO · danno '+(i+1)}));
-    Object.keys(data).filter(k=>k.startsWith('dmg:riconsegna:')).sort().forEach((k,i)=>it.push({dataURL:data[k].dataURL,label:'RICONSEGNA · danno '+(i+1)}));
+    Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')&&data[k].dataURL).sort().forEach(k=>it.push({dataURL:data[k].dataURL,label:'RITIRO · danno — '+(data[k].zone||'?')+(data[k].type?' · '+data[k].type:'')}));
+    Object.keys(data).filter(k=>k.startsWith('dmg:riconsegna:')&&data[k].dataURL).sort().forEach(k=>it.push({dataURL:data[k].dataURL,label:'RICONSEGNA · danno — '+(data[k].zone||'?')+(data[k].type?' · '+data[k].type:'')}));
     return it;
   }
   const READ_GUIDE=[
@@ -1088,7 +1111,13 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     const act=e.target.closest('[data-act]'); if(!act) return;
     if(act.dataset.act==='pos') pick({single:true,key:'ph:'+act.dataset.phase+':'+act.dataset.pos});
     else if(act.dataset.act==='add') pick({prefix:act.dataset.group});
-    else if(act.dataset.act==='phase'){ carPhase=act.dataset.ph; renderPositions(); }
+    else if(act.dataset.act==='phase'){ carPhase=act.dataset.ph; renderPositions(); renderDamage(); }
+    else if(act.dataset.act==='dmgfoto') pick({single:true,key:act.dataset.key});
+    else if(act.dataset.act==='dmgadd'){ const r=act.getBoundingClientRect(); if(r.width&&r.height) addDamage((e.clientX-r.left)/r.width*240,(e.clientY-r.top)/r.height*380); }
+  });
+  document.getElementById('carSection').addEventListener('change',e=>{
+    const mi=e.target.closest('.meta-in'); if(mi){ mset(mi.dataset.mph,mi.dataset.mf,mi.value); return; }
+    const df=e.target.closest('.dmg-field'); if(df && data[df.dataset.key]){ data[df.dataset.key][df.dataset.f]=df.value; dbSet(df.dataset.key,data[df.dataset.key]); }
   });
   document.getElementById('carPositions').addEventListener('change',e=>{
     const el=e.target.closest('.meta-in'); if(el) mset(el.dataset.mph,el.dataset.mf,el.value);
@@ -1100,10 +1129,6 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   document.getElementById('carCompare').addEventListener('click',verifyCompare);
   document.getElementById('pickMode').addEventListener('click',e=>{ const b=e.target.closest('.pm-b'); if(b) setPickMode(b.dataset.m); });
   setPickMode(pickMode);
-  document.getElementById('goPhotos').addEventListener('click',()=>{
-    if(typeof showView==='function') showView('noleggio');
-    openInput({prefix:'doc'}, pickMode==='camera');
-  });
 
   /* ── init ── */
   (async()=>{
