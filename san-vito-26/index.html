@@ -9,6 +9,19 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>San Vito '26 · Travel companion</title>
+
+<!-- anteprima social (WhatsApp/Telegram) -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="it_IT">
+<meta property="og:site_name" content="San Vito '26">
+<meta property="og:title" content="San Vito Lo Capo — il nostro viaggio">
+<meta property="og:description" content="Diario di viaggio: valigia, outfit, noleggio, meteo e conti. E i posti da vedere intorno a San Vito.">
+<meta property="og:image" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/san-vito-26/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/san-vito-26/">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -108,6 +121,12 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-hei
 .top-left{display:flex;align-items:center;gap:9px;min-width:0}
 .hotel-btn{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;font-family:var(--font-sans);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--on-fill);background:var(--accent-fill);border-radius:var(--r-full);padding:6px 12px;text-decoration:none;box-shadow:var(--shadow-sm);white-space:nowrap}
 .hotel-btn:active{transform:scale(.96)}
+.dintorni-link{display:flex;align-items:center;gap:12px;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:15px 17px;margin:0 0 20px;box-shadow:var(--shadow-sm)}
+.dintorni-link:active{transform:scale(.99)}
+.dintorni-link .di{font-size:25px;line-height:1}
+.dintorni-link .dt{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink);display:block}
+.dintorni-link .ds{font-size:12.5px;color:var(--ink-soft);margin-top:2px;display:block}
+.dintorni-link .da{margin-left:auto;color:var(--ink-faint);font-weight:700;font-size:18px}
 .clock{font-family:var(--font-sans);font-weight:500;font-size:28px;letter-spacing:.01em;
   line-height:1;color:var(--ink);font-feature-settings:"tnum" 1}
 .wx{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink-soft);margin-top:9px}
@@ -484,6 +503,12 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <button class="vn" data-v="noleggio" type="button">🚗 Noleggio</button>
     <button class="vn" data-v="spese" type="button">💶 Spese</button>
   </nav>
+
+  <a class="dintorni-link" href="./dintorni.html">
+    <span class="di">🗺️</span>
+    <span><span class="dt">Posti da visitare</span><span class="ds">Itinerario giorno per giorno, spiagge e gite in barca — anche offline</span></span>
+    <span class="da">›</span>
+  </a>
 
   <!-- ═══ SEZIONE 3 · CHECKLIST (solo prima della partenza) ═══ -->
   <section id="checklistSection">
@@ -1103,6 +1128,10 @@ document.getElementById('finVersTable').addEventListener('click',e=>{
 /* re-sync della checklist quando si rientra nella pagina (reload, bfcache, ritorno da app) */
 window.addEventListener('pageshow',()=>{ checks=loadChecks(); applyChecks(); });
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=loadChecks(); applyChecks(); } });
+/* re-sync conti quando si rientra (modifiche fatte sulla pagina di lei) */
+window.addEventListener('pageshow',()=>{ finExp=finLoad(); finVers=finVLoad(); renderFinance(); });
+/* offline in aereo */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
 </script>
 
 <script>
