@@ -289,6 +289,7 @@ section:first-of-type .sec-title{margin-top:0}
 .wx-hour .p{font-size:10.5px;font-weight:700;color:var(--accent);margin-top:3px;min-height:13px}
 .wx-hour .w{font-size:10px;color:var(--ink-faint);margin-top:1px}
 .wx-hour .w.strong{color:var(--ink);font-weight:800}
+.wx-sep{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:32px;color:var(--ink-faint);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;line-height:1.3;border-left:1.5px dashed var(--line);padding-left:7px}
 .wx-foot{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:11px;margin-top:2px}
 .wx-foot b{color:var(--ink);font-weight:700}
 .pickmode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
@@ -747,27 +748,39 @@ function openWxSheet(){
   if(!WX||!WX.hourly||!WX.daily) return;
   const now=new Date(), rp=romeParts(now), ymd=rp.ymd, nowH=rp.h, H=WX.hourly;
   const hourOf=i=>+H.time[i].slice(11,13);
-  // ore di oggi, da adesso fino a fine giornata
-  let fut=[];
-  for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd && hourOf(i)>=nowH) fut.push(i);
-  if(!fut.length) for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd) fut.push(i);
-  if(!fut.length) return;
-  // striscia ora per ora
-  const hoursHtml=fut.map(i=>{
+  // ore di oggi da adesso (per verdetto + riepilogo)
+  let today=[];
+  for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd && hourOf(i)>=nowH) today.push(i);
+  if(!today.length) for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd) today.push(i);
+  // striscia: prossime ~24 ore (oggi + inizio domani)
+  const startKey=ymd+'T'+String(nowH).padStart(2,'0');
+  let strip=[];
+  for(let i=0;i<H.time.length && strip.length<24;i++) if(H.time[i].slice(0,13)>=startKey) strip.push(i);
+  if(!strip.length) strip=today;
+  if(!strip.length) return;
+  // striscia ora per ora (con separatore al cambio giorno)
+  let prevDay=H.time[strip[0]].slice(0,10);
+  const hoursHtml=strip.map(i=>{
+    const ds=H.time[i].slice(0,10);
+    let sep='';
+    if(ds!==prevDay){
+      const lbl=new Intl.DateTimeFormat('it-IT',{weekday:'short',timeZone:'Europe/Rome'}).format(new Date(ds+'T12:00:00'));
+      sep=`<div class="wx-sep">${lbl}<br>${ds.slice(8,10)}</div>`; prevDay=ds;
+    }
     const prob=H.precipitation_probability[i]??0, mm=H.precipitation[i]??0;
     const gust=Math.round(H.windgusts_10m[i]??0), wind=Math.round(H.windspeed_10m[i]??0);
     const rainy=prob>=40||mm>=0.3, windy=gust>=40;
     const cls='wx-hour'+(rainy?' rain':windy?' wind':'');
     const ptxt=prob>=15?('💧'+prob+'%'):'';
     const wtxt=windy?('💨'+gust):('💨'+wind);
-    return `<div class="${cls}"><div class="h">${hourOf(i)}</div><div class="em">${wmo(H.weathercode[i])}</div>`+
+    return sep+`<div class="${cls}"><div class="h">${hourOf(i)}</div><div class="em">${wmo(H.weathercode[i])}</div>`+
            `<div class="t">${Math.round(H.temperature_2m[i])}°</div><div class="p">${ptxt}</div>`+
            `<div class="w${windy?' strong':''}">${wtxt}</div></div>`;
   }).join('');
-  // verdetto: priorità a pioggia e raffiche
+  // verdetto: priorità a pioggia e raffiche (su oggi)
   let rainHour=null;
-  for(const i of fut){ if((H.precipitation_probability[i]??0)>=50||(H.precipitation[i]??0)>=0.5){ rainHour=hourOf(i); break; } }
-  const gustMax=Math.round(Math.max(...fut.map(i=>H.windgusts_10m[i]??0)));
+  for(const i of today){ if((H.precipitation_probability[i]??0)>=50||(H.precipitation[i]??0)>=0.5){ rainHour=hourOf(i); break; } }
+  const gustMax=today.length?Math.round(Math.max(...today.map(i=>H.windgusts_10m[i]??0))):0;
   const D=WX.daily;
   const tmax=Math.round(D.temperature_2m_max[0]), tmin=Math.round(D.temperature_2m_min[0]);
   const rmax=D.precipitation_probability_max[0]??0, uv=Math.round(D.uv_index_max[0]??0);
