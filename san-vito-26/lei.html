@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#13181f">
+<title>San Vito '26 · I nostri conti</title>
+
+<!-- anteprima social (WhatsApp/Telegram) -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="it_IT">
+<meta property="og:site_name" content="San Vito '26">
+<meta property="og:title" content="San Vito Lo Capo — I nostri conti">
+<meta property="og:description" content="Spese del viaggio e cassa comune, sempre aggiornati. E i posti da vedere intorno a San Vito.">
+<meta property="og:image" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/san-vito-26/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://alessandrovizzini1986-a11y.github.io/daycation-bologna/san-vito-26/lei.html">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="San Vito '26">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --font-display:'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-sans:'Hanken Grotesk', -apple-system, system-ui, sans-serif;
+  --r-xs:6px; --r-sm:8px; --r-md:11px; --r-lg:14px; --r-xl:18px; --r-2xl:22px; --r-full:999px;
+  --bg:oklch(96.8% 0.009 80); --surface:oklch(99.2% 0.005 85); --surface-2:oklch(94.2% 0.011 78);
+  --ink:oklch(24% 0.013 65); --ink-soft:oklch(46% 0.017 66); --ink-faint:oklch(62% 0.016 70);
+  --line:oklch(88.5% 0.012 75); --line-soft:oklch(92% 0.009 78);
+  --accent:oklch(46% 0.115 245); --accent-fill:oklch(44% 0.12 247); --accent-soft:oklch(93.5% 0.028 240);
+  --on-fill:#fff;
+  --shadow-sm:0 1px 2px oklch(40% 0.02 65 / .05);
+  --shadow-lg:0 2px 6px oklch(40% 0.02 65 / .06), 0 16px 38px oklch(40% 0.04 65 / .10);
+  --header-bg:oklch(99.2% 0.005 85 / .84);
+}
+@media (prefers-color-scheme:dark){ :root{
+  --bg:oklch(17.5% 0.008 255); --surface:oklch(21.5% 0.011 253); --surface-2:oklch(26% 0.013 253);
+  --ink:oklch(94% 0.008 90); --ink-soft:oklch(73% 0.014 85); --ink-faint:oklch(56% 0.015 88);
+  --line:oklch(30.5% 0.013 253); --line-soft:oklch(27% 0.011 253);
+  --accent:oklch(74% 0.105 240); --accent-fill:oklch(53% 0.13 244); --accent-soft:oklch(30% 0.045 246);
+  --shadow-sm:0 1px 2px oklch(0% 0 0 / .28);
+  --shadow-lg:0 2px 6px oklch(0% 0 0 / .34), 0 18px 44px oklch(0% 0 0 / .46);
+  --header-bg:oklch(20% 0.01 253 / .82);
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-height:1.5;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;min-height:100vh}
+.tiny{font-size:11.5px} .muted{color:var(--ink-soft)}
+::selection{background:var(--accent-soft);color:var(--ink)}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+
+.top{position:sticky;top:0;z-index:50;padding:calc(14px + env(safe-area-inset-top,0)) 20px 14px;background:var(--header-bg);
+  backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line);color:var(--ink)}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top-left{display:flex;align-items:center;gap:9px;min-width:0}
+.place{font-family:var(--font-sans);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+.hotel-btn{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;font-family:var(--font-sans);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--on-fill);background:var(--accent-fill);border-radius:var(--r-full);padding:6px 12px;text-decoration:none;box-shadow:var(--shadow-sm);white-space:nowrap}
+.hotel-btn:active{transform:scale(.96)}
+.clock{font-family:var(--font-sans);font-weight:500;font-size:28px;letter-spacing:.01em;line-height:1;color:var(--ink);font-feature-settings:"tnum" 1}
+.wx{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink-soft);margin-top:9px;cursor:pointer}
+.wx .wx-emoji{font-size:17px;line-height:1}
+.wx b{color:var(--ink);font-weight:700}
+.wx .wx-go{color:var(--ink-faint);font-weight:700;font-size:16px;line-height:1;margin-left:-2px}
+
+main{max-width:600px;margin:0 auto;padding:22px 20px 64px}
+.subnav{display:flex;gap:8px;margin-bottom:18px}
+.subnav a{flex:1;text-align:center;text-decoration:none;font-size:13px;font-weight:700;padding:11px 10px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft)}
+.subnav a.on{border-color:transparent;background:var(--accent-fill);color:var(--on-fill);box-shadow:var(--shadow-sm)}
+.subnav a:active{transform:scale(.98)}
+.sec-title{font-family:var(--font-display);font-weight:500;font-size:clamp(24px,6.5vw,30px);letter-spacing:-.015em;line-height:1.12;margin:0 2px 16px;position:relative;padding-top:16px}
+.sec-title::before{content:"";position:absolute;top:0;left:2px;width:30px;height:2px;background:var(--accent-fill)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow-sm);padding:20px;margin-bottom:14px}
+.card-h{font-family:var(--font-display);font-weight:600;font-size:19px;display:flex;align-items:center;gap:9px;margin-bottom:14px;padding-bottom:13px;border-bottom:1px solid var(--line-soft)}
+.car-sub{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.car-sub .cnt{color:var(--accent);letter-spacing:.05em;white-space:nowrap}
+
+/* meteo sheet */
+.picksheet{position:fixed;inset:0;z-index:200;background:oklch(20% .03 256 / .5);display:none;align-items:flex-end;justify-content:center}
+.picksheet.on{display:flex}
+.picksheet-card{background:var(--surface);width:100%;max-width:480px;border-radius:var(--r-xl) var(--r-xl) 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0));display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-lg)}
+.picksheet-h{font-weight:800;text-align:center;color:var(--ink-soft);font-size:12px;text-transform:uppercase;letter-spacing:.6px;padding:4px 0 6px}
+.picksheet-x{height:48px;border:0;background:none;color:var(--ink-soft);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.wxsheet-card{animation:pop .26s ease}
+.wx-verdict{display:flex;align-items:center;gap:12px;background:var(--surface-2);border-radius:var(--r-md);padding:12px 14px}
+.wx-verdict .e{font-size:30px;line-height:1}
+.wx-verdict .t{font-size:14px;font-weight:600;color:var(--ink);line-height:1.35}
+.wx-hours{display:flex;gap:7px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.wx-hour{flex:0 0 auto;min-width:54px;background:var(--surface-2);border-radius:var(--r-md);padding:9px 7px 8px;text-align:center}
+.wx-hour.rain{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.wx-hour.wind{box-shadow:inset 0 0 0 1.5px oklch(72% .15 70)}
+.wx-hour .h{font-size:11px;font-weight:800;color:var(--ink-soft)}
+.wx-hour .em{font-size:20px;line-height:1;margin:5px 0 3px}
+.wx-hour .t{font-weight:800;font-size:15px;color:var(--ink)}
+.wx-hour .p{font-size:10.5px;font-weight:700;color:var(--accent);margin-top:3px;min-height:13px}
+.wx-hour .w{font-size:10px;color:var(--ink-faint);margin-top:1px}
+.wx-hour .w.strong{color:var(--ink);font-weight:800}
+.wx-sep{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:32px;color:var(--ink-faint);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;line-height:1.3;border-left:1.5px dashed var(--line);padding-left:7px}
+.wx-foot{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:11px;margin-top:2px}
+.wx-foot b{color:var(--ink);font-weight:700}
+
+/* spese & split */
+.fin-balance{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent-fill);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:18px;display:flex;gap:13px;align-items:flex-start}
+.fin-balance .fb-ico{font-size:24px;line-height:1;flex-shrink:0}
+.fin-balance .fb-txt{font-family:var(--font-display);font-size:16px;line-height:1.42;color:var(--ink);font-weight:500}
+.fin-balance .fb-txt b{font-weight:800}
+.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.fin-cell{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 14px;box-shadow:var(--shadow-sm)}
+.fin-cell .k{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+.fin-cell .val{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--ink);margin-top:3px}
+.fin-table{display:flex;flex-direction:column;gap:7px}
+.fin-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px}
+.fin-row .desc{font-weight:700;font-size:14px;color:var(--ink)}
+.fin-row .meta{font-size:11.5px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.fin-pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:var(--r-full)}
+.fin-pill.paid{background:oklch(92% .06 150);color:oklch(40% .1 150)}
+.fin-pill.due{background:var(--accent-soft);color:var(--accent)}
+.fin-pill.cassa{background:oklch(92% .07 300);color:oklch(42% .12 300)}
+.fin-row .amt{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink);white-space:nowrap}
+.fin-acts{display:flex;gap:5px}
+.fin-ico{width:34px;height:34px;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--r-sm);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.fin-ico:active{transform:scale(.94)}
+.fin-form{display:flex;flex-direction:column;gap:10px}
+.fin-form-actions{display:flex;gap:8px}
+.fin-form-actions .btn-verify{flex:1;width:auto}
+.fin-cancel{height:52px;padding:0 18px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-soft);border-radius:var(--r-lg);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.fin-cancel:active{transform:scale(.98)}
+.fin-vadd{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px}
+.fin-vadd .meta-in{min-height:46px}
+.fin-vadd #finVAdd{height:46px;white-space:nowrap}
+.gallery-empty{font-size:13px;color:var(--ink-faint);text-align:center;padding:18px 12px;border:1px dashed var(--line);border-radius:var(--r-md)}
+.meta-in{font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 10px;min-height:42px;width:100%}
+.meta-in:focus{outline:2px solid var(--accent-fill);outline-offset:1px;border-color:transparent}
+select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);background-position:calc(100% - 16px) 19px,calc(100% - 11px) 19px;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+.btn-verify{width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-family:var(--font-sans);font-size:15px;font-weight:700;letter-spacing:.01em;color:var(--on-fill);background:var(--accent-fill);border:0;border-radius:var(--r-lg);box-shadow:var(--shadow-sm);transition:transform .15s ease,opacity .2s}
+.btn-verify:active{transform:scale(.99)}
+.dintorni-link{display:flex;align-items:center;gap:12px;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;margin-top:22px;box-shadow:var(--shadow-sm)}
+.dintorni-link:active{transform:scale(.99)}
+.dintorni-link .di{font-size:26px}
+.dintorni-link .dt{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink)}
+.dintorni-link .ds{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.dintorni-link .da{margin-left:auto;color:var(--ink-faint);font-weight:700}
+
+/* recap stampabile (PDF) */
+#finPrint{display:none}
+@media print{
+  @page{margin:14mm}
+  html,body{background:#fff;height:auto}
+  body>*{display:none !important}
+  body>#finPrint{display:block !important}
+}
+#finPrint{font-family:var(--font-sans);color:#111;background:#fff}
+#finPrint .pr-wrap{max-width:680px;margin:0 auto}
+#finPrint .pr-kicker{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#9a9a9a;font-weight:700}
+#finPrint .pr-title{font-family:var(--font-display);font-size:44px;font-weight:600;letter-spacing:-.02em;margin-top:6px;line-height:1}
+#finPrint .pr-sub{color:#8a8a8a;font-size:14px;margin-top:8px;letter-spacing:.02em}
+#finPrint .pr-hero{margin:44px 0;padding:34px 0;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;text-align:center}
+#finPrint .pr-hero-num{font-family:var(--font-display);font-size:62px;font-weight:600;letter-spacing:-.03em;line-height:1}
+#finPrint .pr-hero-lbl{color:#8a8a8a;font-size:13px;letter-spacing:.04em;margin-top:13px}
+#finPrint .pr-statement{font-family:var(--font-display);font-size:21px;line-height:1.5;font-weight:500;margin:0 0 42px}
+#finPrint table.pr-table{width:100%;border-collapse:collapse;font-size:14px}
+#finPrint .pr-table th{text-align:left;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#aaa;font-weight:700;padding:0 0 11px;border-bottom:1px solid #e8e8e8}
+#finPrint .pr-table th.r,#finPrint .pr-table td.r{text-align:right}
+#finPrint .pr-table td{padding:13px 0;border-bottom:1px solid #f1f1f1}
+#finPrint .pr-table td.desc{font-weight:600}
+#finPrint .pr-table td.amt{font-family:var(--font-display);font-weight:600;white-space:nowrap}
+#finPrint .pr-state{font-size:11px;color:#9a9a9a}
+#finPrint .pr-table tfoot td{border-bottom:0;border-top:2px solid #111;padding-top:15px;font-family:var(--font-display);font-weight:700;font-size:17px}
+#finPrint .pr-grid{display:flex;margin-top:40px}
+#finPrint .pr-stat{flex:1;text-align:center;padding:0 8px;border-left:1px solid #eee}
+#finPrint .pr-stat:first-child{border-left:0}
+#finPrint .pr-stat .v{font-family:var(--font-display);font-size:23px;font-weight:600}
+#finPrint .pr-stat .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#aaa;margin-top:7px}
+#finPrint .pr-foot{margin-top:50px;padding-top:16px;border-top:1px solid #eee;font-size:11px;color:#b8b8b8;letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-row">
+    <div class="top-left">
+      <div class="place">📍 San Vito Lo Capo</div>
+      <a class="hotel-btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=Il%20Giardino%20del%20Sol%2C%20Via%20N.%20Maniaci%207%2C%2091030%20San%20Vito%20Lo%20Capo%20TP&amp;travelmode=driving" target="_blank" rel="noopener" aria-label="Naviga verso l'hotel">🏨 Hotel</a>
+    </div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+  <div class="top-row">
+    <div class="wx" id="wx"><span class="wx-emoji">🌡️</span><span>Meteo in caricamento…</span></div>
+    <div class="tiny" style="opacity:.6;letter-spacing:.06em">ora CET</div>
+  </div>
+</header>
+
+<main>
+  <nav class="subnav">
+    <a class="on" href="./lei.html">💶 Conti</a>
+    <a href="./dintorni.html">🗺️ Dintorni</a>
+  </nav>
+
+  <section id="speseSection">
+    <div class="sec-title">I nostri conti 💶</div>
+
+    <div class="fin-balance" id="finBalance"></div>
+    <div class="fin-grid" id="finSummary"></div>
+
+    <div class="car-sub" style="margin-top:26px"><span>📋 Tutte le spese</span><span class="cnt" id="finCount">0 voci</span></div>
+    <div class="fin-table" id="finTable"></div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="card-h" id="finFormTitle">➕ Aggiungi spesa</div>
+      <div class="fin-form">
+        <input class="meta-in" id="finDesc" type="text" placeholder="Descrizione (es. Cena fuori)" autocomplete="off">
+        <input class="meta-in" id="finAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Importo in €">
+        <select class="meta-in" id="finBy">
+          <option value="Nessuno">Pagato da: Nessuno (da saldare)</option>
+          <option value="Cassa">Pagato da: Cassa comune</option>
+          <option value="Marito">Pagato da: Marito</option>
+          <option value="Moglie">Pagato da: Moglie</option>
+        </select>
+        <div class="fin-form-actions">
+          <button class="btn-verify" id="finSave" type="button">Aggiungi</button>
+          <button class="fin-cancel" id="finCancel" type="button" style="display:none">Annulla</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="car-sub" style="margin-top:26px"><span>💸 Versamenti in cassa</span><span class="cnt" id="finVersCount">0</span></div>
+    <div class="fin-table" id="finVersTable"></div>
+    <div class="fin-vadd">
+      <select class="meta-in" id="finVBy">
+        <option value="Marito">Marito</option>
+        <option value="Moglie">Moglie</option>
+      </select>
+      <input class="meta-in" id="finVAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Importo versato €">
+      <button class="fin-cancel" id="finVAdd" type="button">＋ Versa</button>
+    </div>
+
+    <button class="btn-verify" id="finExport" type="button" style="margin-top:18px">🧾 Esporta recap (PDF)</button>
+
+    <a class="dintorni-link" href="./dintorni.html">
+      <span class="di">🗺️</span>
+      <span><span class="dt">Posti da visitare</span><span class="ds">Itinerario, spiagge, gite in barca — anche offline</span></span>
+      <span class="da">›</span>
+    </a>
+  </section>
+</main>
+
+<!-- meteo · giornata -->
+<div class="picksheet" id="wxSheet">
+  <div class="picksheet-card wxsheet-card">
+    <div id="wxSheetBody"></div>
+    <button class="picksheet-x" type="button" id="wxSheetX">Chiudi</button>
+  </div>
+</div>
+
+<!-- recap stampabile (PDF) -->
+<div id="finPrint"></div>
+
+<script>
+/* orologio Europe/Rome */
+const RP=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+function romeParts(d){ const p={}; for(const x of RP.formatToParts(d)) if(x.type!=='literal') p[x.type]=x.value;
+  return {ymd:`${p.year}-${p.month}-${p.day}`, h:+p.hour, clock:`${p.hour}:${p.minute}:${p.second}`}; }
+function tick(){ document.getElementById('clock').textContent=romeParts(new Date()).clock; }
+
+/* meteo · Open-Meteo */
+function wmo(c){ if(c===0)return'☀️'; if(c===1||c===2)return'🌤️'; if(c===3)return'☁️';
+  if(c===45||c===48)return'🌫️'; if(c>=51&&c<=67)return'🌧️'; if(c>=71&&c<=77)return'❄️';
+  if(c>=80&&c<=82)return'🌦️'; if(c===95||c===96||c===99)return'⛈️'; return'🌡️'; }
+let WX=null;
+async function weather(){
+  const url='https://api.open-meteo.com/v1/forecast?latitude=38.1747&longitude=12.7358'+
+    '&current=temperature_2m,weathercode,windspeed_10m'+
+    '&hourly=temperature_2m,weathercode,precipitation_probability,precipitation,windspeed_10m,windgusts_10m'+
+    '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max'+
+    '&timezone=Europe%2FRome';
+  try{
+    const r=await fetch(url); const j=await r.json(); WX=j; const c=j.current;
+    document.getElementById('wx').innerHTML=
+      `<span class="wx-emoji">${wmo(c.weathercode)}</span>`+
+      `<span><b>${Math.round(c.temperature_2m)}°C</b> · 💨 ${Math.round(c.windspeed_10m)} km/h</span>`+
+      `<span class="wx-go" aria-hidden="true">›</span>`;
+  }catch(e){ WX=null; document.getElementById('wx').innerHTML='<span class="wx-emoji">🌡️</span><span>Meteo non disponibile</span>'; }
+}
+function openWxSheet(){
+  if(!WX||!WX.hourly||!WX.daily) return;
+  const now=new Date(), rp=romeParts(now), ymd=rp.ymd, nowH=rp.h, H=WX.hourly;
+  const hourOf=i=>+H.time[i].slice(11,13);
+  let today=[];
+  for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd && hourOf(i)>=nowH) today.push(i);
+  if(!today.length) for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd) today.push(i);
+  const startKey=ymd+'T'+String(nowH).padStart(2,'0');
+  let strip=[];
+  for(let i=0;i<H.time.length && strip.length<24;i++) if(H.time[i].slice(0,13)>=startKey) strip.push(i);
+  if(!strip.length) strip=today;
+  if(!strip.length) return;
+  let prevDay=H.time[strip[0]].slice(0,10);
+  const hoursHtml=strip.map(i=>{
+    const ds=H.time[i].slice(0,10); let sep='';
+    if(ds!==prevDay){ const lbl=new Intl.DateTimeFormat('it-IT',{weekday:'short',timeZone:'Europe/Rome'}).format(new Date(ds+'T12:00:00'));
+      sep=`<div class="wx-sep">${lbl}<br>${ds.slice(8,10)}</div>`; prevDay=ds; }
+    const prob=H.precipitation_probability[i]??0, mm=H.precipitation[i]??0;
+    const gust=Math.round(H.windgusts_10m[i]??0), wind=Math.round(H.windspeed_10m[i]??0);
+    const rainy=prob>=40||mm>=0.3, windy=gust>=40;
+    const cls='wx-hour'+(rainy?' rain':windy?' wind':'');
+    const ptxt=prob>=15?('💧'+prob+'%'):''; const wtxt=windy?('💨'+gust):('💨'+wind);
+    return sep+`<div class="${cls}"><div class="h">${hourOf(i)}</div><div class="em">${wmo(H.weathercode[i])}</div>`+
+           `<div class="t">${Math.round(H.temperature_2m[i])}°</div><div class="p">${ptxt}</div>`+
+           `<div class="w${windy?' strong':''}">${wtxt}</div></div>`;
+  }).join('');
+  let rainHour=null;
+  for(const i of today){ if((H.precipitation_probability[i]??0)>=50||(H.precipitation[i]??0)>=0.5){ rainHour=hourOf(i); break; } }
+  const gustMax=today.length?Math.round(Math.max(...today.map(i=>H.windgusts_10m[i]??0))):0;
+  const D=WX.daily;
+  const tmax=Math.round(D.temperature_2m_max[0]), tmin=Math.round(D.temperature_2m_min[0]);
+  const rmax=D.precipitation_probability_max[0]??0, uv=Math.round(D.uv_index_max[0]??0);
+  const sr=D.sunrise[0].slice(11,16), ss=D.sunset[0].slice(11,16);
+  let ve,vt, warn=[];
+  if(rainHour!==null) warn.push(`pioggia probabile verso le ${rainHour}:00`);
+  if(gustMax>=40) warn.push(`raffiche fino a ${gustMax} km/h`);
+  if(warn.length){ ve=rainHour!==null?'🌧️':'💨'; vt='Attenzione: '+warn.join(' · ')+'.'; }
+  else if(tmax>=31){ve='🔆';vt='Caldo pieno e stabile — ombrellone e crema solare.';}
+  else if(tmax>=25){ve='😎';vt='Bella giornata stabile da spiaggia.';}
+  else{ve='🌤️';vt='Giornata mite e stabile.';}
+  const dlbl=new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Rome'}).format(now);
+  document.getElementById('wxSheetBody').innerHTML=
+    `<div class="picksheet-h">📍 San Vito · ${dlbl}</div>`+
+    `<div class="wx-verdict"><span class="e">${ve}</span><span class="t">${vt}</span></div>`+
+    `<div class="wx-hours">${hoursHtml}</div>`+
+    `<div class="wx-foot"><span>🌡️ <b>${tmin}°–${tmax}°</b></span><span>💧 max <b>${rmax}%</b></span>`+
+    `<span>💨 raff. <b>${gustMax}</b></span><span>☀️ UV <b>${uv}</b></span>`+
+    `<span>🌅 <b>${sr}</b></span><span>🌇 <b>${ss}</b></span></div>`;
+  document.getElementById('wxSheet').classList.add('on');
+}
+function closeWxSheet(){ document.getElementById('wxSheet').classList.remove('on'); }
+
+/* ════════ Spese & split 50/50 (dati condivisi con il diario via localStorage) ════════ */
+const FIN_LS='svito26_spese';
+const FIN_SPLIT=['Marito','Moglie'];
+const FIN_SEED=[
+  {desc:'Caparra Hotel',amt:125,by:'Marito'},{desc:'Auto',amt:211,by:'Marito'},
+  {desc:'Saldo Hotel',amt:399,by:'Nessuno'},{desc:'Spiaggia',amt:175,by:'Nessuno'},
+  {desc:'Parcheggio',amt:20,by:'Nessuno'},{desc:'Seggiolino',amt:50,by:'Nessuno'},
+  {desc:'Fondo Cassa / Vivere lì',amt:856,by:'Nessuno'},
+];
+const FIN_VLS='svito26_versamenti2';
+const FIN_VSEED=[{by:'Marito',amt:582},{by:'Moglie',amt:918}];
+let finExp=finLoad(), finVers=finVLoad(), finEdit=null;
+function finLoad(){ try{const s=localStorage.getItem(FIN_LS); if(s){const a=JSON.parse(s); if(Array.isArray(a)) return a;}}catch(e){} return FIN_SEED.map(x=>({...x})); }
+function finStore(){ try{localStorage.setItem(FIN_LS,JSON.stringify(finExp));}catch(e){} }
+function finVLoad(){ try{const s=localStorage.getItem(FIN_VLS); if(s){const a=JSON.parse(s); if(Array.isArray(a)) return a;}}catch(e){} return FIN_VSEED.map(x=>({...x})); }
+function finVStore(){ try{localStorage.setItem(FIN_VLS,JSON.stringify(finVers));}catch(e){} }
+const eur=n=>{ n=Math.round(n*100)/100; return (Number.isInteger(n)?String(n):n.toFixed(2).replace('.',','))+' €'; };
+const finArt=n=> n==='Moglie'?'La':'Il';
+const finEsc=s=> String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function finCompute(){
+  let total=0, daSaldare=0, cassaSpent=0; const ant={}, versato={}, contrib={}; FIN_SPLIT.forEach(p=>{ant[p]=0;versato[p]=0;});
+  for(const e of finExp){ const a=+e.amt||0; total+=a;
+    if(e.by==='Nessuno') daSaldare+=a; else if(e.by==='Cassa') cassaSpent+=a; else if(ant[e.by]!=null) ant[e.by]+=a; }
+  for(const v of finVers){ const a=+v.amt||0; if(versato[v.by]!=null) versato[v.by]+=a; }
+  let cassaIn=0; FIN_SPLIT.forEach(p=>{ contrib[p]=ant[p]+versato[p]; cassaIn+=versato[p]; });
+  return {total, quota:total/2, ant, versato, contrib, cassaIn, cassaSpent, cassa:cassaIn-cassaSpent, daSaldare};
+}
+function finBalance(c){
+  if(c.total<=0) return {ico:'💶', html:'Aggiungi una spesa per vedere il bilancio.'};
+  const owe={}; FIN_SPLIT.forEach(p=>owe[p]=c.quota-(c.contrib[p]||0));
+  const debtors=FIN_SPLIT.filter(p=>owe[p]>0.5);
+  if(debtors.length){
+    const parts=debtors.map(p=>`${finArt(p)} <b>${p}</b> deve ancora versare <b>${eur(owe[p])}</b>`);
+    let html=`Per pareggiare le quote (<b>${eur(c.quota)}</b> a testa): ${parts.join(' e ')} nella cassa comune.`;
+    if(c.daSaldare>0.5) html+=' Poi le spese si saldano dalla cassa.';
+    return {ico:'⚖️', html};
+  }
+  if(c.daSaldare>0.5){
+    return {ico:'✅', html:`Quote pareggiate (<b>${eur(c.quota)}</b> a testa). Restano <b>${eur(c.daSaldare)}</b> di spese da saldare dalla cassa comune (saldo: <b>${eur(c.cassa)}</b>).`};
+  }
+  const tail = c.cassa>0.5 ? ` Avanzano <b>${eur(c.cassa)}</b> in cassa.` : (c.cassa<-0.5 ? ` Cassa in rosso di <b>${eur(-c.cassa)}</b>.` : ' Cassa a zero.');
+  return {ico:'✅', html:`Tutto saldato, quote pari.`+tail};
+}
+function renderFinance(){
+  const c=finCompute(), b=finBalance(c);
+  document.getElementById('finBalance').innerHTML=`<span class="fb-ico">${b.ico}</span><span class="fb-txt">${b.html}</span>`;
+  document.getElementById('finSummary').innerHTML=
+    `<div class="fin-cell"><div class="k">Costo totale</div><div class="val">${eur(c.total)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Quota a testa</div><div class="val">${eur(c.quota)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Marito · ha messo</div><div class="val">${eur(c.contrib.Marito||0)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Moglie · ha messo</div><div class="val">${eur(c.contrib.Moglie||0)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Saldo cassa</div><div class="val">${eur(c.cassa)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Da saldare</div><div class="val">${eur(c.daSaldare)}</div></div>`;
+  renderVers();
+  document.getElementById('finCount').textContent=finExp.length+(finExp.length===1?' voce':' voci');
+  document.getElementById('finTable').innerHTML=finExp.map((e,i)=>{
+    const due=e.by==='Nessuno', cassa=e.by==='Cassa';
+    const pillCls=due?'due':cassa?'cassa':'paid', pillTxt=due?'Da saldare':cassa?'Cassa':'Pagato';
+    const metaTxt=due?'da saldare':cassa?'pagato dalla cassa comune':'pagato da '+e.by;
+    return `<div class="fin-row"><div><div class="desc">${finEsc(e.desc)}</div>`+
+      `<div class="meta"><span class="fin-pill ${pillCls}">${pillTxt}</span><span>${metaTxt}</span></div></div>`+
+      `<div class="amt">${eur(+e.amt||0)}</div>`+
+      `<div class="fin-acts"><button class="fin-ico" data-edit="${i}" title="Modifica">✏️</button>`+
+      `<button class="fin-ico" data-del="${i}" title="Rimuovi">🗑️</button></div></div>`;
+  }).join('') || '<div class="gallery-empty">Nessuna spesa registrata.</div>';
+}
+function renderVers(){
+  document.getElementById('finVersCount').textContent=finVers.length===1?'1 versamento':finVers.length+' versamenti';
+  document.getElementById('finVersTable').innerHTML=finVers.map((v,i)=>
+    `<div class="fin-row"><div><div class="desc">${finEsc(v.by)}</div>`+
+    `<div class="meta"><span class="fin-pill paid">In cassa</span><span>versamento</span></div></div>`+
+    `<div class="amt">${eur(+v.amt||0)}</div>`+
+    `<div class="fin-acts"><button class="fin-ico" data-vdel="${i}" title="Rimuovi">🗑️</button></div></div>`
+  ).join('') || '<div class="gallery-empty">Nessun versamento.</div>';
+}
+function finResetForm(){
+  finEdit=null;
+  document.getElementById('finDesc').value=''; document.getElementById('finAmt').value=''; document.getElementById('finBy').value='Nessuno';
+  document.getElementById('finFormTitle').textContent='➕ Aggiungi spesa';
+  document.getElementById('finSave').textContent='Aggiungi';
+  document.getElementById('finCancel').style.display='none';
+}
+function finSubmit(){
+  const desc=document.getElementById('finDesc').value.trim();
+  const amt=parseFloat(document.getElementById('finAmt').value.replace(',','.'));
+  const by=document.getElementById('finBy').value;
+  if(!desc){ document.getElementById('finDesc').focus(); return; }
+  if(!(amt>0)){ document.getElementById('finAmt').focus(); return; }
+  const row={desc,amt,by};
+  if(finEdit!==null) finExp[finEdit]=row; else finExp.push(row);
+  finStore(); renderFinance(); finResetForm();
+}
+function finStartEdit(i){
+  finEdit=i; const e=finExp[i];
+  document.getElementById('finDesc').value=e.desc; document.getElementById('finAmt').value=e.amt; document.getElementById('finBy').value=e.by;
+  document.getElementById('finFormTitle').textContent='✏️ Modifica spesa';
+  document.getElementById('finSave').textContent='Salva modifica';
+  document.getElementById('finCancel').style.display='';
+  document.getElementById('finFormTitle').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function finDelete(i){ finExp.splice(i,1); if(finEdit===i) finResetForm(); else if(finEdit>i) finEdit--; finStore(); renderFinance(); }
+function finExportPDF(){
+  const c=finCompute(), b=finBalance(c);
+  const f=n=>new Intl.NumberFormat('it-IT',{maximumFractionDigits:2}).format(Math.round(n*100)/100)+' €';
+  const rows=finExp.map(e=>
+    `<tr><td class="desc">${finEsc(e.desc)}</td>`+
+    `<td class="pr-state">${e.by==='Nessuno'?'Da saldare':e.by==='Cassa'?'Cassa comune':'Pagato · '+e.by}</td>`+
+    `<td class="amt r">${f(+e.amt||0)}</td></tr>`).join('');
+  const dateStr=new Intl.DateTimeFormat('it-IT',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Rome'}).format(new Date());
+  document.getElementById('finPrint').innerHTML=
+    `<div class="pr-wrap">`+
+      `<div class="pr-kicker">Riepilogo spese</div><div class="pr-title">San Vito Lo Capo</div>`+
+      `<div class="pr-sub">14 – 19 giugno 2026</div>`+
+      `<div class="pr-hero"><div class="pr-hero-num">${f(c.total)}</div><div class="pr-hero-lbl">spesa totale · ${f(c.quota)} a testa</div></div>`+
+      `<div class="pr-statement">${b.html}</div>`+
+      `<table class="pr-table"><thead><tr><th>Voce</th><th>Stato</th><th class="r">Importo</th></tr></thead>`+
+      `<tbody>${rows}</tbody>`+
+      `<tfoot><tr><td>Totale</td><td></td><td class="r">${f(c.total)}</td></tr></tfoot></table>`+
+      `<div class="pr-grid">`+
+        `<div class="pr-stat"><div class="v">${f(c.contrib.Marito)}</div><div class="l">Marito · messo</div></div>`+
+        `<div class="pr-stat"><div class="v">${f(c.contrib.Moglie)}</div><div class="l">Moglie · messo</div></div>`+
+        `<div class="pr-stat"><div class="v">${f(c.cassa)}</div><div class="l">In cassa</div></div>`+
+        `<div class="pr-stat"><div class="v">${f(c.daSaldare)}</div><div class="l">Da saldare</div></div>`+
+      `</div>`+
+      `<div class="pr-foot">Generato il ${dateStr} · San Vito '26</div>`+
+    `</div>`;
+  window.print();
+}
+renderFinance(); finResetForm();
+document.getElementById('finSave').addEventListener('click',finSubmit);
+document.getElementById('finCancel').addEventListener('click',finResetForm);
+document.getElementById('finExport').addEventListener('click',finExportPDF);
+document.getElementById('finTable').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-edit]'), de=e.target.closest('[data-del]');
+  if(ed) finStartEdit(+ed.dataset.edit); else if(de) finDelete(+de.dataset.del);
+});
+document.getElementById('finVAdd').addEventListener('click',()=>{
+  const by=document.getElementById('finVBy').value;
+  const amt=parseFloat(document.getElementById('finVAmt').value.replace(',','.'));
+  if(!(amt>0)){ document.getElementById('finVAmt').focus(); return; }
+  finVers.push({by,amt}); finVStore(); document.getElementById('finVAmt').value=''; renderFinance();
+});
+document.getElementById('finVersTable').addEventListener('click',e=>{
+  const d=e.target.closest('[data-vdel]'); if(d){ finVers.splice(+d.dataset.vdel,1); finVStore(); renderFinance(); }
+});
+
+/* init */
+tick(); setInterval(tick,1000);
+weather(); setInterval(weather,600000);
+document.getElementById('wx').addEventListener('click',openWxSheet);
+document.getElementById('wxSheetX').addEventListener('click',closeWxSheet);
+document.getElementById('wxSheet').addEventListener('click',e=>{ if(e.target.id==='wxSheet') closeWxSheet(); });
+/* re-sync conti quando si rientra (modifiche fatte sull'altra pagina) */
+window.addEventListener('pageshow',()=>{ finExp=finLoad(); finVers=finVLoad(); renderFinance(); });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ finExp=finLoad(); finVers=finVLoad(); renderFinance(); } });
+/* offline */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
