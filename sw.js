@@ -4,7 +4,7 @@
      => niente "versione vecchia bloccata" quando aggiorni index.html dall'app GitHub
    - icone / og / manifest: cache-first (cambiano di rado, caricano subito)
    Per forzare un refresh totale della cache, cambia il numero in CACHE. */
-const CACHE = 'dcb-v5';
+const CACHE = 'dcb-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -53,7 +53,7 @@ self.addEventListener('fetch', e => {
   if (isFresh) {
     // network-first: prova la rete, salva in cache, fallback alla cache offline
     e.respondWith(
-      fetch(req).then(r => {
+      fetch(req, { cache: 'no-store' }).then(r => {
         const copy = r.clone();
         caches.open(CACHE).then(c => c.put(req, copy));
         return r;
