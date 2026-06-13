@@ -681,8 +681,8 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <div class="vou-row"><span class="k">Volo</span><span class="vv">WI2009</span></div>
     <div class="vou-h">📍 Riconsegna</div>
     <div class="vou-row"><span class="k">Dove</span><span class="vv">Aeroporto di Trapani</span></div>
-    <div class="vou-row"><span class="k">Quando</span><span class="vv warn">18/06/2026 · 15:00 ⚠️</span></div>
-    <div class="vou-note alert">⚠️ <b>Attenzione date:</b> la riconsegna è il <b>18/06</b>, ma il volo di ritorno è il <b>19/06 ore 16:15</b>. Il 19 restereste senza auto. Valuta di spostare la riconsegna al 19.</div>
+    <div class="vou-row"><span class="k">Quando</span><span class="vv">18/06/2026 · 15:00</span></div>
+    <div class="vou-note">🕓 Stesso giorno del volo (18/06 ore 16:15): riconsegna in aeroporto, poi check-in. Conviene arrivare verso le 14:00–14:15 e lasciare l’auto un po’ prima delle 15:00.</div>
     <div class="vou-h">Condizioni</div>
     <div class="vou-row"><span class="k">Carburante</span><span class="vv">Pieno → pieno</span></div>
     <div class="vou-row"><span class="k">Chilometri</span><span class="vv">Illimitati</span></div>
@@ -702,8 +702,8 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
 const DEP = new Date('2026-06-14T07:00:00+02:00');  // partenza BLQ
 const ARR = new Date('2026-06-14T09:30:00+02:00');  // ~arrivo/transfer fatto
 const D15 = new Date('2026-06-15T00:00:00+02:00');  // inizio soggiorno pieno
-const J19 = new Date('2026-06-19T00:00:00+02:00');  // inizio ultimo giorno
-const RET = new Date('2026-06-19T16:15:00+02:00');  // volo di rientro TPS→BLQ
+const J18 = new Date('2026-06-18T00:00:00+02:00');  // inizio ultimo giorno (partenza)
+const RET = new Date('2026-06-18T16:15:00+02:00');  // volo di rientro TPS→BLQ
 const DAY = 86400000;
 
 /* ════════ Componenti "ora" in fuso Europe/Rome ════════ */
@@ -743,16 +743,10 @@ const DAYS=[
   evening:{h:'Sera', items:[['Camicia grigio lino','top'],['Chino beige','bottom'],['Sneaker','shoe']],
     vibe:'Tono su tono — mediterranean style'}},
 
- {date:'2026-06-18', label:'Giovedì', d:'18 giu', tag:'🏖️ Giorno 4',
-  morning:{h:'Mattina / Spiaggia', items:[['T-shirt bianca (o ruggine)','top'],['Costume nero','costume'],['Birkenstock','shoe']],
-    vibe:'Ultima mattinata — goditi la spiaggia'},
-  evening:{h:'Sera / Pre-volo', items:[], warn:'⚠️ Volo domani 19 giugno alle 16:15 da TPS',
-    notes:['Prepara lo zaino stasera. Controlla: niente liquidi >100 ml, boarding pass scaricato offline, documento d’identità a portata.']}},
-
- {date:'2026-06-19', label:'Venerdì', d:'19 giu', tag:'✈️ Ritorno',
-  morning:{h:'Mattina · Ritorno', items:[['T-shirt nera','top'],['Chino scuro','bottom'],['Sneaker','shoe']],
-    notes:['Indossa i capi più voluminosi.'],
-    rem:['🕓 Aeroporto TPS: arriva entro le 14:15 (2h prima)','Volo TPS 16:15 → BLQ · arrivo Bologna ~18:00']},
+ {date:'2026-06-18', label:'Giovedì', d:'18 giu', tag:'✈️ Ritorno',
+  morning:{h:'Mattina · Ultimo tuffo + volo', items:[['T-shirt nera','top'],['Chino scuro','bottom'],['Sneaker','shoe']],
+    notes:['Indossa i capi più voluminosi per lo zaino.','Ultima mattinata di mare se c’è tempo, poi check-out.'],
+    rem:['🧳 Check-out e zaino pronto','🚗 Riconsegna auto all’aeroporto di Trapani (entro le 15:00)','🕓 In aeroporto entro le ~14:15 · ✈️ Volo TPS 16:15 → BLQ (arrivo Bologna ~18:00)']},
   evening:null}
 ];
 
@@ -876,7 +870,7 @@ function setStatus(now){
   if(now<DEP){ const t=cd(DEP-now); txt=`⏳ Partenza tra ${t.g}g ${t.h}h ${t.m}m`; live=false; }
   else if(now<ARR){ txt='✈️ In volo verso Trapani'; }
   else if(now<D15){ txt='🌊 Benvenuto a San Vito!'; }
-  else if(now<J19){ const t=cd(RET-now); txt=`🌊 Sei a San Vito! Rientro tra ${t.g}g ${t.h}h`; }
+  else if(now<J18){ const t=cd(RET-now); txt=`🌊 Sei a San Vito! Rientro tra ${t.g}g ${t.h}h`; }
   else if(now<RET){ txt='✈️ Oggi si torna — volo alle 16:15'; }
   else { txt='✈️ Viaggio completato'; live=false; }
   el.textContent=txt; el.classList.toggle('live',live);
@@ -884,8 +878,8 @@ function setStatus(now){
 function setBanner(now){
   const rp=romeParts(now), ymd=rp.ymd; let ico='🌴', msg;
   if(now>=RET){ ico='✈️'; msg='Bentornato a Bologna ✈️ Viaggio completato'; }
-  else if(ymd==='2026-06-19'){ ico='🧳'; msg='Ultimo giorno — volo alle 16:15 da TPS 🧳'; }
-  else if(ymd>='2026-06-15' && ymd<='2026-06-18'){
+  else if(ymd==='2026-06-18'){ ico='🧳'; msg='Ultimo giorno — volo alle 16:15 da TPS 🧳'; }
+  else if(ymd>='2026-06-15' && ymd<='2026-06-17'){
     const i=todayIndex(now);
     if(rp.h<18){ ico='☀️'; msg='Buongiorno da San Vito! L’outfit di oggi è qui sotto 👇'; }
     else { ico='🌙'; msg='Stasera: '+eveningSummary(i); }
@@ -1005,7 +999,7 @@ function defaultView(){
   const now=new Date();
   if(now<DEP) return 'valigia';
   const ymd=romeParts(now).ymd;
-  if(ymd==='2026-06-14'||ymd==='2026-06-19') return 'noleggio';
+  if(ymd==='2026-06-14'||ymd==='2026-06-18') return 'noleggio';
   return 'outfit';
 }
 document.getElementById('viewNav').addEventListener('click',e=>{ const b=e.target.closest('.vn'); if(b) showView(b.dataset.v); });
@@ -1143,7 +1137,7 @@ function finExportPDF(){
     `<div class="pr-wrap">`+
       `<div class="pr-kicker">Riepilogo spese</div>`+
       `<div class="pr-title">San Vito Lo Capo</div>`+
-      `<div class="pr-sub">14 – 19 giugno 2026</div>`+
+      `<div class="pr-sub">14 – 18 giugno 2026</div>`+
       `<div class="pr-hero"><div class="pr-hero-num">${f(c.total)}</div><div class="pr-hero-lbl">spesa totale · ${f(c.quota)} a testa</div></div>`+
       `<div class="pr-statement">${b.html}</div>`+
       `<table class="pr-table"><thead><tr><th>Voce</th><th>Stato</th><th class="r">Importo</th></tr></thead>`+
