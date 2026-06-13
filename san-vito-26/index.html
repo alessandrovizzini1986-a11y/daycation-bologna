@@ -6,6 +6,13 @@
 <meta name="theme-color" content="#13181f">
 <meta name="robots" content="noindex,nofollow">
 <title>San Vito '26 · Travel companion</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="San Vito '26">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -255,6 +262,13 @@ section:first-of-type .sec-title{margin-top:0}
 .vchip{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-full);padding:5px 11px}
 .gallery-empty{grid-column:1/-1;font-size:13px;color:var(--ink-faint);text-align:center;padding:18px 12px;border:1px dashed var(--line);border-radius:var(--r-md)}
 .car-privacy{font-size:11.5px;color:var(--ink-faint);text-align:center;line-height:1.5;padding:0 8px}
+.picksheet{position:fixed;inset:0;z-index:200;background:oklch(20% .03 256 / .5);display:none;align-items:flex-end;justify-content:center}
+.picksheet.on{display:flex}
+.picksheet-card{background:var(--surface);width:100%;max-width:480px;border-radius:var(--r-xl) var(--r-xl) 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0));display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-lg)}
+.picksheet-h{font-weight:800;text-align:center;color:var(--ink-soft);font-size:12px;text-transform:uppercase;letter-spacing:.6px;padding:4px 0 6px}
+.picksheet-b{height:56px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit}
+.picksheet-b:active{transform:scale(.98)}
+.picksheet-x{height:48px;border:0;background:none;color:var(--ink-soft);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
 .report{margin-top:16px;display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   padding:18px;box-shadow:var(--shadow-sm)}
 .report.show{display:block;animation:pop .3s ease}
@@ -767,10 +781,11 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   function refreshCompareBtn(){ document.getElementById('carCompare').disabled=!hasPhase('riconsegna'); }
   function renderAll(){ renderContract(); renderPositions(); renderDamage(); refreshCompareBtn(); }
 
-  /* ── selezione file ── */
-  function pick(target){
+  /* ── selezione file: scelta fotocamera / galleria ── */
+  function openInput(target,useCapture){
     const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
-    inp.multiple=!target.single; inp.style.display='none';
+    if(useCapture) inp.setAttribute('capture','environment');
+    inp.multiple=!target.single && !useCapture; inp.style.display='none';
     document.body.appendChild(inp);
     inp.addEventListener('change',async()=>{
       const files=[...inp.files]; inp.remove(); if(!files.length) return;
@@ -787,6 +802,24 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     });
     inp.click();
   }
+  let pickCb=null;
+  function pickSheet(){
+    let o=document.getElementById('pickSheet'); if(o) return o;
+    o=document.createElement('div'); o.id='pickSheet'; o.className='picksheet';
+    o.innerHTML='<div class="picksheet-card"><div class="picksheet-h">Aggiungi foto</div>'+
+      '<button class="picksheet-b" data-c="1" type="button">📷 Scatta foto</button>'+
+      '<button class="picksheet-b" data-c="0" type="button">🖼️ Carica da galleria</button>'+
+      '<button class="picksheet-x" data-c="-1" type="button">Annulla</button></div>';
+    document.body.appendChild(o);
+    o.addEventListener('click',e=>{
+      if(e.target===o){ o.classList.remove('on'); pickCb=null; return; }
+      const b=e.target.closest('[data-c]'); if(!b) return;
+      const c=b.dataset.c; o.classList.remove('on'); const cb=pickCb; pickCb=null;
+      if(c!=='-1' && cb) cb(c==='1');
+    });
+    return o;
+  }
+  function pick(target){ pickCb=cap=>openInput(target,cap); pickSheet().classList.add('on'); }
   async function remove(key){ delete data[key]; try{await dbDel(key);}catch(e){} renderAll(); }
 
   /* ── markdown leggero per l'esito ── */
