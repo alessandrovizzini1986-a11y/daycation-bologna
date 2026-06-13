@@ -233,7 +233,7 @@ function romeParts(d){
   return {ymd:`${p.year}-${p.month}-${p.day}`, h:+p.hour, mi:+p.minute, s:+p.second,
           clock:`${p.hour}:${p.minute}:${p.second}`};
 }
-function cd(ms){const s=Math.max(0,Math.floor(ms/1000));return{g:Math.floor(s/DAY*1000),h:Math.floor(s%86400/3600),m:Math.floor(s%3600/60)};}
+function cd(ms){const s=Math.max(0,Math.floor(ms/1000));return{g:Math.floor(s/86400),h:Math.floor(s%86400/3600),m:Math.floor(s%3600/60)};}
 
 /* ════════ DATI · giornate & outfit ════════ */
 const DAYS=[
@@ -312,13 +312,18 @@ const ESS=['Documento identità / passaporto','Boarding pass (app Ryanair — vo
 
 /* ════════ localStorage checklist ════════ */
 const LS='svito26_checklist';
-let checks={}; try{checks=JSON.parse(localStorage.getItem(LS))||{};}catch(e){checks={};}
-function saveChecks(){try{localStorage.setItem(LS,JSON.stringify(checks));}catch(e){}}
+function loadChecks(){ try{return JSON.parse(localStorage.getItem(LS))||{};}catch(e){return {};} }
+let checks=loadChecks();
+function saveChecks(){ try{localStorage.setItem(LS,JSON.stringify(checks));}catch(e){} }
 
 function itemHTML(key,label,note){
-  const on=checks[key]?'checked':'';
   const sub=note?`<small>${note}</small>`:'';
-  return `<label class="ci"><input type="checkbox" data-k="${key}" ${on}><span class="box"></span><span class="t">${label}${sub}</span></label>`;
+  return `<label class="ci"><input type="checkbox" data-k="${key}"><span class="box"></span><span class="t">${label}${sub}</span></label>`;
+}
+/* ripristino robusto: imposto la PROPRIETÀ .checked (non l'attributo) da localStorage */
+function applyChecks(){
+  document.querySelectorAll('.ci input').forEach(inp=>{ inp.checked = !!checks[inp.dataset.k]; });
+  updateProgress();
 }
 function buildChecklist(){
   document.getElementById('listAbb').innerHTML = ABB.map((t,i)=>itemHTML('a'+i,t)).join('');
@@ -330,7 +335,7 @@ function buildChecklist(){
   document.querySelectorAll('.ci input').forEach(inp=>{
     inp.addEventListener('change',()=>{ checks[inp.dataset.k]=inp.checked; saveChecks(); updateProgress(); });
   });
-  updateProgress();
+  applyChecks();
 }
 function updateProgress(){
   const inl=[...document.querySelectorAll('.ci input')];
@@ -439,6 +444,9 @@ buildTabs();
 renderDay(todayIndex(new Date()));
 tick(); setInterval(tick,1000);
 weather(); setInterval(weather,600000);
+/* re-sync della checklist quando si rientra nella pagina (reload, bfcache, ritorno da app) */
+window.addEventListener('pageshow',()=>{ checks=loadChecks(); applyChecks(); });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=loadChecks(); applyChecks(); } });
 </script>
 </body>
 </html>
