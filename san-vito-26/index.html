@@ -279,12 +279,16 @@ section:first-of-type .sec-title{margin-top:0}
 .wx-verdict{display:flex;align-items:center;gap:12px;background:var(--surface-2);border-radius:var(--r-md);padding:12px 14px}
 .wx-verdict .e{font-size:30px;line-height:1}
 .wx-verdict .t{font-size:14px;font-weight:600;color:var(--ink);line-height:1.35}
-.wx-bands{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.wx-band{background:var(--surface-2);border-radius:var(--r-md);padding:11px 6px;text-align:center}
-.wx-band .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-faint);font-weight:800}
-.wx-band .em{font-size:24px;line-height:1;margin:5px 0 4px}
-.wx-band .tmp{font-weight:800;font-size:17px;color:var(--ink)}
-.wx-band .sub{font-size:11px;color:var(--ink-soft);margin-top:3px}
+.wx-hours{display:flex;gap:7px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.wx-hour{flex:0 0 auto;min-width:54px;background:var(--surface-2);border-radius:var(--r-md);padding:9px 7px 8px;text-align:center}
+.wx-hour.rain{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.wx-hour.wind{box-shadow:inset 0 0 0 1.5px var(--sun,oklch(72% .15 70))}
+.wx-hour .h{font-size:11px;font-weight:800;color:var(--ink-soft)}
+.wx-hour .em{font-size:20px;line-height:1;margin:5px 0 3px}
+.wx-hour .t{font-weight:800;font-size:15px;color:var(--ink)}
+.wx-hour .p{font-size:10.5px;font-weight:700;color:var(--accent);margin-top:3px;min-height:13px}
+.wx-hour .w{font-size:10px;color:var(--ink-faint);margin-top:1px}
+.wx-hour .w.strong{color:var(--ink);font-weight:800}
 .wx-foot{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:11px;margin-top:2px}
 .wx-foot b{color:var(--ink);font-weight:700}
 .pickmode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
@@ -725,7 +729,7 @@ let WX=null;
 async function weather(){
   const url='https://api.open-meteo.com/v1/forecast?latitude=38.1747&longitude=12.7358'+
     '&current=temperature_2m,weathercode,windspeed_10m'+
-    '&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m'+
+    '&hourly=temperature_2m,weathercode,precipitation_probability,precipitation,windspeed_10m,windgusts_10m'+
     '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max'+
     '&timezone=Europe%2FRome';
   try{
@@ -741,41 +745,48 @@ async function weather(){
 }
 function openWxSheet(){
   if(!WX||!WX.hourly||!WX.daily) return;
-  const ymd=romeParts(new Date()).ymd, H=WX.hourly, idx=[];
-  for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd) idx.push(i);
-  if(!idx.length) return;
+  const now=new Date(), rp=romeParts(now), ymd=rp.ymd, nowH=rp.h, H=WX.hourly;
   const hourOf=i=>+H.time[i].slice(11,13);
-  const bands=[{lbl:'Mattina',from:7,to:12,mid:10},{lbl:'Pomeriggio',from:12,to:18,mid:15},{lbl:'Sera',from:18,to:23,mid:20}];
-  const bandHtml=bands.map(b=>{
-    const ii=idx.filter(i=>{const h=hourOf(i);return h>=b.from&&h<b.to;});
-    if(!ii.length) return '';
-    const mid=ii.reduce((a,i)=>Math.abs(hourOf(i)-b.mid)<Math.abs(hourOf(a)-b.mid)?i:a,ii[0]);
-    const rain=Math.max(...ii.map(i=>H.precipitation_probability[i]??0));
-    const wind=Math.round(Math.max(...ii.map(i=>H.windspeed_10m[i]??0)));
-    let worst=ii[0]; for(const i of ii) if((H.precipitation_probability[i]??0)>(H.precipitation_probability[worst]??0)) worst=i;
-    return `<div class="wx-band"><div class="lbl">${b.lbl}</div><div class="em">${wmo(H.weathercode[worst])}</div>`+
-           `<div class="tmp">${Math.round(H.temperature_2m[mid])}°</div>`+
-           `<div class="sub">💧 ${rain}% · 💨 ${wind}</div></div>`;
+  // ore di oggi, da adesso fino a fine giornata
+  let fut=[];
+  for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd && hourOf(i)>=nowH) fut.push(i);
+  if(!fut.length) for(let i=0;i<H.time.length;i++) if(H.time[i].slice(0,10)===ymd) fut.push(i);
+  if(!fut.length) return;
+  // striscia ora per ora
+  const hoursHtml=fut.map(i=>{
+    const prob=H.precipitation_probability[i]??0, mm=H.precipitation[i]??0;
+    const gust=Math.round(H.windgusts_10m[i]??0), wind=Math.round(H.windspeed_10m[i]??0);
+    const rainy=prob>=40||mm>=0.3, windy=gust>=40;
+    const cls='wx-hour'+(rainy?' rain':windy?' wind':'');
+    const ptxt=prob>=15?('💧'+prob+'%'):'';
+    const wtxt=windy?('💨'+gust):('💨'+wind);
+    return `<div class="${cls}"><div class="h">${hourOf(i)}</div><div class="em">${wmo(H.weathercode[i])}</div>`+
+           `<div class="t">${Math.round(H.temperature_2m[i])}°</div><div class="p">${ptxt}</div>`+
+           `<div class="w${windy?' strong':''}">${wtxt}</div></div>`;
   }).join('');
+  // verdetto: priorità a pioggia e raffiche
+  let rainHour=null;
+  for(const i of fut){ if((H.precipitation_probability[i]??0)>=50||(H.precipitation[i]??0)>=0.5){ rainHour=hourOf(i); break; } }
+  const gustMax=Math.round(Math.max(...fut.map(i=>H.windgusts_10m[i]??0)));
   const D=WX.daily;
   const tmax=Math.round(D.temperature_2m_max[0]), tmin=Math.round(D.temperature_2m_min[0]);
   const rmax=D.precipitation_probability_max[0]??0, uv=Math.round(D.uv_index_max[0]??0);
   const sr=D.sunrise[0].slice(11,16), ss=D.sunset[0].slice(11,16);
-  const windMax=Math.round(Math.max(...idx.map(i=>H.windspeed_10m[i]??0)));
-  let ve,vt;
-  if(rmax>=60){ve='🌧️';vt='Giornata incerta — tieni un k-way a portata.';}
-  else if(rmax>=35){ve='🌦️';vt='Qualche rovescio possibile, ma c\'è spazio per il mare.';}
-  else if(tmax>=31){ve='🔆';vt='Caldo pieno — ombrellone, acqua e crema solare.';}
-  else if(tmax>=25){ve='😎';vt='Bella giornata da spiaggia.';}
-  else{ve='🌤️';vt='Giornata mite e piacevole.';}
-  if(windMax>=30) vt+=' Vento sostenuto.';
-  const dlbl=new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Rome'}).format(new Date());
+  let ve,vt, warn=[];
+  if(rainHour!==null) warn.push(`pioggia probabile verso le ${rainHour}:00`);
+  if(gustMax>=40) warn.push(`raffiche fino a ${gustMax} km/h`);
+  if(warn.length){ ve=rainHour!==null?'🌧️':'💨'; vt='Attenzione: '+warn.join(' · ')+'.'; }
+  else if(tmax>=31){ve='🔆';vt='Caldo pieno e stabile — ombrellone e crema solare.';}
+  else if(tmax>=25){ve='😎';vt='Bella giornata stabile da spiaggia.';}
+  else{ve='🌤️';vt='Giornata mite e stabile.';}
+  const dlbl=new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Rome'}).format(now);
   document.getElementById('wxSheetBody').innerHTML=
     `<div class="picksheet-h">📍 San Vito · ${dlbl}</div>`+
     `<div class="wx-verdict"><span class="e">${ve}</span><span class="t">${vt}</span></div>`+
-    `<div class="wx-bands">${bandHtml}</div>`+
+    `<div class="wx-hours">${hoursHtml}</div>`+
     `<div class="wx-foot"><span>🌡️ <b>${tmin}°–${tmax}°</b></span><span>💧 max <b>${rmax}%</b></span>`+
-    `<span>☀️ UV <b>${uv}</b></span><span>🌅 <b>${sr}</b></span><span>🌇 <b>${ss}</b></span></div>`;
+    `<span>💨 raff. <b>${gustMax}</b></span><span>☀️ UV <b>${uv}</b></span>`+
+    `<span>🌅 <b>${sr}</b></span><span>🌇 <b>${ss}</b></span></div>`;
   document.getElementById('wxSheet').classList.add('on');
 }
 function closeWxSheet(){ document.getElementById('wxSheet').classList.remove('on'); }
