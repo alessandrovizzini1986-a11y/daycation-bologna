@@ -313,6 +313,18 @@ section:first-of-type .sec-title{margin-top:0}
 .meta-lbl{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
 .thumbs{display:flex;flex-wrap:wrap;gap:8px}
 .shot.sm{width:66px;height:66px}
+.poslist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.pl{display:flex;align-items:center;gap:11px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer}
+.pl.ok{border-color:var(--accent-fill)}
+.pl-n{flex-shrink:0;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--surface-2);color:var(--accent)}
+.pl.ok .pl-n{background:var(--accent-fill);color:var(--on-fill)}
+.pl-t{flex:1;font-size:14px;font-weight:700;min-width:0;line-height:1.25}
+.pl-t small{display:block;font-size:11px;font-weight:500;color:var(--ink-soft)}
+.pl-cam{font-size:18px;opacity:.55;flex-shrink:0}
+.pl-th{width:42px;height:42px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.pl-del{flex-shrink:0;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft);width:30px;height:30px;border-radius:8px;cursor:pointer;font-family:inherit}
+.time-est{display:flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--ink);border-radius:var(--r-lg);padding:11px 14px;font-size:13.5px;font-weight:600;margin:0 0 14px}
+.time-est b{font-weight:800}
 #dmgSvg{cursor:crosshair}
 .xmark text{fill:var(--alert);font-size:20px;font-weight:900;font-family:-apple-system,system-ui,sans-serif}
 .xbg{fill:var(--surface);opacity:.85}
@@ -437,6 +449,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
   <!-- ═══ SEZIONE 5 · NOLEGGIO AUTO (ritiro · riconsegna · confronto) ═══ -->
   <section id="carSection">
     <div class="sec-title">Noleggio auto 🚗</div>
+    <div class="time-est">⏱ Controllo completo: <b>~7-8 min</b> · (contratto + 9 foto auto + eventuali danni). Avvisa pure chi ti aspetta 😉</div>
 
     <div class="card">
       <div class="car-intro">Foto al <b>ritiro</b>, le stesse alla <b>riconsegna</b>: le confronti affiancate. Annota km e carburante.</div>
@@ -842,11 +855,13 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     const svg=`<svg class="carsvg" viewBox="0 0 240 380">`+
       CAR_BODY+dots+`</svg>`;
     const taken=POS.filter(p=>data['ph:'+ph+':'+p.id]);
-    const strip=taken.length ? `<div class="thumbs">`+taken.map(p=>`<div class="shot sm"><img src="${data['ph:'+ph+':'+p.id].dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="ph:${ph}:${p.id}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('')+`</div>` : '';
+    const strip=`<div class="poslist">`+POS.map((p,i)=>{ const d=data['ph:'+ph+':'+p.id], done=!!d;
+      return `<div class="pl${done?' ok':''}" data-act="pos" data-phase="${ph}" data-pos="${p.id}"><span class="pl-n">${done?'✓':(i+1)}</span><span class="pl-t">${p.label}${p.hint?`<small>${p.hint}</small>`:''}</span>${done?`<img class="pl-th" src="${d.dataURL}" loading="lazy" decoding="async" alt=""><button class="del pl-del" data-del="ph:${ph}:${p.id}" type="button" aria-label="Rimuovi">✕</button>`:`<span class="pl-cam">📷</span>`}</div>`;
+    }).join('')+`</div>`;
     document.getElementById('carPositions').innerHTML=
       `<div class="phasetoggle"><button class="ph-b${ph==='ritiro'?' on':''}" data-act="phase" data-ph="ritiro" type="button">Ritiro</button>`+
       `<button class="ph-b${ph==='riconsegna'?' on':''}" data-act="phase" data-ph="riconsegna" type="button">Riconsegna</button></div>`+
-      `<div class="carmap-hint tiny muted">Tocca un punto per fotografarlo · ✓ = fatto</div>`+
+      `<div class="carmap-hint tiny muted">Tocca un punto sulla mappa o una riga sotto per scattare · ✓ = fatto</div>`+
       svg+
       `<div class="meta-wrap"><div class="meta-lbl">Km + carburante · ${ph==='ritiro'?'ritiro':'riconsegna'}</div>${metaBox(ph)}</div>`+
       strip;
