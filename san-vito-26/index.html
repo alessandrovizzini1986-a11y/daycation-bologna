@@ -386,7 +386,8 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
       <div class="car-intro"><b>Stato dell’auto: ritiro e riconsegna.</b> Carica le foto in ordine per ogni posizione — prima al <b>ritiro</b>, poi le stesse alla <b>riconsegna</b>: le vedi affiancate per il confronto. Sul cruscotto annota km e carburante. Poi fai controllare tutto a Claude.</div>
     </div>
 
-    <div class="car-sub"><span>📄 Contratto di noleggio</span><span class="cnt" id="carDocCnt">0 foto</span></div>
+    <div class="car-sub"><span>📄 Contratto Autovia</span><span class="cnt" id="carDocCnt">0 foto</span></div>
+    <div class="car-intro" style="margin:0 0 10px">Fotografa <b>tutte le pagine</b>: contratto, <b>parte economica</b> e soprattutto lo <b>schema dell’auto con i danni già segnati</b> (e la legenda dei codici, se c’è). Una foto sola non basta.</div>
     <div class="shot-grid docs" id="carContract"></div>
 
     <div class="car-sub" style="margin-top:26px"><span>📸 Posizioni · in ordine</span><span class="cnt" id="carShotCnt">0 / 9</span></div>
@@ -402,7 +403,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <div class="car-actions">
       <button class="btn-verify" id="carVerify" type="button"><span class="vlbl">🔎 Verifica ritiro (contratto + stato)</span></button>
       <button class="btn-compare" id="carCompare" type="button" disabled><span class="clbl">🔁 Confronta ritiro / riconsegna</span></button>
-      <div class="car-privacy">Le foto restano sul tuo dispositivo. Vengono inviate a Claude solo quando tocchi un pulsante di verifica.</div>
+      <div class="car-privacy">Le foto restano sul tuo dispositivo. Il pulsante genera un <b>PDF</b> da aprire in una chat Claude (col prompt già pronto).</div>
     </div>
 
     <div class="report" id="carReport"></div>
@@ -719,7 +720,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   function renderContract(){
     const keys=Object.keys(data).filter(k=>k.startsWith('doc:')).sort();
     let html=keys.map(k=>`<div class="shot docs"><img src="${data[k].dataURL}" alt=""><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
-    html+=`<div class="shot docs empty add-tile" data-act="add" data-group="doc"><span class="ph-ico">＋</span><span class="ph-lbl">Aggiungi contratto</span></div>`;
+    html+=`<div class="shot docs empty add-tile" data-act="add" data-group="doc"><span class="ph-ico">＋</span><span class="ph-lbl">Aggiungi pagina</span></div>`;
     document.getElementById('carContract').innerHTML=html;
     document.getElementById('carDocCnt').textContent=keys.length+' foto';
   }
@@ -940,7 +941,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     'COME LEGGERE QUESTO PDF (leggi con attenzione, niente errori):',
     '- È composto da più pagine. QUESTA prima pagina contiene solo istruzioni.',
     '- Ogni pagina SUCCESSIVA contiene UNA SOLA fotografia reale, con in alto una barra scura che ne indica il contenuto (l\'ETICHETTA). Leggi sempre l\'etichetta per sapere cosa stai guardando, poi analizza la foto con la vision.',
-    '- «CONTRATTO · pagina N» = contratto di noleggio di AUTOVIA (la società). Qui sono annotati i danni preesistenti che LORO dichiarano.',
+    '- «CONTRATTO · pagina N» = pagine del contratto di noleggio AUTOVIA (più pagine). Tra queste cerca lo SCHEMA dell\'auto e/o l\'elenco con i danni preesistenti segnati da Autovia, spesso indicati con CODICI/SIMBOLI e una LEGENDA: usali per ricostruire la lista dei danni che loro dichiarano.',
     '- «RITIRO · <posizione>» = mia foto della carrozzeria al RITIRO.',
     '- «RICONSEGNA · <posizione>» = mia foto della stessa posizione alla RICONSEGNA.',
     '- «RITIRO/RICONSEGNA · danno N» = dettaglio di un danno.',
@@ -948,7 +949,8 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   ].join('\n');
   function pickupPrompt(){
     return READ_GUIDE+'\n\n'+
-      'RUOLO: assistente esperto di noleggio auto. Ti do il CONTRATTO di Autovia (coi danni preesistenti che LORO dichiarano) e le MIE foto dell\'auto al RITIRO. '+
+      'RUOLO: assistente esperto di noleggio auto. Ti do il CONTRATTO di Autovia (più pagine, coi danni preesistenti che LORO dichiarano) e le MIE foto dell\'auto al RITIRO. '+
+      'Prima leggi con cura TUTTE le pagine del contratto: individua lo SCHEMA dell\'auto e/o l\'elenco danni di Autovia, decodifica eventuali codici/simboli usando la legenda se presente, e ricostruisci l\'elenco completo dei danni preesistenti dichiarati (con posizione). '+
       'OBIETTIVO PRINCIPALE: trovare le DISCREPANZE tra i danni dichiarati da Autovia sul contratto e i danni realmente visibili nelle mie foto, così li faccio verbalizzare PRIMA di partire ed evito addebiti alla riconsegna. '+
       'Valori dichiarati al ritiro: '+metaLine('ritiro')+'.\n\n'+TASK_PICKUP+'\n'+
       '## Discrepanze con i danni dichiarati da Autovia\n'+
