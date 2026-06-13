@@ -3,143 +3,301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0A1628">
+<meta name="theme-color" content="#13181f">
 <meta name="robots" content="noindex,nofollow">
 <title>San Vito '26 · Travel companion</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
 
 <style>
-/* ===== Token: identici all'app principale (Daycation) ===== */
+/* ════════════════════════════════════════════════════════════════
+   SAN VITO '26 — almanacco di viaggio
+   Sistema di design: tipografia editoriale, carta + inchiostro,
+   un solo accento mare, righe sottili, motion minimo.
+   (Tutti gli hook id/class/data-* del JS restano invariati.)
+   ════════════════════════════════════════════════════════════════ */
 :root{
-  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
-  --font-sans:'Hanken Grotesk',-apple-system,system-ui,sans-serif;
-  --r-sm:10px; --r-md:14px; --r-lg:20px; --r-xl:28px; --r-2xl:34px; --r-full:999px;
-  --bg:oklch(98.5% 0.006 240); --surface:oklch(100% 0 0); --surface-2:oklch(96.5% 0.008 235);
-  --ink:oklch(27% 0.035 252); --ink-soft:oklch(52% 0.028 250); --ink-faint:oklch(66% 0.022 248);
-  --line:oklch(92% 0.012 245);
-  --sky:oklch(60% 0.135 240); --sky-deep:oklch(44% 0.115 250); --sky-tint:oklch(95% 0.03 235);
-  --sunset:oklch(70% 0.155 45); --sunset-tint:oklch(95% 0.04 60);
-  --price:oklch(56% 0.12 162); --price-tint:oklch(95% 0.04 162);
-  --grad-dawn:linear-gradient(164deg, oklch(52% 0.13 252) 0%, oklch(60% 0.12 230) 44%, oklch(78% 0.095 58) 100%);
-  --grad-sky:linear-gradient(135deg, oklch(62% 0.14 242), oklch(50% 0.13 256));
-  --grad-sunset:linear-gradient(135deg, oklch(74% 0.15 55), oklch(67% 0.16 30));
-  --glass:oklch(100% 0 0 / .72); --glass-line:oklch(100% 0 0 / .14);
-  --shadow-sm:0 1px 2px oklch(45% 0.04 250 / .06), 0 2px 6px oklch(45% 0.06 250 / .05);
-  --shadow-md:0 4px 12px oklch(45% 0.06 250 / .08), 0 12px 28px oklch(45% 0.08 250 / .08);
-  --shadow-lg:0 8px 24px oklch(40% 0.07 250 / .12), 0 24px 56px oklch(40% 0.09 250 / .14);
-  --shadow-key:0 10px 30px oklch(55% 0.14 245 / .28);
-  --amber:#C77D14; --amber-tint:oklch(95% 0.05 75);
-  --red:#D2452A; --red-tint:oklch(95% 0.045 35);
+  --font-display:'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-sans:'Hanken Grotesk', -apple-system, system-ui, sans-serif;
+  --font-mono:ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --r-xs:6px; --r-sm:8px; --r-md:11px; --r-lg:14px; --r-xl:18px; --r-2xl:22px; --r-full:999px;
+
+  /* ── Light · carta calda + inchiostro ── */
+  --bg:oklch(96.8% 0.009 80);
+  --surface:oklch(99.2% 0.005 85);
+  --surface-2:oklch(94.2% 0.011 78);
+  --ink:oklch(24% 0.013 65);
+  --ink-soft:oklch(46% 0.017 66);
+  --ink-faint:oklch(62% 0.016 70);
+  --line:oklch(88.5% 0.012 75);
+  --line-soft:oklch(92% 0.009 78);
+
+  --accent:oklch(46% 0.115 245);       /* testo + icone + tinte    */
+  --accent-fill:oklch(44% 0.12 247);   /* riempimenti, testo bianco */
+  --accent-soft:oklch(93.5% 0.028 240);
+  --on-fill:#fff;
+
+  --ok:oklch(46% 0.085 168);     --ok-soft:oklch(93% 0.032 168);
+  --warn:oklch(52% 0.095 72);    --warn-soft:oklch(94% 0.04 78);
+  --alert:oklch(50% 0.16 33);    --alert-soft:oklch(94% 0.04 35);
+  --sand:oklch(45% 0.07 66);     --sand-soft:oklch(93% 0.026 72);
+
+  --shadow-sm:0 1px 2px oklch(40% 0.02 65 / .05);
+  --shadow-md:0 1px 2px oklch(40% 0.02 65 / .05), 0 6px 18px oklch(40% 0.03 65 / .06);
+  --shadow-lg:0 2px 6px oklch(40% 0.02 65 / .06), 0 16px 38px oklch(40% 0.04 65 / .10);
+
+  --header-bg:oklch(99.2% 0.005 85 / .84);
 }
 @media (prefers-color-scheme:dark){ :root{
-  --bg:oklch(20% 0.028 256); --surface:oklch(25.5% 0.03 255); --surface-2:oklch(29.5% 0.032 256);
-  --ink:oklch(97% 0.006 240); --ink-soft:oklch(76% 0.022 248); --ink-faint:oklch(62% 0.025 250);
-  --line:oklch(34% 0.03 255);
-  --sky:oklch(73% 0.13 240); --sky-deep:oklch(60% 0.13 245); --sky-tint:oklch(33% 0.05 245);
-  --sunset:oklch(77% 0.15 50); --sunset-tint:oklch(36% 0.06 50);
-  --price:oklch(75% 0.13 162); --price-tint:oklch(34% 0.05 162);
-  --grad-dawn:linear-gradient(164deg, oklch(34% 0.08 256) 0%, oklch(30% 0.06 250) 46%, oklch(36% 0.065 38) 100%);
-  --grad-sky:linear-gradient(135deg, oklch(60% 0.14 242), oklch(46% 0.12 256));
-  --glass:oklch(28% 0.03 255 / .6); --glass-line:oklch(100% 0 0 / .08);
-  --shadow-sm:0 1px 2px oklch(0% 0 0 / .3); --shadow-md:0 6px 16px oklch(0% 0 0 / .38);
-  --shadow-lg:0 16px 40px oklch(0% 0 0 / .5); --shadow-key:0 10px 30px oklch(60% 0.13 240 / .42);
-  --amber-tint:oklch(34% 0.06 75); --red-tint:oklch(34% 0.06 35);
+  --bg:oklch(17.5% 0.008 255);
+  --surface:oklch(21.5% 0.011 253);
+  --surface-2:oklch(26% 0.013 253);
+  --ink:oklch(94% 0.008 90);
+  --ink-soft:oklch(73% 0.014 85);
+  --ink-faint:oklch(56% 0.015 88);
+  --line:oklch(30.5% 0.013 253);
+  --line-soft:oklch(27% 0.011 253);
+
+  --accent:oklch(74% 0.105 240);
+  --accent-fill:oklch(53% 0.13 244);
+  --accent-soft:oklch(30% 0.045 246);
+  --on-fill:#fff;
+
+  --ok:oklch(74% 0.095 170);     --ok-soft:oklch(30% 0.045 170);
+  --warn:oklch(78% 0.10 82);     --warn-soft:oklch(31% 0.05 80);
+  --alert:oklch(72% 0.14 36);    --alert-soft:oklch(31% 0.06 36);
+  --sand:oklch(78% 0.07 74);     --sand-soft:oklch(30% 0.035 74);
+
+  --shadow-sm:0 1px 2px oklch(0% 0 0 / .28);
+  --shadow-md:0 1px 2px oklch(0% 0 0 / .3), 0 8px 22px oklch(0% 0 0 / .34);
+  --shadow-lg:0 2px 6px oklch(0% 0 0 / .34), 0 18px 44px oklch(0% 0 0 / .46);
+
+  --header-bg:oklch(20% 0.01 253 / .82);
 }}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
-body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-height:1.45;
-  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;min-height:100vh}
-.tiny{font-size:11px} .muted{color:var(--ink-soft)}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-height:1.5;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;min-height:100vh}
+.tiny{font-size:11.5px} .muted{color:var(--ink-soft)}
+::selection{background:var(--accent-soft);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent-fill);outline-offset:3px;border-radius:var(--r-xs)}
 
-/* ===== SEZIONE 1 · header sticky glass ===== */
-.top{position:sticky;top:0;z-index:50;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0));
-  background:oklch(20% 0.03 256 / .62);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--glass-line);color:#fff;box-shadow:var(--shadow-md)}
+/* ═════ SEZIONE 1 · masthead sticky ═════ */
+.top{position:sticky;top:0;z-index:50;
+  padding:calc(14px + env(safe-area-inset-top,0)) 20px 14px;
+  background:var(--header-bg);
+  backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);
+  border-bottom:1px solid var(--line);color:var(--ink)}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.place{font-family:var(--font-display);font-weight:800;font-size:15px;letter-spacing:-.2px;display:flex;align-items:center;gap:6px}
-.clock{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.5px}
-.wx{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;opacity:.95;margin-top:4px}
-.wx .wx-emoji{font-size:18px}
-.status{margin-top:9px;width:100%;border-radius:var(--r-full);padding:9px 14px;font-size:13.5px;font-weight:800;
-  text-align:center;background:oklch(100% 0 0 / .14);border:1px solid var(--glass-line);letter-spacing:.1px}
-.status.live{background:var(--grad-sky);box-shadow:var(--shadow-key)}
+.place{font-family:var(--font-sans);font-weight:700;font-size:12px;text-transform:uppercase;
+  letter-spacing:.16em;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+.clock{font-family:var(--font-sans);font-weight:500;font-size:28px;letter-spacing:.01em;
+  line-height:1;color:var(--ink);font-feature-settings:"tnum" 1}
+.wx{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink-soft);margin-top:9px}
+.wx .wx-emoji{font-size:17px;line-height:1}
+.wx b{color:var(--ink);font-weight:700}
+.status{margin-top:13px;width:100%;border-radius:var(--r-full);padding:10px 15px;font-size:13px;font-weight:700;
+  text-align:center;background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line);letter-spacing:.01em}
+.status.live{background:var(--accent-fill);color:var(--on-fill);border-color:transparent;box-shadow:var(--shadow-sm)}
+.status.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--on-fill);margin-right:9px;vertical-align:.06em;animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.78)}}
 
-main{max-width:600px;margin:0 auto;padding:16px 16px 60px}
+main{max-width:600px;margin:0 auto;padding:22px 20px 64px}
 
-/* ===== card (match app) ===== */
-.card{background:var(--surface);border-radius:var(--r-xl);border:1px solid var(--line);box-shadow:var(--shadow-md);
-  padding:18px;transition:transform .2s,box-shadow .2s;margin-bottom:14px}
-@media (hover:hover){.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}}
-.card-h{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+/* ═════ card ═════ */
+.card{background:var(--surface);border-radius:var(--r-xl);border:1px solid var(--line);box-shadow:var(--shadow-sm);
+  padding:20px;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;margin-bottom:14px}
+@media (hover:hover){.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--line-soft)}}
+.card-h{font-family:var(--font-display);font-weight:600;font-size:19px;letter-spacing:-.01em;
+  display:flex;align-items:center;gap:9px;margin-bottom:14px;padding-bottom:13px;border-bottom:1px solid var(--line-soft)}
 
-/* ===== SEZIONE 2 · banner ===== */
-.banner{background:var(--grad-dawn);color:#fff;border-radius:var(--r-xl);padding:18px 18px;margin-bottom:18px;
-  box-shadow:var(--shadow-key);font-weight:700;font-size:15.5px;line-height:1.4;display:flex;gap:12px;align-items:center}
-.banner .b-ico{font-size:26px;flex-shrink:0}
+/* ═════ SEZIONE 2 · banner contestuale ═════ */
+.banner{background:var(--accent-soft);color:var(--ink);border-radius:var(--r-lg);
+  border:1px solid var(--line);border-left:3px solid var(--accent-fill);
+  padding:16px 18px;margin-bottom:24px;font-weight:500;font-size:15.5px;line-height:1.42;
+  display:flex;gap:13px;align-items:center}
+.banner .b-ico{font-size:24px;flex-shrink:0;line-height:1}
+.banner #bMsg{font-family:var(--font-display);font-size:17px;letter-spacing:-.01em}
 
-.sec-title{font-family:var(--font-display);font-weight:800;font-size:21px;letter-spacing:-.5px;margin:26px 4px 14px}
+.sec-title{font-family:var(--font-display);font-weight:500;font-size:clamp(24px,6.5vw,30px);
+  letter-spacing:-.015em;line-height:1.12;margin:34px 2px 16px;position:relative;padding-top:16px}
+.sec-title::before{content:"";position:absolute;top:0;left:2px;width:30px;height:2px;background:var(--accent-fill)}
+section:first-of-type .sec-title{margin-top:0}
 
-/* ===== SEZIONE 3 · checklist ===== */
-.progress-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
-.progress-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-.progress-top b{font-family:var(--font-display);font-size:17px}
-.bar{height:12px;border-radius:var(--r-full);background:var(--surface-2);overflow:hidden}
-.bar-fill{height:100%;border-radius:var(--r-full);background:var(--grad-sky);width:0;transition:width .3s ease}
-.done-banner{display:none;margin-top:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--price-tint);
-  color:var(--price);font-weight:800;text-align:center;animation:pop .3s ease}
+/* ═════ SEZIONE 3 · checklist ═════ */
+.progress-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:16px 18px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.progress-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px;gap:12px}
+.progress-top .muted{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.progress-top b{font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--ink)}
+.bar{height:8px;border-radius:var(--r-full);background:var(--surface-2);overflow:hidden;border:1px solid var(--line-soft)}
+.bar-fill{height:100%;border-radius:var(--r-full);background:var(--accent-fill);width:0;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.done-banner{display:none;margin-top:14px;padding:12px 14px;border-radius:var(--r-md);
+  background:var(--ok-soft);color:var(--ok);font-weight:700;text-align:center;letter-spacing:.01em;animation:pop .3s ease}
 .done-banner.show{display:block}
-@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
 
-.subgroup{border-left:4px solid var(--line);padding-left:12px;margin:16px 0}
-.subgroup-h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
-.sg-green{border-color:var(--price)} .sg-green .subgroup-h{color:var(--price)}
-.sg-amber{border-color:var(--amber)} .sg-amber .subgroup-h{color:var(--amber)}
-.sg-red{border-color:var(--red)} .sg-red .subgroup-h{color:var(--red)}
+.subgroup{border-left:2px solid var(--line);padding-left:14px;margin:20px 0}
+.subgroup-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;color:var(--ink-soft)}
+.sg-green{border-color:var(--ok)} .sg-green .subgroup-h{color:var(--ok)}
+.sg-amber{border-color:var(--warn)} .sg-amber .subgroup-h{color:var(--warn)}
+.sg-red{border-color:var(--alert)} .sg-red .subgroup-h{color:var(--alert)}
 .sg-gray{border-color:var(--ink-faint)} .sg-gray .subgroup-h{color:var(--ink-faint)}
 
-.ci{display:flex;align-items:flex-start;gap:11px;padding:9px 0;cursor:pointer;user-select:none}
+.ci{display:flex;align-items:flex-start;gap:12px;padding:11px 0;cursor:pointer;user-select:none;min-height:46px;
+  border-bottom:1px solid var(--line-soft)}
+.ci:last-child{border-bottom:0}
 .ci input{position:absolute;opacity:0;width:0;height:0}
-.ci .box{flex-shrink:0;width:24px;height:24px;border-radius:8px;border:2px solid var(--line);background:var(--surface-2);
-  display:grid;place-items:center;font-size:14px;transition:background .2s,border-color .2s;margin-top:1px}
-.ci input:checked ~ .box{background:var(--price-tint);border-color:var(--price)}
-.ci input:checked ~ .box::after{content:"✅"}
-.ci .t{font-size:14.5px;font-weight:600;transition:opacity .2s}
-.ci .t small{display:block;font-size:11.5px;font-weight:500;color:var(--ink-soft);margin-top:2px;line-height:1.4}
-.ci input:checked ~ .t{opacity:.4;text-decoration:line-through}
+.ci .box{flex-shrink:0;width:23px;height:23px;border-radius:var(--r-xs);border:1.5px solid var(--line);
+  background:var(--surface-2);display:grid;place-items:center;transition:background .2s,border-color .2s;margin-top:1px}
+.ci input:checked ~ .box{background:var(--accent-fill);border-color:var(--accent-fill)}
+.ci input:checked ~ .box::after{content:"";width:6px;height:11px;border:solid var(--on-fill);
+  border-width:0 2px 2px 0;transform:rotate(43deg) translateY(-1px)}
+.ci input:focus-visible ~ .box{outline:2px solid var(--accent-fill);outline-offset:2px}
+.ci .t{font-size:14.5px;font-weight:600;line-height:1.4;transition:opacity .2s;padding-top:1px}
+.ci .t small{display:block;font-size:12px;font-weight:500;color:var(--ink-soft);margin-top:3px;line-height:1.45}
+.ci input:checked ~ .t{opacity:.42;text-decoration:line-through}
 .sg-gray .ci .t{text-decoration:line-through;color:var(--ink-faint)}
 
-.info{background:var(--sky-tint);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;margin-top:6px}
-.info-h{font-weight:800;font-size:13.5px;display:flex;gap:8px;align-items:center;color:var(--sky-deep);margin-bottom:8px}
-.calc{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;color:var(--ink)}
-.calc .ok{color:var(--price);font-weight:700}
+.info{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:15px 16px;margin-top:14px}
+.info-h{font-weight:800;font-size:13px;display:flex;gap:7px;align-items:center;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px}
+.calc{font-family:var(--font-mono);font-size:11.5px;line-height:1.75;white-space:pre-wrap;color:var(--ink-soft);
+  border-top:1px solid var(--line-soft);padding-top:10px}
+.calc .ok{color:var(--ok);font-weight:700}
 
-/* ===== SEZIONE 4 · planner ===== */
-.daytabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+/* ═════ SEZIONE 4 · outfit planner ═════ */
+.daytabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .daytabs::-webkit-scrollbar{display:none}
-.daytab{flex-shrink:0;padding:10px 15px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);
-  color:var(--ink-soft);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;transition:transform .15s,background .2s,color .2s,border-color .2s}
-.daytab:active{transform:scale(.95)}
-.daytab.active{background:var(--grad-sky);color:#fff;border-color:transparent;box-shadow:var(--shadow-key)}
-.daytab small{display:block;font-size:9.5px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.4px}
+.daytab{flex-shrink:0;min-height:48px;padding:8px 16px;border-radius:var(--r-md);border:1px solid var(--line);
+  background:var(--surface);color:var(--ink-soft);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:center;gap:2px;
+  transition:transform .15s ease,background .2s,color .2s,border-color .2s}
+.daytab:active{transform:scale(.96)}
+.daytab.active{background:var(--accent-fill);color:var(--on-fill);border-color:transparent;box-shadow:var(--shadow-sm)}
+.daytab small{font-size:9.5px;font-weight:700;opacity:.78;text-transform:uppercase;letter-spacing:.1em}
 
-.outfit-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin-bottom:10px}
+.outfit-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);margin-bottom:13px}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
-.pill{padding:8px 13px;border-radius:var(--r-full);font-size:13px;font-weight:700;border:1px solid transparent}
-.pill-top{background:var(--sky-tint);color:var(--sky-deep)}
-.pill-bottom{background:var(--sunset-tint);color:var(--sunset)}
+.pill{padding:8px 14px;border-radius:var(--r-full);font-size:13px;font-weight:700;border:1px solid transparent;letter-spacing:.005em}
+.pill-top{background:var(--accent-soft);color:var(--accent)}
+.pill-bottom{background:var(--sand-soft);color:var(--sand)}
 .pill-shoe{background:var(--surface-2);color:var(--ink-soft);border-color:var(--line)}
-.pill-costume{background:var(--sky);color:#fff}
-.vibe{margin-top:11px;font-size:13px;font-weight:600;color:var(--ink-soft);font-style:italic}
-.notes{margin-top:11px;display:flex;flex-direction:column;gap:7px}
-.note{font-size:12.5px;font-weight:600;color:var(--ink-soft);line-height:1.45}
-.rem{margin-top:10px;display:flex;flex-direction:column;gap:7px}
-.rem .r{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 12px;font-size:12.5px;font-weight:700}
-.warn-note{background:var(--amber-tint);border:1px solid var(--amber);color:var(--amber);border-radius:var(--r-md);padding:11px 13px;font-size:13px;font-weight:700;line-height:1.45}
-@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+.pill-costume{background:var(--accent-fill);color:var(--on-fill)}
+.vibe{margin-top:14px;font-family:var(--font-display);font-style:italic;font-size:16px;color:var(--ink-soft);line-height:1.4}
+.notes{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.note{font-size:13px;font-weight:500;color:var(--ink-soft);line-height:1.5}
+.rem{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.rem .r{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 13px;font-size:12.5px;font-weight:600;line-height:1.45}
+.warn-note{background:var(--warn-soft);border:1px solid var(--warn);border-left:3px solid var(--warn);color:var(--warn);
+  border-radius:var(--r-md);padding:12px 14px;font-size:13px;font-weight:700;line-height:1.45;margin-top:12px}
+
+/* ═════ toggle «mostra checklist» (compare dopo la partenza) ═════ */
+.cl-toggle{display:none;width:100%;align-items:center;justify-content:center;gap:9px;
+  margin-bottom:24px;padding:13px 16px;min-height:48px;cursor:pointer;
+  font-family:var(--font-sans);font-size:14px;font-weight:700;letter-spacing:.01em;
+  color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-sm);transition:transform .15s ease,border-color .2s,background .2s,color .2s}
+.cl-toggle:active{transform:scale(.985)}
+@media (hover:hover){.cl-toggle:hover{border-color:var(--accent);color:var(--accent)}}
+.cl-toggle .ico{font-size:17px;line-height:1}
+.cl-toggle[aria-pressed="true"]{background:var(--surface-2)}
+
+/* ═════ SEZIONE 5 · noleggio auto ═════ */
+.car-intro{font-size:14px;line-height:1.55;color:var(--ink-soft)}
+.car-intro b{color:var(--ink);font-weight:700}
+.car-sub{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);
+  margin:0 2px 12px;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.car-sub .cnt{color:var(--accent);letter-spacing:.05em;white-space:nowrap}
+.shot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:10px}
+.shot-grid.docs{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
+.shot{position:relative;aspect-ratio:1/1;border-radius:var(--r-md);overflow:hidden;cursor:pointer;
+  background:var(--surface-2);border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;
+  transition:border-color .2s,transform .15s ease}
+.shot.docs{aspect-ratio:3/4}
+.shot.empty{border-style:dashed}
+.shot:active{transform:scale(.97)}
+@media (hover:hover){.shot.empty:hover{border-color:var(--accent);color:var(--accent)}}
+.shot .ph-ico{font-size:20px;opacity:.7;line-height:1}
+.shot .ph-lbl{font-size:10.5px;font-weight:700;line-height:1.25;color:var(--ink-soft);padding:0 6px}
+.shot .ph-plus{position:absolute;top:5px;right:7px;font-size:15px;font-weight:800;color:var(--ink-faint);line-height:1}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.shot .tag{position:absolute;left:0;right:0;bottom:0;padding:8px 8px 6px;font-size:10px;font-weight:700;
+  color:#fff;letter-spacing:.02em;background:linear-gradient(to top,oklch(15% 0.02 260 / .82),transparent)}
+.shot .del{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:var(--r-full);border:0;cursor:pointer;
+  background:oklch(15% 0.02 260 / .6);color:#fff;font-size:13px;line-height:1;display:grid;place-items:center;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.add-tile{color:var(--ink-soft)}
+.car-actions{margin-top:20px;display:flex;flex-direction:column;gap:11px}
+.btn-verify{width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+  font-family:var(--font-sans);font-size:15px;font-weight:700;letter-spacing:.01em;
+  color:var(--on-fill);background:var(--accent-fill);border:0;border-radius:var(--r-lg);box-shadow:var(--shadow-sm);
+  transition:transform .15s ease,opacity .2s}
+.btn-verify:active{transform:scale(.99)}
+.btn-verify:disabled{opacity:.62;cursor:default}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid color-mix(in oklch,currentColor 32%,transparent);border-top-color:currentColor;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-upload{width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+  font-family:var(--font-sans);font-size:15px;font-weight:700;letter-spacing:.01em;margin-bottom:14px;
+  color:var(--accent);background:var(--surface);border:1.5px solid var(--accent);border-radius:var(--r-lg);
+  transition:transform .15s ease,background .2s,color .2s,border-color .2s}
+.btn-upload:active{transform:scale(.99)}
+.btn-upload:disabled{opacity:.62;cursor:default}
+@media (hover:hover){.btn-upload:hover{background:var(--accent-fill);border-color:var(--accent-fill);color:var(--on-fill)}}
+.views-hint{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.views-hint .vh-lbl{width:100%;font-size:12px;font-weight:600;color:var(--ink-faint);line-height:1.45;margin-bottom:2px}
+.vchip{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-full);padding:5px 11px}
+.gallery-empty{grid-column:1/-1;font-size:13px;color:var(--ink-faint);text-align:center;padding:18px 12px;border:1px dashed var(--line);border-radius:var(--r-md)}
+.car-privacy{font-size:11.5px;color:var(--ink-faint);text-align:center;line-height:1.5;padding:0 8px}
+.report{margin-top:16px;display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:18px;box-shadow:var(--shadow-sm)}
+.report.show{display:block;animation:pop .3s ease}
+.report-top{font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:-.01em;
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
+.rep-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin:16px 0 7px}
+.rep-p{font-size:14px;line-height:1.55;color:var(--ink);margin-bottom:4px}
+.rep-li{font-size:14px;line-height:1.5;color:var(--ink);padding-left:17px;position:relative;margin-bottom:4px}
+.rep-li::before{content:"•";position:absolute;left:3px;color:var(--accent);font-weight:800}
+.rep-sp{height:7px}
+
+/* ═════ noleggio: posizioni ritiro/riconsegna ═════ */
+.pos-legend{display:flex;gap:10px;margin:0 2px 12px}
+.leg{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:4px 11px;border-radius:var(--r-full)}
+.leg-rit{background:var(--accent-soft);color:var(--accent)}
+.leg-ric{background:var(--warn-soft);color:var(--warn)}
+.pos{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
+.pos-h{font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pos-n{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:12px;font-weight:800;flex-shrink:0}
+.pos-hint{font-size:11.5px;font-weight:600;color:var(--ink-faint);letter-spacing:0;text-transform:none}
+.pos-cells{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pos-cell{display:flex;flex-direction:column;gap:6px}
+.pos-cell .shot{aspect-ratio:4/3}
+.cell-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.cell-lbl.rit{color:var(--accent)} .cell-lbl.ric{color:var(--warn)}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.meta-box{display:flex;flex-direction:column;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:11px}
+.meta-f{display:flex;flex-direction:column;gap:4px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+.meta-in{font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 10px;min-height:42px;width:100%}
+.meta-in:focus{outline:2px solid var(--accent-fill);outline-offset:1px;border-color:transparent}
+select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);background-position:calc(100% - 16px) 19px,calc(100% - 11px) 19px;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+.dmg-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dmg-col{display:flex;flex-direction:column;gap:8px}
+.dmg-col .shot-grid{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}
+.btn-compare{width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+  font-family:var(--font-sans);font-size:15px;font-weight:700;letter-spacing:.01em;
+  color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);
+  transition:transform .15s ease,opacity .2s,border-color .2s,color .2s}
+.btn-compare:active{transform:scale(.99)}
+.btn-compare:disabled{opacity:.5;cursor:not-allowed}
+@media (hover:hover){.btn-compare:not(:disabled):hover{border-color:var(--warn);color:var(--warn)}}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 </style>
 </head>
 <body>
@@ -152,7 +310,7 @@ main{max-width:600px;margin:0 auto;padding:16px 16px 60px}
   </div>
   <div class="top-row">
     <div class="wx" id="wx"><span class="wx-emoji">🌡️</span><span>Meteo in caricamento…</span></div>
-    <div class="tiny" style="opacity:.65">ora CET</div>
+    <div class="tiny" style="opacity:.6;letter-spacing:.06em">ora CET</div>
   </div>
   <div class="status" id="status">…</div>
 </header>
@@ -161,12 +319,17 @@ main{max-width:600px;margin:0 auto;padding:16px 16px 60px}
   <!-- ═══ SEZIONE 2 · BANNER CONTESTUALE ═══ -->
   <div class="banner" id="banner"><span class="b-ico" id="bIco">🌴</span><span id="bMsg"></span></div>
 
+  <!-- toggle: riapre la checklist valigia dopo la partenza (utile al ritorno) -->
+  <button class="cl-toggle" id="checklistToggle" type="button" aria-pressed="false">
+    <span class="ico">🎒</span><span class="lbl">Mostra checklist valigia</span>
+  </button>
+
   <!-- ═══ SEZIONE 3 · CHECKLIST (solo prima della partenza) ═══ -->
   <section id="checklistSection">
     <div class="sec-title">Hai messo tutto in valigia? 🎒</div>
 
     <div class="progress-wrap">
-      <div class="progress-top"><span class="muted" style="font-weight:700">Preparativi</span><b id="progLabel">0 / 0 pronti</b></div>
+      <div class="progress-top"><span class="muted">Preparativi</span><b id="progLabel">0 / 0 pronti</b></div>
       <div class="bar"><div class="bar-fill" id="progFill"></div></div>
       <div class="done-banner" id="doneBanner">Zaino pronto! Buona vacanza 🌊</div>
     </div>
@@ -213,6 +376,36 @@ main{max-width:600px;margin:0 auto;padding:16px 16px 60px}
     <div class="sec-title">Outfit del giorno 👔</div>
     <div class="daytabs" id="dayTabs"></div>
     <div id="dayContent"></div>
+  </section>
+
+  <!-- ═══ SEZIONE 5 · NOLEGGIO AUTO (ritiro · riconsegna · confronto) ═══ -->
+  <section id="carSection">
+    <div class="sec-title">Noleggio auto 🚗</div>
+
+    <div class="card">
+      <div class="car-intro"><b>Stato dell’auto: ritiro e riconsegna.</b> Carica le foto in ordine per ogni posizione — prima al <b>ritiro</b>, poi le stesse alla <b>riconsegna</b>: le vedi affiancate per il confronto. Sul cruscotto annota km e carburante. Poi fai controllare tutto a Claude.</div>
+    </div>
+
+    <div class="car-sub"><span>📄 Contratto di noleggio</span><span class="cnt" id="carDocCnt">0 foto</span></div>
+    <div class="shot-grid docs" id="carContract"></div>
+
+    <div class="car-sub" style="margin-top:26px"><span>📸 Posizioni · in ordine</span><span class="cnt" id="carShotCnt">0 / 9</span></div>
+    <div class="pos-legend"><span class="leg leg-rit">Ritiro</span><span class="leg leg-ric">Riconsegna</span></div>
+    <div id="carPositions"></div>
+
+    <div class="car-sub" style="margin-top:26px"><span>⚠️ Segnalazione danni</span><span class="cnt" id="carDmgCnt">0 foto</span></div>
+    <div class="dmg-cols">
+      <div class="dmg-col"><div class="cell-lbl rit">Ritiro</div><div class="shot-grid" id="carDmgRitiro"></div></div>
+      <div class="dmg-col"><div class="cell-lbl ric">Riconsegna</div><div class="shot-grid" id="carDmgRiconsegna"></div></div>
+    </div>
+
+    <div class="car-actions">
+      <button class="btn-verify" id="carVerify" type="button"><span class="vlbl">🔎 Verifica ritiro (contratto + stato)</span></button>
+      <button class="btn-compare" id="carCompare" type="button" disabled><span class="clbl">🔁 Confronta ritiro / riconsegna</span></button>
+      <div class="car-privacy">Le foto restano sul tuo dispositivo. Vengono inviate a Claude solo quando tocchi un pulsante di verifica.</div>
+    </div>
+
+    <div class="report" id="carReport"></div>
   </section>
 </main>
 
@@ -316,6 +509,12 @@ function loadChecks(){ try{return JSON.parse(localStorage.getItem(LS))||{};}catc
 let checks=loadChecks();
 function saveChecks(){ try{localStorage.setItem(LS,JSON.stringify(checks));}catch(e){} }
 
+/* ════════ stato UI · mostra/nascondi checklist dopo la partenza ════════ */
+const LS_UI='svito26_ui';
+function loadUI(){ try{return JSON.parse(localStorage.getItem(LS_UI))||{};}catch(e){return {};} }
+let forceChecklist=!!loadUI().forceChecklist;
+function saveUI(){ try{localStorage.setItem(LS_UI,JSON.stringify({forceChecklist}));}catch(e){} }
+
 function itemHTML(key,label,note){
   const sub=note?`<small>${note}</small>`:'';
   return `<label class="ci"><input type="checkbox" data-k="${key}"><span class="box"></span><span class="t">${label}${sub}</span></label>`;
@@ -416,7 +615,15 @@ function tick(){
   const now=new Date();
   document.getElementById('clock').textContent=romeParts(now).clock;
   setStatus(now); setBanner(now);
-  document.getElementById('checklistSection').style.display = now<DEP ? '' : 'none';
+  const beforeDep = now<DEP;
+  document.getElementById('checklistSection').style.display = (beforeDep || forceChecklist) ? '' : 'none';
+  const tg=document.getElementById('checklistToggle');
+  if(tg){
+    tg.style.display = beforeDep ? 'none' : 'flex';
+    tg.setAttribute('aria-pressed', forceChecklist ? 'true' : 'false');
+    tg.querySelector('.lbl').textContent = forceChecklist ? 'Nascondi checklist valigia' : 'Mostra checklist valigia';
+    tg.querySelector('.ico').textContent = forceChecklist ? '✕' : '🎒';
+  }
 }
 
 /* ════════ Meteo · Open-Meteo (no key) ════════ */
@@ -442,11 +649,288 @@ async function weather(){
 buildChecklist();
 buildTabs();
 renderDay(todayIndex(new Date()));
+const _clToggle=document.getElementById('checklistToggle');
+if(_clToggle) _clToggle.addEventListener('click',()=>{ forceChecklist=!forceChecklist; saveUI(); tick(); });
 tick(); setInterval(tick,1000);
 weather(); setInterval(weather,600000);
 /* re-sync della checklist quando si rientra nella pagina (reload, bfcache, ritorno da app) */
 window.addEventListener('pageshow',()=>{ checks=loadChecks(); applyChecks(); });
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=loadChecks(); applyChecks(); } });
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   Modulo NOLEGGIO AUTO — foto stato iniziale + verifica con Claude
+   Scope isolato. Le foto stanno in IndexedDB (troppo pesanti per LS).
+   Non tocca alcun hook del modulo principale.
+   ════════════════════════════════════════════════════════════════ */
+(function(){
+  /* posizioni foto, in ordine di caricamento (ritiro e riconsegna) */
+  const POS=[
+    {id:'cruscotto', label:'Cruscotto', meta:true, hint:'motore acceso · km + carburante'},
+    {id:'avanti',    label:'Lato avanti'},
+    {id:'parabrezza',label:'Parabrezza'},
+    {id:'latsx1',    label:'Laterale sinistro · 1'},
+    {id:'latsx2',    label:'Laterale sinistro · 2'},
+    {id:'latdx1',    label:'Laterale destro · 1'},
+    {id:'latdx2',    label:'Laterale destro · 2'},
+    {id:'dietro',    label:'Posteriore'},
+    {id:'lunotto',   label:'Lunotto posteriore'}
+  ];
+  const FUEL=['—','Pieno','3/4','1/2','1/4','Riserva'];
+
+  /* km + carburante (testo) in localStorage */
+  const LS_META='svito26_car_meta';
+  function loadMeta(){ try{return JSON.parse(localStorage.getItem(LS_META))||{};}catch(e){return {};} }
+  let meta=loadMeta();
+  function saveMeta(){ try{localStorage.setItem(LS_META,JSON.stringify(meta));}catch(e){} }
+  function mget(ph,f){ return (meta[ph]&&meta[ph][f])||''; }
+  function mset(ph,f,v){ if(!meta[ph])meta[ph]={}; meta[ph][f]=v; saveMeta(); }
+
+  /* ── IndexedDB ── */
+  const DB='svito26_car', STORE='photos';
+  function db(){return new Promise((res,rej)=>{const r=indexedDB.open(DB,1);
+    r.onupgradeneeded=()=>r.result.createObjectStore(STORE);
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);});}
+  async function dbSet(k,v){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(STORE,'readwrite');t.objectStore(STORE).put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+  async function dbDel(k){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(STORE,'readwrite');t.objectStore(STORE).delete(k);t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+  async function dbAll(){const d=await db();return new Promise((res,rej)=>{const out={};const t=d.transaction(STORE,'readonly');const c=t.objectStore(STORE).openCursor();c.onsuccess=e=>{const cur=e.target.result;if(cur){out[cur.key]=cur.value;cur.continue();}else res(out);};c.onerror=()=>rej(c.error);});}
+
+  let data={};
+
+  /* ── ridimensiona + comprimi (rispettando l'orientamento EXIF) ── */
+  function viaImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
+  function loadBmp(file){
+    if('createImageBitmap' in window){
+      return createImageBitmap(file,{imageOrientation:'from-image'}).catch(()=>createImageBitmap(file)).catch(()=>viaImg(file));
+    }
+    return viaImg(file);
+  }
+  async function toDataURL(file){
+    const bmp=await loadBmp(file);
+    const max=1080,q=.75; let w=bmp.width,h=bmp.height;
+    const sc=Math.min(1,max/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(bmp,0,0,w,h); if(bmp.close)bmp.close();
+    return cv.toDataURL('image/jpeg',q);
+  }
+
+  /* ── render ── */
+  function renderContract(){
+    const keys=Object.keys(data).filter(k=>k.startsWith('doc:')).sort();
+    let html=keys.map(k=>`<div class="shot docs"><img src="${data[k].dataURL}" alt=""><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
+    html+=`<div class="shot docs empty add-tile" data-act="add" data-group="doc"><span class="ph-ico">＋</span><span class="ph-lbl">Aggiungi contratto</span></div>`;
+    document.getElementById('carContract').innerHTML=html;
+    document.getElementById('carDocCnt').textContent=keys.length+' foto';
+  }
+  function tile(phase,pos){
+    const key='ph:'+phase+':'+pos, d=data[key];
+    if(d) return `<div class="shot" data-act="pos" data-phase="${phase}" data-pos="${pos}"><img src="${d.dataURL}" alt=""><button class="del" data-del="${key}" type="button" aria-label="Rimuovi foto">✕</button></div>`;
+    return `<div class="shot empty" data-act="pos" data-phase="${phase}" data-pos="${pos}"><span class="ph-plus">+</span><span class="ph-ico">📷</span></div>`;
+  }
+  function metaBox(phase){
+    const cls=phase==='ritiro'?'rit':'ric';
+    const opts=FUEL.map(f=>`<option value="${f}"${mget(phase,'fuel')===f?' selected':''}>${f}</option>`).join('');
+    return `<div class="meta-box"><div class="cell-lbl ${cls}">${phase==='ritiro'?'Ritiro':'Riconsegna'}</div>`+
+      `<label class="meta-f">Km <input type="text" inputmode="numeric" class="meta-in" data-mph="${phase}" data-mf="km" value="${mget(phase,'km')}" placeholder="es. 45210"></label>`+
+      `<label class="meta-f">Carburante <select class="meta-in" data-mph="${phase}" data-mf="fuel">${opts}</select></label></div>`;
+  }
+  function renderPositions(){
+    let ritDone=0;
+    const html=POS.map((p,i)=>{
+      if(data['ph:ritiro:'+p.id]) ritDone++;
+      let block=`<div class="pos"><div class="pos-h"><span class="pos-n">${i+1}</span> ${p.label}${p.hint?` <span class="pos-hint">${p.hint}</span>`:''}</div>`+
+        `<div class="pos-cells">`+
+        `<div class="pos-cell"><div class="cell-lbl rit">Ritiro</div>${tile('ritiro',p.id)}</div>`+
+        `<div class="pos-cell"><div class="cell-lbl ric">Riconsegna</div>${tile('riconsegna',p.id)}</div>`+
+        `</div>`;
+      if(p.meta) block+=`<div class="meta-grid">${metaBox('ritiro')}${metaBox('riconsegna')}</div>`;
+      return block+`</div>`;
+    }).join('');
+    document.getElementById('carPositions').innerHTML=html;
+    document.getElementById('carShotCnt').textContent=ritDone+' / '+POS.length;
+  }
+  function renderDamageCol(phase,mount){
+    const keys=Object.keys(data).filter(k=>k.startsWith('dmg:'+phase+':')).sort();
+    let html=keys.map(k=>`<div class="shot"><img src="${data[k].dataURL}" alt=""><button class="del" data-del="${k}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('');
+    html+=`<div class="shot empty add-tile" data-act="add" data-group="dmg:${phase}"><span class="ph-ico">＋</span><span class="ph-lbl">Aggiungi</span></div>`;
+    document.getElementById(mount).innerHTML=html;
+    return keys.length;
+  }
+  function renderDamage(){
+    const a=renderDamageCol('ritiro','carDmgRitiro');
+    const b=renderDamageCol('riconsegna','carDmgRiconsegna');
+    document.getElementById('carDmgCnt').textContent=(a+b)+' foto';
+  }
+  function hasPhase(phase){ return Object.keys(data).some(k=>k.startsWith('ph:'+phase+':')||k.startsWith('dmg:'+phase+':')); }
+  function refreshCompareBtn(){ document.getElementById('carCompare').disabled=!(hasPhase('ritiro')&&hasPhase('riconsegna')); }
+  function renderAll(){ renderContract(); renderPositions(); renderDamage(); refreshCompareBtn(); }
+
+  /* ── selezione file ── */
+  function pick(target){
+    const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+    inp.multiple=!target.single; inp.style.display='none';
+    document.body.appendChild(inp);
+    inp.addEventListener('change',async()=>{
+      const files=[...inp.files]; inp.remove(); if(!files.length) return;
+      let n=0;
+      for(const f of files){
+        try{
+          const url=await toDataURL(f);
+          const key=target.single ? target.key : (target.prefix+':'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+(n++));
+          data[key]={dataURL:url,ts:Date.now()+n}; await dbSet(key,data[key]);
+          if(target.single) break;
+        }catch(err){ console.warn('foto non caricata',err); }
+      }
+      renderAll();
+    });
+    inp.click();
+  }
+  async function remove(key){ delete data[key]; try{await dbDel(key);}catch(e){} renderAll(); }
+
+  /* ── markdown leggero per l'esito ── */
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
+  function md(t){return (t||'').split(/\n/).map(line=>{
+    const l=line.trim();
+    if(!l) return '<div class="rep-sp"></div>';
+    if(l.startsWith('## ')) return '<div class="rep-h">'+inl(l.slice(3))+'</div>';
+    if(l.startsWith('# ')) return '<div class="rep-h">'+inl(l.slice(2))+'</div>';
+    if(/^[-•*]\s+/.test(l)) return '<div class="rep-li">'+inl(l.replace(/^[-•*]\s+/,''))+'</div>';
+    return '<div class="rep-p">'+inl(l)+'</div>';
+  }).join('');}
+  function showReport(text){
+    const r=document.getElementById('carReport');
+    r.innerHTML='<div class="report-top">📋 Esito verifica</div>'+md(text);
+    r.classList.add('show');
+    try{localStorage.setItem('svito26_carreport',text);}catch(e){}
+  }
+
+  /* ── verifica con Claude (vision) ── */
+  const RIT_IDLE='<span class="vlbl">🔎 Verifica ritiro (contratto + stato)</span>';
+  const CMP_IDLE='<span class="clbl">🔁 Confronta ritiro / riconsegna</span>';
+  const INTRO_PICKUP='Sei un assistente esperto di noleggio auto. Ti fornisco il CONTRATTO e le FOTO dello stato dell\'auto al RITIRO.';
+  const INTRO_COMPARE='Sei un assistente esperto di noleggio auto. Ti fornisco, posizione per posizione, la foto al RITIRO e quella corrispondente alla RICONSEGNA. Confrontale per capire se l\'auto e stata resa nello stesso stato.';
+  const TASK_PICKUP=[
+    'Rispondi in ITALIANO, conciso. Usa ESATTAMENTE queste sezioni, ognuna su una riga che inizia con "## ":',
+    '## Dati dal contratto',
+    'Estrai se leggibili: targa, modello e colore, livello carburante, km, danni preesistenti annotati. Se non leggibile scrivi "non leggibile".',
+    '## Corrispondenza foto e contratto',
+    'Targa e modello/colore nelle foto coincidono col contratto? Inizia con: coincide, non verificabile, o discrepanza; poi spiega breve. Confronta anche km e carburante letti dal cruscotto con i valori dichiarati al ritiro.',
+    '## Danni da mettere a verbale',
+    'Elenca con trattini i danni VISIBILI nelle foto non annotati sul contratto, da far verbalizzare prima di partire. Se non ne vedi, dillo.',
+    '## Foto mancanti o poco chiare',
+    'Segnala posizioni assenti o sfocate.',
+    '## In sintesi',
+    'Una riga: si puo partire tranquilli o cosa far annotare.',
+    'Non inventare nulla che non sia visibile.'
+  ].join('\n');
+  const TASK_COMPARE=[
+    'Rispondi in ITALIANO, conciso. Usa ESATTAMENTE queste sezioni, ognuna su una riga che inizia con "## ":',
+    '## Nuovi danni alla riconsegna',
+    'Confronta ogni posizione RITIRO vs RICONSEGNA ed elenca con trattini SOLO i danni nuovi (graffi, ammaccature, crepe, cerchioni/gomme) presenti alla riconsegna ma non al ritiro, indicando la posizione. Se non ne vedi di nuovi, scrivilo chiaramente.',
+    '## Km e carburante',
+    'Confronta km e livello carburante fra ritiro e riconsegna (usa i valori dichiarati e cio che leggi dal cruscotto). Segnala se il carburante e inferiore (rischio addebito) e quanti km sono stati percorsi.',
+    '## Pulizia e dettagli',
+    'Note su sporco evidente o differenze rilevanti viste nelle foto.',
+    '## Rischio addebiti',
+    'Inizia con: basso, medio o alto; poi una riga su cosa potrebbero contestarti.',
+    '## In sintesi',
+    'Una riga: cosa fotografare o far annotare alla riconsegna per tutelarti.',
+    'Non inventare nulla che non sia visibile.'
+  ].join('\n');
+
+  function imgBlock(dataURL){return {type:'image',source:{type:'base64',media_type:'image/jpeg',data:dataURL.split(',')[1]}};}
+  /* ricomprime prima dell'invio per alleggerire il payload */
+  function shrink(dataURL,max,q){return new Promise(res=>{const im=new Image();im.onload=()=>{let w=im.width,h=im.height;const sc=Math.min(1,max/Math.max(w,h));w=Math.round(w*sc);h=Math.round(h*sc);const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(im,0,0,w,h);res(cv.toDataURL('image/jpeg',q));};im.onerror=()=>res(dataURL);im.src=dataURL;});}
+  async function pushImg(content,label,dataURL,max,q){ content.push({type:'text',text:label}); content.push(imgBlock(await shrink(dataURL,max,q))); }
+  function metaLine(phase){
+    const km=mget(phase,'km'), fu=mget(phase,'fuel');
+    return (km?('km '+km):'km non indicati')+' · carburante '+(fu&&fu!=='—'?fu:'non indicato');
+  }
+  function setBusy(btn,on,idleHTML,busyLabel){
+    btn.innerHTML=on?('<span class="spin"></span><span>'+busyLabel+'</span>'):idleHTML;
+    document.getElementById('carVerify').disabled=on; document.getElementById('carCompare').disabled=on;
+    if(!on) refreshCompareBtn();
+  }
+  function errMsg(err){
+    const m=''+err;
+    if(/AI_UNAVAILABLE/.test(m)) return '⚠️ La verifica AI non è disponibile su questa versione pubblicata (richiede un backend). Le foto e i dati restano salvati sul tuo dispositivo.';
+    let msg='⚠️ Verifica non riuscita. ';
+    if(/429|rate|limit/i.test(m)) msg+='Troppe richieste in poco tempo: attendi un minuto e riprova.';
+    else if(/413|large|payload|size|400/i.test(m)) msg+='Le foto sono troppe o troppo pesanti: prova con qualche foto in meno.';
+    else msg+='Controlla la connessione e riprova.';
+    return msg;
+  }
+  async function runClaude(content){
+    if(!(window.claude && typeof window.claude.complete==='function')) throw new Error('AI_UNAVAILABLE');
+    return window.claude.complete({messages:[{role:'user',content}]});
+  }
+
+  /* A · verifica al RITIRO: contratto + stato iniziale */
+  async function verifyPickup(){
+    const docs=Object.keys(data).filter(k=>k.startsWith('doc:')).sort();
+    const pos=POS.filter(p=>data['ph:ritiro:'+p.id]);
+    const dmg=Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort();
+    if(!docs.length){ showReport('⚠️ Aggiungi prima almeno una foto del **contratto** di noleggio.'); return; }
+    if(!pos.length && !dmg.length){ showReport('⚠️ Carica almeno una **foto dell\'auto** (colonna Ritiro) prima di verificare.'); return; }
+    const btn=document.getElementById('carVerify'); setBusy(btn,true,RIT_IDLE,'Analisi ritiro…');
+    const content=[{type:'text',text:INTRO_PICKUP+' Valori dichiarati al ritiro: '+metaLine('ritiro')+'.'}];
+    try{
+      for(let i=0;i<docs.length;i++) await pushImg(content,'— CONTRATTO · pagina '+(i+1)+' —',data[docs[i]].dataURL,1000,.72);
+      for(const p of pos) await pushImg(content,'— FOTO · '+p.label+' —',data['ph:ritiro:'+p.id].dataURL,900,.68);
+      for(let i=0;i<dmg.length;i++) await pushImg(content,'— DANNO segnalato '+(i+1)+' —',data[dmg[i]].dataURL,900,.68);
+      content.push({type:'text',text:TASK_PICKUP});
+      showReport(await runClaude(content)||'Nessuna risposta. Riprova.');
+    }catch(err){ showReport(errMsg(err)); }
+    finally{ setBusy(btn,false,RIT_IDLE,''); }
+  }
+
+  /* B · confronto RITIRO vs RICONSEGNA */
+  async function verifyCompare(){
+    if(!hasPhase('ritiro')||!hasPhase('riconsegna')){ showReport('⚠️ Servono le foto di **entrambi** i momenti (ritiro e riconsegna) per il confronto.'); return; }
+    const pairs=POS.filter(p=>data['ph:ritiro:'+p.id]||data['ph:riconsegna:'+p.id]);
+    const btn=document.getElementById('carCompare'); setBusy(btn,true,CMP_IDLE,'Confronto in corso…');
+    const content=[{type:'text',text:INTRO_COMPARE+' Km/carburante al RITIRO: '+metaLine('ritiro')+'. Alla RICONSEGNA: '+metaLine('riconsegna')+'.'}];
+    try{
+      for(const p of pairs){
+        if(data['ph:ritiro:'+p.id]) await pushImg(content,'— '+p.label+' · RITIRO —',data['ph:ritiro:'+p.id].dataURL,820,.62);
+        if(data['ph:riconsegna:'+p.id]) await pushImg(content,'— '+p.label+' · RICONSEGNA —',data['ph:riconsegna:'+p.id].dataURL,820,.62);
+      }
+      const dr=Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort();
+      const dc=Object.keys(data).filter(k=>k.startsWith('dmg:riconsegna:')).sort();
+      for(let i=0;i<dr.length;i++) await pushImg(content,'— DANNO al ritiro '+(i+1)+' —',data[dr[i]].dataURL,820,.62);
+      for(let i=0;i<dc.length;i++) await pushImg(content,'— DANNO alla riconsegna '+(i+1)+' —',data[dc[i]].dataURL,820,.62);
+      content.push({type:'text',text:TASK_COMPARE});
+      showReport(await runClaude(content)||'Nessuna risposta. Riprova.');
+    }catch(err){ showReport(errMsg(err)); }
+    finally{ setBusy(btn,false,CMP_IDLE,''); }
+  }
+
+  /* ── eventi ── */
+  document.getElementById('carSection').addEventListener('click',e=>{
+    const del=e.target.closest('[data-del]');
+    if(del){ e.stopPropagation(); remove(del.getAttribute('data-del')); return; }
+    const act=e.target.closest('[data-act]'); if(!act) return;
+    if(act.dataset.act==='pos') pick({single:true,key:'ph:'+act.dataset.phase+':'+act.dataset.pos});
+    else if(act.dataset.act==='add') pick({prefix:act.dataset.group});
+  });
+  document.getElementById('carPositions').addEventListener('change',e=>{
+    const el=e.target.closest('.meta-in'); if(el) mset(el.dataset.mph,el.dataset.mf,el.value);
+  });
+  document.getElementById('carPositions').addEventListener('input',e=>{
+    const el=e.target.closest('.meta-in'); if(el && el.tagName==='INPUT') mset(el.dataset.mph,el.dataset.mf,el.value);
+  });
+  document.getElementById('carVerify').addEventListener('click',verifyPickup);
+  document.getElementById('carCompare').addEventListener('click',verifyCompare);
+
+  /* ── init ── */
+  (async()=>{
+    try{ data=await dbAll(); }catch(e){ data={}; }
+    renderAll();
+    try{ const last=localStorage.getItem('svito26_carreport'); if(last) showReport(last); }catch(e){}
+  })();
+})();
 </script>
 </body>
 </html>
