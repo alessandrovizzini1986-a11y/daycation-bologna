@@ -272,6 +272,12 @@ section:first-of-type .sec-title{margin-top:0}
 .picksheet-b{height:56px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit}
 .picksheet-b:active{transform:scale(.98)}
 .picksheet-x{height:48px;border:0;background:none;color:var(--ink-soft);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.pickmode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.pickmode .pm-lbl{font-size:12px;font-weight:700;color:var(--ink-soft)}
+.pm-b{height:40px;padding:0 14px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.pm-b.on{border-color:transparent;background:var(--grad-sky);color:#fff;box-shadow:var(--shadow-key)}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));z-index:120;height:54px;padding:0 20px;border:0;border-radius:var(--r-full);background:var(--grad-sky);color:#fff;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:var(--shadow-key);display:inline-flex;align-items:center;gap:8px}
+.fab:active{transform:scale(.96)}
 .report{margin-top:16px;display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   padding:18px;box-shadow:var(--shadow-sm)}
 .report.show{display:block;animation:pop .3s ease}
@@ -403,6 +409,11 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
       <div class="car-intro"><b>Stato dell’auto: ritiro e riconsegna.</b> Carica le foto in ordine per ogni posizione — prima al <b>ritiro</b>, poi le stesse alla <b>riconsegna</b>: le vedi affiancate per il confronto. Sul cruscotto annota km e carburante. Poi fai controllare tutto a Claude.</div>
     </div>
 
+    <div class="pickmode" id="pickMode">
+      <span class="pm-lbl">Aggiungi foto con:</span>
+      <button class="pm-b" data-m="camera" type="button">📷 Fotocamera</button>
+      <button class="pm-b" data-m="gallery" type="button">🖼️ Galleria</button>
+    </div>
     <div class="car-sub"><span>📄 Contratto Autovia</span><span class="cnt" id="carDocCnt">0 foto</span></div>
     <div class="car-intro" style="margin:0 0 10px">Fotografa <b>tutte le pagine</b>: contratto, <b>parte economica</b> e soprattutto lo <b>schema dell’auto con i danni già segnati</b> (e la legenda dei codici, se c’è). Una foto sola non basta.</div>
     <div class="shot-grid docs" id="carContract"></div>
@@ -426,6 +437,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <div class="report" id="carReport"></div>
   </section>
 </main>
+<button id="goPhotos" class="fab" type="button">📷 Foto noleggio</button>
 
 <script>
 /* ════════ Istanti chiave (Europe/Rome · CEST = +02:00) ════════ */
@@ -813,24 +825,10 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     });
     inp.click();
   }
-  let pickCb=null;
-  function pickSheet(){
-    let o=document.getElementById('pickSheet'); if(o) return o;
-    o=document.createElement('div'); o.id='pickSheet'; o.className='picksheet';
-    o.innerHTML='<div class="picksheet-card"><div class="picksheet-h">Aggiungi foto</div>'+
-      '<button class="picksheet-b" data-c="1" type="button">📷 Scatta foto</button>'+
-      '<button class="picksheet-b" data-c="0" type="button">🖼️ Carica da galleria</button>'+
-      '<button class="picksheet-x" data-c="-1" type="button">Annulla</button></div>';
-    document.body.appendChild(o);
-    o.addEventListener('click',e=>{
-      if(e.target===o){ o.classList.remove('on'); pickCb=null; return; }
-      const b=e.target.closest('[data-c]'); if(!b) return;
-      const c=b.dataset.c; o.classList.remove('on'); const cb=pickCb; pickCb=null;
-      if(c!=='-1' && cb) cb(c==='1');
-    });
-    return o;
-  }
-  function pick(target){ pickCb=cap=>openInput(target,cap); pickSheet().classList.add('on'); }
+  let pickMode='camera'; try{ pickMode=localStorage.getItem('svito26_pickmode')||'camera'; }catch(e){}
+  function setPickMode(m){ pickMode=m; try{localStorage.setItem('svito26_pickmode',m);}catch(e){}
+    document.querySelectorAll('#pickMode .pm-b').forEach(b=>b.classList.toggle('on',b.dataset.m===m)); }
+  function pick(target){ openInput(target, pickMode==='camera'); }
   async function remove(key){ delete data[key]; try{await dbDel(key);}catch(e){} renderAll(); }
 
   /* ── markdown leggero per l'esito ── */
@@ -1043,6 +1041,12 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   });
   document.getElementById('carVerify').addEventListener('click',verifyPickup);
   document.getElementById('carCompare').addEventListener('click',verifyCompare);
+  document.getElementById('pickMode').addEventListener('click',e=>{ const b=e.target.closest('.pm-b'); if(b) setPickMode(b.dataset.m); });
+  setPickMode(pickMode);
+  document.getElementById('goPhotos').addEventListener('click',()=>{
+    document.getElementById('carSection').scrollIntoView({behavior:'smooth',block:'start'});
+    openInput({prefix:'doc'}, pickMode==='camera');
+  });
 
   /* ── init ── */
   (async()=>{
