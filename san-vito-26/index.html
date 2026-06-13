@@ -763,7 +763,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     document.getElementById('carDmgCnt').textContent=(a+b)+' foto';
   }
   function hasPhase(phase){ return Object.keys(data).some(k=>k.startsWith('ph:'+phase+':')||k.startsWith('dmg:'+phase+':')); }
-  function refreshCompareBtn(){ document.getElementById('carCompare').disabled=!(hasPhase('ritiro')&&hasPhase('riconsegna')); }
+  function refreshCompareBtn(){ document.getElementById('carCompare').disabled=!hasPhase('riconsegna'); }
   function renderAll(){ renderContract(); renderPositions(); renderDamage(); refreshCompareBtn(); }
 
   /* ── selezione file ── */
@@ -862,49 +862,123 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     else msg+='Controlla la connessione e riprova.';
     return msg;
   }
-  async function runClaude(content){
-    if(!(window.claude && typeof window.claude.complete==='function')) throw new Error('AI_UNAVAILABLE');
-    return window.claude.complete({messages:[{role:'user',content}]});
+  /* ── export PDF per Claude (un solo file, foto etichettate, niente librerie) ── */
+  function atobBytes(b64){ const bin=atob(b64); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i); return u; }
+  function loadImage(durl){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=durl; }); }
+  async function pagePhoto(durl,label){
+    const im=await loadImage(durl); const maxW=1240, pad=22, bar=58;
+    const sc=Math.min(1,maxW/im.width), iw=Math.round(im.width*sc), ih=Math.round(im.height*sc);
+    const W=iw+pad*2, H=ih+pad*2+bar;
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
+    x.fillStyle='#fff'; x.fillRect(0,0,W,H);
+    x.fillStyle='#0A1628'; x.fillRect(0,0,W,bar);
+    x.fillStyle='#fff'; x.font='bold 24px -apple-system,system-ui,sans-serif'; x.textBaseline='middle'; x.fillText(label,pad,bar/2+1);
+    x.drawImage(im,pad,bar+pad,iw,ih);
+    return {bytes:atobBytes(cv.toDataURL('image/jpeg',.78).split(',')[1]), w:W, h:H};
+  }
+  function pageText(title,lines){
+    const W=1000, pad=46, lh=30, H=Math.max(560, 72+pad*2+lines.length*lh);
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
+    x.fillStyle='#fff'; x.fillRect(0,0,W,H);
+    x.fillStyle='#0A1628'; x.fillRect(0,0,W,72);
+    x.fillStyle='#fff'; x.font='bold 30px -apple-system,system-ui,sans-serif'; x.textBaseline='middle'; x.fillText(title,pad,38);
+    x.fillStyle='#0A1628'; x.font='18px -apple-system,system-ui,sans-serif'; x.textBaseline='top';
+    let y=72+pad; for(const ln of lines){ x.fillText(ln,pad,y); y+=lh; }
+    return {bytes:atobBytes(cv.toDataURL('image/jpeg',.82).split(',')[1]), w:W, h:H};
+  }
+  function wrap(t,n){ const out=[]; (t||'').split('\n').forEach(line=>{ if(!line){out.push(''); return;} let s=line; while(s.length>n){ let i=s.lastIndexOf(' ',n); if(i<=0)i=n; out.push(s.slice(0,i)); s=s.slice(i+1);} out.push(s); }); return out; }
+  function pdfBytes(pages){
+    const enc=new TextEncoder(); let parts=[], off=[], pos=0;
+    const push=v=>{ const b=(typeof v==='string')?enc.encode(v):v; parts.push(b); pos+=b.length; };
+    const mark=n=>off[n]=pos;
+    push('%PDF-1.4\n'); push(new Uint8Array([0x25,0xFF,0xFF,0xFF,0xFF,0x0A]));
+    const N=pages.length, pid=[],cid=[],iid=[]; let id=3;
+    for(let i=0;i<N;i++){pid.push(id++);cid.push(id++);iid.push(id++);}
+    mark(1); push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+    mark(2); push('2 0 obj\n<< /Type /Pages /Count '+N+' /Kids ['+pid.map(p=>p+' 0 R').join(' ')+'] >>\nendobj\n');
+    for(let i=0;i<N;i++){ const pg=pages[i];
+      mark(pid[i]); push(pid[i]+' 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+pg.w+' '+pg.h+'] /Resources << /XObject << /Im0 '+iid[i]+' 0 R >> >> /Contents '+cid[i]+' 0 R >>\nendobj\n');
+      const c='q '+pg.w+' 0 0 '+pg.h+' 0 0 cm /Im0 Do Q';
+      mark(cid[i]); push(cid[i]+' 0 obj\n<< /Length '+c.length+' >>\nstream\n'+c+'\nendstream\nendobj\n');
+      mark(iid[i]); push(iid[i]+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+pg.w+' /Height '+pg.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+pg.bytes.length+' >>\nstream\n');
+      push(pg.bytes); push('\nendstream\nendobj\n');
+    }
+    const xp=pos, total=id;
+    let xref='xref\n0 '+total+'\n0000000000 65535 f \n';
+    for(let n=1;n<total;n++) xref+=String(off[n]).padStart(10,'0')+' 00000 n \n';
+    push(xref); push('trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xp+'\n%%EOF');
+    let len=parts.reduce((a,b)=>a+b.length,0), out=new Uint8Array(len), o=0;
+    for(const b of parts){ out.set(b,o); o+=b.length; }
+    return new Blob([out],{type:'application/pdf'});
+  }
+  function dl(blob,name){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+  async function buildPDF(items,filename,prompt,coverTitle){
+    const pages=[pageText(coverTitle,['Allega questo PDF in una chat Claude e incolla il prompt qui sotto.','(il prompt è anche negli appunti)','',...wrap(prompt,92)])];
+    for(const it of items) pages.push(await pagePhoto(it.dataURL,it.label));
+    dl(pdfBytes(pages),filename);
+    try{ await navigator.clipboard.writeText(prompt); }catch(e){}
+  }
+  function ritiroItems(){
+    const it=[]; let n=1;
+    Object.keys(data).filter(k=>k.startsWith('doc:')).sort().forEach(k=>it.push({dataURL:data[k].dataURL,label:'CONTRATTO · pagina '+(n++)}));
+    POS.forEach(p=>{ if(data['ph:ritiro:'+p.id]) it.push({dataURL:data['ph:ritiro:'+p.id].dataURL,label:'RITIRO · '+p.label}); });
+    Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort().forEach((k,i)=>it.push({dataURL:data[k].dataURL,label:'RITIRO · danno '+(i+1)}));
+    return it;
+  }
+  function fullItems(){
+    const it=[]; let n=1;
+    Object.keys(data).filter(k=>k.startsWith('doc:')).sort().forEach(k=>it.push({dataURL:data[k].dataURL,label:'CONTRATTO · pagina '+(n++)}));
+    POS.forEach(p=>{
+      if(data['ph:ritiro:'+p.id]) it.push({dataURL:data['ph:ritiro:'+p.id].dataURL,label:'RITIRO · '+p.label});
+      if(data['ph:riconsegna:'+p.id]) it.push({dataURL:data['ph:riconsegna:'+p.id].dataURL,label:'RICONSEGNA · '+p.label});
+    });
+    Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort().forEach((k,i)=>it.push({dataURL:data[k].dataURL,label:'RITIRO · danno '+(i+1)}));
+    Object.keys(data).filter(k=>k.startsWith('dmg:riconsegna:')).sort().forEach((k,i)=>it.push({dataURL:data[k].dataURL,label:'RICONSEGNA · danno '+(i+1)}));
+    return it;
+  }
+  const READ_GUIDE=[
+    'COME LEGGERE QUESTO PDF (leggi con attenzione, niente errori):',
+    '- È composto da più pagine. QUESTA prima pagina contiene solo istruzioni.',
+    '- Ogni pagina SUCCESSIVA contiene UNA SOLA fotografia reale, con in alto una barra scura che ne indica il contenuto (l\'ETICHETTA). Leggi sempre l\'etichetta per sapere cosa stai guardando, poi analizza la foto con la vision.',
+    '- «CONTRATTO · pagina N» = contratto di noleggio di AUTOVIA (la società). Qui sono annotati i danni preesistenti che LORO dichiarano.',
+    '- «RITIRO · <posizione>» = mia foto della carrozzeria al RITIRO.',
+    '- «RICONSEGNA · <posizione>» = mia foto della stessa posizione alla RICONSEGNA.',
+    '- «RITIRO/RICONSEGNA · danno N» = dettaglio di un danno.',
+    '- Quando ci sono entrambe, «RITIRO» e «RICONSEGNA» della stessa posizione sono in pagine CONSECUTIVE: confrontale tra loro.'
+  ].join('\n');
+  function pickupPrompt(){
+    return READ_GUIDE+'\n\n'+
+      'RUOLO: assistente esperto di noleggio auto. Ti do il CONTRATTO di Autovia (coi danni preesistenti che LORO dichiarano) e le MIE foto dell\'auto al RITIRO. '+
+      'OBIETTIVO PRINCIPALE: trovare le DISCREPANZE tra i danni dichiarati da Autovia sul contratto e i danni realmente visibili nelle mie foto, così li faccio verbalizzare PRIMA di partire ed evito addebiti alla riconsegna. '+
+      'Valori dichiarati al ritiro: '+metaLine('ritiro')+'.\n\n'+TASK_PICKUP+'\n'+
+      '## Discrepanze con i danni dichiarati da Autovia\n'+
+      'Confronta UNO A UNO i danni annotati sul contratto con ciò che vedi nelle foto: per ciascuno di\' se è confermato, più grave del dichiarato, o non visibile. Poi elenca con trattini i danni che vedo nelle foto ma che NON risultano sul contratto: sono i più importanti, da far mettere a verbale subito.';
+  }
+  function comparePrompt(){
+    return READ_GUIDE+'\n\n'+
+      'RUOLO: assistente esperto di noleggio auto. Questo PDF contiene SIA il RITIRO sia la RICONSEGNA: per ogni posizione le due pagine sono consecutive, confrontale. '+
+      'Km/carburante al RITIRO: '+metaLine('ritiro')+'. Alla RICONSEGNA: '+metaLine('riconsegna')+'.\n\n'+TASK_COMPARE;
   }
 
   /* A · verifica al RITIRO: contratto + stato iniziale */
   async function verifyPickup(){
-    const docs=Object.keys(data).filter(k=>k.startsWith('doc:')).sort();
-    const pos=POS.filter(p=>data['ph:ritiro:'+p.id]);
-    const dmg=Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort();
+    const docs=Object.keys(data).filter(k=>k.startsWith('doc:'));
+    const hasCar=POS.some(p=>data['ph:ritiro:'+p.id])||Object.keys(data).some(k=>k.startsWith('dmg:ritiro:'));
     if(!docs.length){ showReport('⚠️ Aggiungi prima almeno una foto del **contratto** di noleggio.'); return; }
-    if(!pos.length && !dmg.length){ showReport('⚠️ Carica almeno una **foto dell\'auto** (colonna Ritiro) prima di verificare.'); return; }
-    const btn=document.getElementById('carVerify'); setBusy(btn,true,RIT_IDLE,'Analisi ritiro…');
-    const content=[{type:'text',text:INTRO_PICKUP+' Valori dichiarati al ritiro: '+metaLine('ritiro')+'.'}];
-    try{
-      for(let i=0;i<docs.length;i++) await pushImg(content,'— CONTRATTO · pagina '+(i+1)+' —',data[docs[i]].dataURL,1000,.72);
-      for(const p of pos) await pushImg(content,'— FOTO · '+p.label+' —',data['ph:ritiro:'+p.id].dataURL,900,.68);
-      for(let i=0;i<dmg.length;i++) await pushImg(content,'— DANNO segnalato '+(i+1)+' —',data[dmg[i]].dataURL,900,.68);
-      content.push({type:'text',text:TASK_PICKUP});
-      showReport(await runClaude(content)||'Nessuna risposta. Riprova.');
-    }catch(err){ showReport(errMsg(err)); }
-    finally{ setBusy(btn,false,RIT_IDLE,''); }
+    if(!hasCar){ showReport('⚠️ Carica almeno una **foto dell\'auto** (colonna Ritiro).'); return; }
+    showReport('📄 Genero il PDF del ritiro…');
+    try{ await buildPDF(ritiroItems(),'noleggio-RITIRO.pdf',pickupPrompt(),'Noleggio auto · verifica RITIRO');
+      showReport('✅ **PDF ritiro scaricato** e prompt copiato. Aprilo in una chat Claude, allega il PDF e incolla il prompt: ti dice se ci sono **discrepanze con i danni dichiarati da Autovia**.'); }
+    catch(e){ showReport('⚠️ Generazione PDF non riuscita: '+e); }
   }
 
   /* B · confronto RITIRO vs RICONSEGNA */
   async function verifyCompare(){
-    if(!hasPhase('ritiro')||!hasPhase('riconsegna')){ showReport('⚠️ Servono le foto di **entrambi** i momenti (ritiro e riconsegna) per il confronto.'); return; }
-    const pairs=POS.filter(p=>data['ph:ritiro:'+p.id]||data['ph:riconsegna:'+p.id]);
-    const btn=document.getElementById('carCompare'); setBusy(btn,true,CMP_IDLE,'Confronto in corso…');
-    const content=[{type:'text',text:INTRO_COMPARE+' Km/carburante al RITIRO: '+metaLine('ritiro')+'. Alla RICONSEGNA: '+metaLine('riconsegna')+'.'}];
-    try{
-      for(const p of pairs){
-        if(data['ph:ritiro:'+p.id]) await pushImg(content,'— '+p.label+' · RITIRO —',data['ph:ritiro:'+p.id].dataURL,820,.62);
-        if(data['ph:riconsegna:'+p.id]) await pushImg(content,'— '+p.label+' · RICONSEGNA —',data['ph:riconsegna:'+p.id].dataURL,820,.62);
-      }
-      const dr=Object.keys(data).filter(k=>k.startsWith('dmg:ritiro:')).sort();
-      const dc=Object.keys(data).filter(k=>k.startsWith('dmg:riconsegna:')).sort();
-      for(let i=0;i<dr.length;i++) await pushImg(content,'— DANNO al ritiro '+(i+1)+' —',data[dr[i]].dataURL,820,.62);
-      for(let i=0;i<dc.length;i++) await pushImg(content,'— DANNO alla riconsegna '+(i+1)+' —',data[dc[i]].dataURL,820,.62);
-      content.push({type:'text',text:TASK_COMPARE});
-      showReport(await runClaude(content)||'Nessuna risposta. Riprova.');
-    }catch(err){ showReport(errMsg(err)); }
-    finally{ setBusy(btn,false,CMP_IDLE,''); }
+    if(!hasPhase('riconsegna')){ showReport('⚠️ Carica prima le **foto della riconsegna** (colonna Riconsegna).'); return; }
+    showReport('📄 Genero il PDF completo…');
+    try{ await buildPDF(fullItems(),'noleggio-CONFRONTO.pdf',comparePrompt(),'Noleggio auto · RITIRO + RICONSEGNA');
+      showReport('✅ **PDF completo scaricato** (ritiro + riconsegna) e prompt copiato. Un solo file: aprilo in una chat Claude, allega il PDF e incolla il prompt → confronto automatico. Contenendo entrambi i momenti, non importa in quale chat lo carichi.'); }
+    catch(e){ showReport('⚠️ Generazione PDF non riuscita: '+e); }
   }
 
   /* ── eventi ── */
@@ -928,6 +1002,9 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   (async()=>{
     try{ data=await dbAll(); }catch(e){ data={}; }
     renderAll();
+    const bv=document.getElementById('carVerify'), bc=document.getElementById('carCompare');
+    if(bv) bv.innerHTML='📄 PDF ritiro per Claude';
+    if(bc) bc.innerHTML='📄 PDF confronto per Claude';
     try{ const last=localStorage.getItem('svito26_carreport'); if(last) showReport(last); }catch(e){}
   })();
 })();
