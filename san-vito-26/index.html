@@ -105,6 +105,9 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-hei
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .place{font-family:var(--font-sans);font-weight:700;font-size:12px;text-transform:uppercase;
   letter-spacing:.16em;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+.top-left{display:flex;align-items:center;gap:9px;min-width:0}
+.hotel-btn{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;font-family:var(--font-sans);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--on-fill);background:var(--accent-fill);border-radius:var(--r-full);padding:6px 12px;text-decoration:none;box-shadow:var(--shadow-sm);white-space:nowrap}
+.hotel-btn:active{transform:scale(.96)}
 .clock{font-family:var(--font-sans);font-weight:500;font-size:28px;letter-spacing:.01em;
   line-height:1;color:var(--ink);font-feature-settings:"tnum" 1}
 .wx{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink-soft);margin-top:9px}
@@ -307,6 +310,7 @@ section:first-of-type .sec-title{margin-top:0}
 .fin-pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:var(--r-full)}
 .fin-pill.paid{background:oklch(92% .06 150);color:oklch(40% .1 150)}
 .fin-pill.due{background:var(--accent-soft);color:var(--accent)}
+.fin-pill.cassa{background:oklch(92% .07 300);color:oklch(42% .12 300)}
 .fin-row .amt{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink);white-space:nowrap}
 .fin-acts{display:flex;gap:5px}
 .fin-ico{width:34px;height:34px;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--r-sm);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-family:inherit}
@@ -456,7 +460,10 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
 <!-- ═══ SEZIONE 1 · HEADER STICKY (orologio · meteo · countdown) ═══ -->
 <header class="top">
   <div class="top-row">
-    <div class="place">📍 San Vito Lo Capo</div>
+    <div class="top-left">
+      <div class="place">📍 San Vito Lo Capo</div>
+      <a class="hotel-btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=Il%20Giardino%20del%20Sol%2C%20Via%20N.%20Maniaci%207%2C%2091030%20San%20Vito%20Lo%20Capo%20TP&amp;travelmode=driving" target="_blank" rel="noopener" aria-label="Naviga verso l'hotel Il Giardino del Sol">🏨 Hotel</a>
+    </div>
     <div class="clock" id="clock">--:--:--</div>
   </div>
   <div class="top-row">
@@ -582,6 +589,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
         <input class="meta-in" id="finAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Importo in €">
         <select class="meta-in" id="finBy">
           <option value="Nessuno">Pagato da: Nessuno (da saldare)</option>
+          <option value="Cassa">Pagato da: Cassa comune</option>
           <option value="Marito">Pagato da: Marito</option>
           <option value="Moglie">Pagato da: Moglie</option>
         </select>
@@ -948,44 +956,45 @@ const FIN_SEED=[
   {desc:'Seggiolino',amt:50,by:'Nessuno'},
   {desc:'Fondo Cassa / Vivere lì',amt:856,by:'Nessuno'},
 ];
-const FIN_VLS='svito26_versamenti';
-const FIN_VSEED=[{by:'Marito',amt:582}];   // i 582 € già versati in cassa
+const FIN_VLS='svito26_versamenti2';
+const FIN_VSEED=[{by:'Marito',amt:582},{by:'Moglie',amt:918}];   // cassa comune iniziale 1500 € (582 Marito + 918 Moglie)
 let finExp=finLoad(), finVers=finVLoad(), finEdit=null;
 function finLoad(){ try{const s=localStorage.getItem(FIN_LS); if(s){const a=JSON.parse(s); if(Array.isArray(a)) return a;}}catch(e){} return FIN_SEED.map(x=>({...x})); }
 function finStore(){ try{localStorage.setItem(FIN_LS,JSON.stringify(finExp));}catch(e){} }
 function finVLoad(){ try{const s=localStorage.getItem(FIN_VLS); if(s){const a=JSON.parse(s); if(Array.isArray(a)) return a;}}catch(e){} return FIN_VSEED.map(x=>({...x})); }
 function finVStore(){ try{localStorage.setItem(FIN_VLS,JSON.stringify(finVers));}catch(e){} }
-const finStato=e=> e.by==='Nessuno'?'Da saldare':'Pagato';
 const eur=n=>{ n=Math.round(n*100)/100; return (Number.isInteger(n)?String(n):n.toFixed(2).replace('.',','))+' €'; };
 const finArt=n=> n==='Moglie'?'La':'Il';
 const finEsc=s=> String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
 function finCompute(){
-  let total=0, daSaldare=0; const ant={}, versato={}, contrib={}; FIN_SPLIT.forEach(p=>{ant[p]=0;versato[p]=0;});
-  for(const e of finExp){ const a=+e.amt||0; total+=a; if(e.by==='Nessuno') daSaldare+=a; else if(ant[e.by]!=null) ant[e.by]+=a; }
+  let total=0, daSaldare=0, cassaSpent=0; const ant={}, versato={}, contrib={}; FIN_SPLIT.forEach(p=>{ant[p]=0;versato[p]=0;});
+  for(const e of finExp){ const a=+e.amt||0; total+=a;
+    if(e.by==='Nessuno') daSaldare+=a;
+    else if(e.by==='Cassa') cassaSpent+=a;          // pagato dalla cassa comune → scala il saldo
+    else if(ant[e.by]!=null) ant[e.by]+=a; }
   for(const v of finVers){ const a=+v.amt||0; if(versato[v.by]!=null) versato[v.by]+=a; }
-  let cassa=0; FIN_SPLIT.forEach(p=>{ contrib[p]=ant[p]+versato[p]; cassa+=versato[p]; });
-  return {total, quota:total/2, ant, versato, contrib, cassa, daSaldare};
+  let cassaIn=0; FIN_SPLIT.forEach(p=>{ contrib[p]=ant[p]+versato[p]; cassaIn+=versato[p]; });
+  return {total, quota:total/2, ant, versato, contrib, cassaIn, cassaSpent, cassa:cassaIn-cassaSpent, daSaldare};
 }
 function finBalance(c){
   if(c.total<=0) return {ico:'💶', html:'Aggiungi una spesa per vedere il bilancio.'};
-  const owe={}; FIN_SPLIT.forEach(p=>owe[p]=c.quota-(c.contrib[p]||0));  // quanto manca alla quota (al netto dei versamenti)
-  const manager=(c.ant[FIN_SPLIT[0]]||0)<=(c.ant[FIN_SPLIT[1]]||0)?FIN_SPLIT[0]:FIN_SPLIT[1];
-  const others=FIN_SPLIT.filter(p=>p!==manager);
-  if(c.daSaldare>0.5){
-    const parts=others.map(p=>{
-      if(owe[p]>0.5) return `${finArt(p)} <b>${p}</b> deve versare <b>${eur(owe[p])}</b> nella cassa comune.`;
-      if((c.versato[p]||0)>0.5) return `${finArt(p)} <b>${p}</b> ha completato la sua quota (<b>${eur(c.versato[p])}</b> versati). ✓`;
-      return `${finArt(p)} <b>${p}</b> ha già coperto la sua quota. ✓`;
-    });
-    parts.push(`${finArt(manager)} <b>${manager}</b> gestirà la cassa saldando le spese rimanenti.`);
-    const settled=others.every(p=>owe[p]<=0.5);
-    return {ico: settled?'✅':'⚖️', html:parts.join(' ')};
+  const owe={}; FIN_SPLIT.forEach(p=>owe[p]=c.quota-(c.contrib[p]||0));  // quanto manca a ciascuno per la propria quota
+  const debtors=FIN_SPLIT.filter(p=>owe[p]>0.5);
+  // 1) qualcuno non ha ancora coperto la sua quota → deve versare in cassa
+  if(debtors.length){
+    const parts=debtors.map(p=>`${finArt(p)} <b>${p}</b> deve ancora versare <b>${eur(owe[p])}</b>`);
+    let html=`Per pareggiare le quote (<b>${eur(c.quota)}</b> a testa): ${parts.join(' e ')} nella cassa comune.`;
+    if(c.daSaldare>0.5) html+=' Poi le spese si saldano dalla cassa.';
+    return {ico:'⚖️', html};
   }
-  // nessuna spesa da saldare → conguaglio diretto
-  const d=FIN_SPLIT.find(p=>owe[p]>0.5), cr=FIN_SPLIT.find(p=>owe[p]<-0.5);
-  if(d&&cr) return {ico:'⚖️', html:`${finArt(d)} <b>${d}</b> deve dare <b>${eur(owe[d])}</b> ${cr==='Moglie'?'alla Moglie':'al Marito'}.`};
-  return {ico:'✅', html:'I conti sono in pari. ✓'};
+  // 2) quote pareggiate, restano spese da pagare dalla cassa
+  if(c.daSaldare>0.5){
+    return {ico:'✅', html:`Quote pareggiate (<b>${eur(c.quota)}</b> a testa). Restano <b>${eur(c.daSaldare)}</b> di spese da saldare dalla cassa comune (saldo: <b>${eur(c.cassa)}</b>).`};
+  }
+  // 3) tutto saldato
+  const tail = c.cassa>0.5 ? ` Avanzano <b>${eur(c.cassa)}</b> in cassa.` : (c.cassa<-0.5 ? ` Cassa in rosso di <b>${eur(-c.cassa)}</b>.` : ' Cassa a zero.');
+  return {ico:'✅', html:`Tutto saldato, quote pari.`+tail};
 }
 function renderFinance(){
   const c=finCompute(), b=finBalance(c);
@@ -995,15 +1004,17 @@ function renderFinance(){
     `<div class="fin-cell"><div class="k">Quota a testa</div><div class="val">${eur(c.quota)}</div></div>`+
     `<div class="fin-cell"><div class="k">Marito · ha messo</div><div class="val">${eur(c.contrib.Marito||0)}</div></div>`+
     `<div class="fin-cell"><div class="k">Moglie · ha messo</div><div class="val">${eur(c.contrib.Moglie||0)}</div></div>`+
-    `<div class="fin-cell"><div class="k">In cassa</div><div class="val">${eur(c.cassa)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Saldo cassa</div><div class="val">${eur(c.cassa)}</div></div>`+
     `<div class="fin-cell"><div class="k">Da saldare</div><div class="val">${eur(c.daSaldare)}</div></div>`;
   renderVers();
   document.getElementById('finCount').textContent=finExp.length+(finExp.length===1?' voce':' voci');
   document.getElementById('finTable').innerHTML=finExp.map((e,i)=>{
-    const due=e.by==='Nessuno';
+    const due=e.by==='Nessuno', cassa=e.by==='Cassa';
+    const pillCls=due?'due':cassa?'cassa':'paid', pillTxt=due?'Da saldare':cassa?'Cassa':'Pagato';
+    const metaTxt=due?'da saldare':cassa?'pagato dalla cassa comune':'pagato da '+e.by;
     return `<div class="fin-row"><div><div class="desc">${finEsc(e.desc)}</div>`+
-      `<div class="meta"><span class="fin-pill ${due?'due':'paid'}">${finStato(e)}</span>`+
-      `<span>${due?'da saldare':'pagato da '+e.by}</span></div></div>`+
+      `<div class="meta"><span class="fin-pill ${pillCls}">${pillTxt}</span>`+
+      `<span>${metaTxt}</span></div></div>`+
       `<div class="amt">${eur(+e.amt||0)}</div>`+
       `<div class="fin-acts"><button class="fin-ico" data-edit="${i}" title="Modifica">✏️</button>`+
       `<button class="fin-ico" data-del="${i}" title="Rimuovi">🗑️</button></div></div>`;
@@ -1049,7 +1060,7 @@ function finExportPDF(){
   const f=n=>new Intl.NumberFormat('it-IT',{maximumFractionDigits:2}).format(Math.round(n*100)/100)+' €';
   const rows=finExp.map(e=>
     `<tr><td class="desc">${finEsc(e.desc)}</td>`+
-    `<td class="pr-state">${e.by==='Nessuno'?'Da saldare':'Pagato · '+e.by}</td>`+
+    `<td class="pr-state">${e.by==='Nessuno'?'Da saldare':e.by==='Cassa'?'Cassa comune':'Pagato · '+e.by}</td>`+
     `<td class="amt r">${f(+e.amt||0)}</td></tr>`).join('');
   const dateStr=new Intl.DateTimeFormat('it-IT',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Rome'}).format(new Date());
   document.getElementById('finPrint').innerHTML=
