@@ -290,6 +290,32 @@ section:first-of-type .sec-title{margin-top:0}
 .wx-hour .w{font-size:10px;color:var(--ink-faint);margin-top:1px}
 .wx-hour .w.strong{color:var(--ink);font-weight:800}
 .wx-sep{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:32px;color:var(--ink-faint);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;line-height:1.3;border-left:1.5px dashed var(--line);padding-left:7px}
+/* ═════ Spese & split 50/50 ═════ */
+.fin-balance{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent-fill);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:18px;display:flex;gap:13px;align-items:flex-start}
+.fin-balance .fb-ico{font-size:24px;line-height:1;flex-shrink:0}
+.fin-balance .fb-txt{font-family:var(--font-display);font-size:16px;line-height:1.42;color:var(--ink);font-weight:500}
+.fin-balance .fb-txt b{font-weight:800}
+.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.fin-cell{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 14px;box-shadow:var(--shadow-sm)}
+.fin-cell.wide{grid-column:1/-1}
+.fin-cell .k{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+.fin-cell .val{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--ink);margin-top:3px}
+.fin-table{display:flex;flex-direction:column;gap:7px}
+.fin-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px}
+.fin-row .desc{font-weight:700;font-size:14px;color:var(--ink)}
+.fin-row .meta{font-size:11.5px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.fin-pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:var(--r-full)}
+.fin-pill.paid{background:oklch(92% .06 150);color:oklch(40% .1 150)}
+.fin-pill.due{background:var(--accent-soft);color:var(--accent)}
+.fin-row .amt{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink);white-space:nowrap}
+.fin-acts{display:flex;gap:5px}
+.fin-ico{width:34px;height:34px;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--r-sm);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.fin-ico:active{transform:scale(.94)}
+.fin-form{display:flex;flex-direction:column;gap:10px}
+.fin-form-actions{display:flex;gap:8px}
+.fin-form-actions .btn-verify{flex:1;width:auto}
+.fin-cancel{height:52px;padding:0 18px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-soft);border-radius:var(--r-lg);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.fin-cancel:active{transform:scale(.98)}
 .wx-foot{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:11px;margin-top:2px}
 .wx-foot b{color:var(--ink);font-weight:700}
 .pickmode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
@@ -415,6 +441,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <button class="vn" data-v="valigia" type="button">🎒 Valigia</button>
     <button class="vn" data-v="outfit" type="button">👔 Outfit</button>
     <button class="vn" data-v="noleggio" type="button">🚗 Noleggio</button>
+    <button class="vn" data-v="spese" type="button">💶 Spese</button>
   </nav>
 
   <!-- ═══ SEZIONE 3 · CHECKLIST (solo prima della partenza) ═══ -->
@@ -502,6 +529,36 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     </div>
 
     <div class="report" id="carReport"></div>
+  </section>
+
+  <!-- ═══ SEZIONE 6 · SPESE & SPLIT 50/50 ═══ -->
+  <section id="speseSection">
+    <div class="sec-title">Spese &amp; conti 50/50 💶</div>
+
+    <div class="fin-balance" id="finBalance"></div>
+    <div class="fin-grid" id="finSummary"></div>
+
+    <div class="car-sub" style="margin-top:26px"><span>📋 Tutte le spese</span><span class="cnt" id="finCount">0 voci</span></div>
+    <div class="fin-table" id="finTable"></div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="card-h" id="finFormTitle">➕ Aggiungi spesa</div>
+      <div class="fin-form">
+        <input class="meta-in" id="finDesc" type="text" placeholder="Descrizione (es. Cena fuori)" autocomplete="off">
+        <input class="meta-in" id="finAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Importo in €">
+        <select class="meta-in" id="finBy">
+          <option value="Nessuno">Pagato da: Nessuno (da saldare)</option>
+          <option value="Marito">Pagato da: Marito</option>
+          <option value="Moglie">Pagato da: Moglie</option>
+        </select>
+        <div class="fin-form-actions">
+          <button class="btn-verify" id="finSave" type="button">Aggiungi</button>
+          <button class="fin-cancel" id="finCancel" type="button" style="display:none">Annulla</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-compare" id="finExport" type="button" style="margin-top:14px"><span class="clbl">📊 Esporta in DF (CSV)</span></button>
   </section>
 </main>
 
@@ -812,6 +869,7 @@ function showView(v){
   document.getElementById('checklistSection').style.display = v==='valigia'?'':'none';
   document.getElementById('outfitSection').style.display   = v==='outfit'?'':'none';
   document.getElementById('carSection').style.display      = v==='noleggio'?'':'none';
+  document.getElementById('speseSection').style.display    = v==='spese'?'':'none';
   document.querySelectorAll('#viewNav .vn').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -829,6 +887,108 @@ weather(); setInterval(weather,600000);
 document.getElementById('wx').addEventListener('click',openWxSheet);
 document.getElementById('wxSheetX').addEventListener('click',closeWxSheet);
 document.getElementById('wxSheet').addEventListener('click',e=>{ if(e.target.id==='wxSheet') closeWxSheet(); });
+
+/* ════════ Spese & split 50/50 ════════ */
+const FIN_LS='svito26_spese';
+const FIN_SPLIT=['Marito','Moglie'];
+const FIN_SEED=[
+  {desc:'Caparra Hotel',amt:125,by:'Marito'},
+  {desc:'Auto',amt:211,by:'Marito'},
+  {desc:'Saldo Hotel',amt:399,by:'Nessuno'},
+  {desc:'Spiaggia',amt:175,by:'Nessuno'},
+  {desc:'Parcheggio',amt:20,by:'Nessuno'},
+  {desc:'Seggiolino',amt:50,by:'Nessuno'},
+  {desc:'Fondo Cassa / Vivere lì',amt:856,by:'Nessuno'},
+];
+let finExp=finLoad(), finEdit=null;
+function finLoad(){ try{const s=localStorage.getItem(FIN_LS); if(s){const a=JSON.parse(s); if(Array.isArray(a)) return a;}}catch(e){} return FIN_SEED.map(x=>({...x})); }
+function finStore(){ try{localStorage.setItem(FIN_LS,JSON.stringify(finExp));}catch(e){} }
+const finStato=e=> e.by==='Nessuno'?'Da saldare':'Pagato';
+const eur=n=>{ n=Math.round(n*100)/100; return (Number.isInteger(n)?String(n):n.toFixed(2).replace('.',','))+' €'; };
+const finArt=n=> n==='Moglie'?'La':'Il';
+const finEsc=s=> String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+function finCompute(){
+  let total=0, daSaldare=0; const ant={}; FIN_SPLIT.forEach(p=>ant[p]=0);
+  for(const e of finExp){ const a=+e.amt||0; total+=a; if(e.by==='Nessuno') daSaldare+=a; else ant[e.by]=(ant[e.by]||0)+a; }
+  return {total, quota:total/2, ant, daSaldare};
+}
+function finBalance(c){
+  if(c.total<=0) return {ico:'💶', html:'Aggiungi una spesa per vedere il bilancio.'};
+  const owe={}; FIN_SPLIT.forEach(p=>owe[p]=c.quota-(c.ant[p]||0));
+  const manager=(c.ant[FIN_SPLIT[0]]||0)<=(c.ant[FIN_SPLIT[1]]||0)?FIN_SPLIT[0]:FIN_SPLIT[1];
+  const debtors=FIN_SPLIT.filter(p=>p!==manager && owe[p]>0.005);
+  if(c.daSaldare>0.005 && debtors.length){
+    const parts=debtors.map(p=>`${finArt(p)} <b>${p}</b> deve versare <b>${eur(owe[p])}</b> nella cassa comune.`);
+    parts.push(`${finArt(manager)} <b>${manager}</b> gestirà la cassa saldando le spese rimanenti.`);
+    return {ico:'⚖️', html:parts.join(' ')};
+  }
+  const d=FIN_SPLIT.find(p=>owe[p]>0.005), cr=FIN_SPLIT.find(p=>owe[p]<-0.005);
+  if(d&&cr) return {ico:'⚖️', html:`${finArt(d)} <b>${d}</b> deve dare <b>${eur(owe[d])}</b> ${cr==='Moglie'?'alla Moglie':'al Marito'}.`};
+  return {ico:'✅', html:'I conti sono già in pari.'};
+}
+function renderFinance(){
+  const c=finCompute(), b=finBalance(c);
+  document.getElementById('finBalance').innerHTML=`<span class="fb-ico">${b.ico}</span><span class="fb-txt">${b.html}</span>`;
+  document.getElementById('finSummary').innerHTML=
+    `<div class="fin-cell"><div class="k">Costo totale</div><div class="val">${eur(c.total)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Quota a testa</div><div class="val">${eur(c.quota)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Anticipato · Marito</div><div class="val">${eur(c.ant.Marito||0)}</div></div>`+
+    `<div class="fin-cell"><div class="k">Anticipato · Moglie</div><div class="val">${eur(c.ant.Moglie||0)}</div></div>`+
+    `<div class="fin-cell wide"><div class="k">Spese rimanenti da saldare</div><div class="val">${eur(c.daSaldare)}</div></div>`;
+  document.getElementById('finCount').textContent=finExp.length+(finExp.length===1?' voce':' voci');
+  document.getElementById('finTable').innerHTML=finExp.map((e,i)=>{
+    const due=e.by==='Nessuno';
+    return `<div class="fin-row"><div><div class="desc">${finEsc(e.desc)}</div>`+
+      `<div class="meta"><span class="fin-pill ${due?'due':'paid'}">${finStato(e)}</span>`+
+      `<span>${due?'da saldare':'pagato da '+e.by}</span></div></div>`+
+      `<div class="amt">${eur(+e.amt||0)}</div>`+
+      `<div class="fin-acts"><button class="fin-ico" data-edit="${i}" title="Modifica">✏️</button>`+
+      `<button class="fin-ico" data-del="${i}" title="Rimuovi">🗑️</button></div></div>`;
+  }).join('') || '<div class="gallery-empty">Nessuna spesa registrata.</div>';
+}
+function finResetForm(){
+  finEdit=null;
+  document.getElementById('finDesc').value=''; document.getElementById('finAmt').value=''; document.getElementById('finBy').value='Nessuno';
+  document.getElementById('finFormTitle').textContent='➕ Aggiungi spesa';
+  document.getElementById('finSave').textContent='Aggiungi';
+  document.getElementById('finCancel').style.display='none';
+}
+function finSubmit(){
+  const desc=document.getElementById('finDesc').value.trim();
+  const amt=parseFloat(document.getElementById('finAmt').value.replace(',','.'));
+  const by=document.getElementById('finBy').value;
+  if(!desc){ document.getElementById('finDesc').focus(); return; }
+  if(!(amt>0)){ document.getElementById('finAmt').focus(); return; }
+  const row={desc,amt,by};
+  if(finEdit!==null) finExp[finEdit]=row; else finExp.push(row);
+  finStore(); renderFinance(); finResetForm();
+}
+function finStartEdit(i){
+  finEdit=i; const e=finExp[i];
+  document.getElementById('finDesc').value=e.desc; document.getElementById('finAmt').value=e.amt; document.getElementById('finBy').value=e.by;
+  document.getElementById('finFormTitle').textContent='✏️ Modifica spesa';
+  document.getElementById('finSave').textContent='Salva modifica';
+  document.getElementById('finCancel').style.display='';
+  document.getElementById('finFormTitle').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function finDelete(i){ finExp.splice(i,1); if(finEdit===i) finResetForm(); else if(finEdit>i) finEdit--; finStore(); renderFinance(); }
+function finExportCSV(){
+  const esc=v=>{ v=String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  const lines=['Descrizione,Importo,Pagato da,Stato'];
+  for(const e of finExp) lines.push([esc(e.desc),(+e.amt||0).toFixed(2),esc(e.by),esc(finStato(e))].join(','));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='spese_san_vito_2026.csv';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+renderFinance(); finResetForm();
+document.getElementById('finSave').addEventListener('click',finSubmit);
+document.getElementById('finCancel').addEventListener('click',finResetForm);
+document.getElementById('finExport').addEventListener('click',finExportCSV);
+document.getElementById('finTable').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-edit]'), de=e.target.closest('[data-del]');
+  if(ed) finStartEdit(+ed.dataset.edit); else if(de) finDelete(+de.dataset.del);
+});
 /* re-sync della checklist quando si rientra nella pagina (reload, bfcache, ritorno da app) */
 window.addEventListener('pageshow',()=>{ checks=loadChecks(); applyChecks(); });
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=loadChecks(); applyChecks(); } });
