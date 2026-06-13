@@ -300,6 +300,9 @@ section:first-of-type .sec-title{margin-top:0}
 .car-body{fill:var(--surface-2);stroke:var(--line);stroke-width:2}
 .car-roof{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
 .car-line{fill:none;stroke:var(--line);stroke-width:2}
+.car-cabin{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.car-glass{fill:var(--surface);stroke:var(--line);stroke-width:1.25}
+.car-mirror{fill:var(--surface-2);stroke:var(--line);stroke-width:1.5}
 .hot{cursor:pointer}
 .hot .hot-hit{fill:transparent;pointer-events:all}
 .hot .hot-dot{fill:var(--surface);stroke:var(--accent);stroke-width:2.5;transition:fill .15s,stroke .15s}
@@ -816,6 +819,13 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   }
   let carPhase='ritiro';
   const COORDS={ avanti:[120,48], parabrezza:[120,100], cruscotto:[120,152], latsx1:[60,150], latsx2:[60,268], latdx1:[180,150], latdx2:[180,268], lunotto:[120,300], dietro:[120,346] };
+  const CAR_BODY=
+    '<path class="car-body" d="M120 30 C158 30 178 46 182 80 C186 122 186 150 186 192 C186 252 185 302 176 328 C170 348 150 352 120 352 C90 352 70 348 64 328 C55 302 54 252 54 192 C54 150 54 122 58 80 C62 46 82 30 120 30 Z"/>'+
+    '<path class="car-mirror" d="M56 92 L42 87 Q37 88 39 94 L41 101 Q43 105 48 102 Z"/>'+
+    '<path class="car-mirror" d="M184 92 L198 87 Q203 88 201 94 L199 101 Q197 105 192 102 Z"/>'+
+    '<rect class="car-cabin" x="72" y="118" width="96" height="172" rx="26"/>'+
+    '<path class="car-glass" d="M86 120 L154 120 L137 96 L103 96 Z"/>'+
+    '<path class="car-glass" d="M90 288 L150 288 L145 314 L95 314 Z"/>';
   function metaBox(phase){
     const opts=FUEL.map(f=>`<option value="${f}"${mget(phase,'fuel')===f?' selected':''}>${f}</option>`).join('');
     return `<div class="meta-box"><label class="meta-f">Km <input type="text" inputmode="numeric" class="meta-in" data-mph="${phase}" data-mf="km" value="${mget(phase,'km')}" placeholder="es. 45210"></label>`+
@@ -830,10 +840,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
         `<text class="hot-ico" text-anchor="middle" dy="5.5">${done?'✓':(i+1)}</text></g>`;
     }).join('');
     const svg=`<svg class="carsvg" viewBox="0 0 240 380">`+
-      `<rect class="car-body" x="50" y="28" width="140" height="324" rx="46"/>`+
-      `<rect class="car-roof" x="76" y="118" width="88" height="172" rx="26"/>`+
-      `<path class="car-line" d="M72 96 q48 -20 96 0"/><path class="car-line" d="M74 312 q46 16 92 0"/>`+
-      dots+`</svg>`;
+      CAR_BODY+dots+`</svg>`;
     const taken=POS.filter(p=>data['ph:'+ph+':'+p.id]);
     const strip=taken.length ? `<div class="thumbs">`+taken.map(p=>`<div class="shot sm"><img src="${data['ph:'+ph+':'+p.id].dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="ph:${ph}:${p.id}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('')+`</div>` : '';
     document.getElementById('carPositions').innerHTML=
@@ -865,8 +872,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     const keys=Object.keys(data).filter(k=>k.startsWith('dmg:'+ph+':')).sort();
     const marks=keys.map(k=>{const d=data[k];return `<g class="xmark" pointer-events="none" transform="translate(${d.x||120},${d.y||190})"><circle class="xbg" r="13"></circle><text text-anchor="middle" dy="6">✕</text></g>`;}).join('');
     const svg=`<svg id="dmgSvg" class="carsvg" data-act="dmgadd" viewBox="0 0 240 380">`+
-      `<rect class="car-body" x="50" y="28" width="140" height="324" rx="46"/><rect class="car-roof" x="76" y="118" width="88" height="172" rx="26"/>`+
-      `<path class="car-line" d="M72 96 q48 -20 96 0"/><path class="car-line" d="M74 312 q46 16 92 0"/>`+marks+`</svg>`;
+      CAR_BODY+marks+`</svg>`;
     const rows=keys.map(k=>{ const d=data[k];
       const thumb=d.dataURL?`<img class="dmg-thumb" data-act="dmgfoto" data-key="${k}" src="${d.dataURL}" loading="lazy" decoding="async" alt="">`:`<button class="dmg-foto" data-act="dmgfoto" data-key="${k}" type="button">📷</button>`;
       const zopt=ZONES.map(z=>`<option${d.zone===z?' selected':''}>${z}</option>`).join('');
