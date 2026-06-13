@@ -294,6 +294,24 @@ section:first-of-type .sec-title{margin-top:0}
 
 /* ═════ noleggio: posizioni ritiro/riconsegna ═════ */
 .pos-legend{display:flex;gap:10px;margin:0 2px 12px}
+.phasetoggle{display:flex;gap:8px;margin:0 0 12px}
+.ph-b{flex:1;height:44px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.ph-b.on{border-color:transparent;background:var(--accent-fill);color:var(--on-fill);box-shadow:var(--shadow-sm)}
+.carmap-hint{text-align:center;margin:0 0 4px}
+.carsvg{width:100%;max-width:300px;display:block;margin:2px auto 10px}
+.car-body{fill:var(--surface-2);stroke:var(--line);stroke-width:2}
+.car-roof{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.car-line{fill:none;stroke:var(--line);stroke-width:2}
+.hot{cursor:pointer}
+.hot .hot-hit{fill:transparent;pointer-events:all}
+.hot .hot-dot{fill:var(--surface);stroke:var(--accent);stroke-width:2.5;transition:fill .15s,stroke .15s}
+.hot .hot-ico{fill:var(--accent);font-size:15px;font-weight:800;font-family:-apple-system,system-ui,sans-serif;pointer-events:none}
+.hot.done .hot-dot{fill:var(--accent-fill);stroke:var(--accent-fill)}
+.hot.done .hot-ico{fill:var(--on-fill)}
+.meta-wrap{margin:2px 0 12px}
+.meta-lbl{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px}
+.shot.sm{width:66px;height:66px}
 .leg{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:4px 11px;border-radius:var(--r-full)}
 .leg-rit{background:var(--accent-soft);color:var(--accent)}
 .leg-ric{background:var(--warn-soft);color:var(--warn)}
@@ -423,8 +441,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <div class="car-intro" style="margin:0 0 10px"><b>Tutte le pagine</b>, soprattutto lo <b>schema danni</b>. Una foto non basta.</div>
     <div class="shot-grid docs" id="carContract"></div>
 
-    <div class="car-sub" style="margin-top:26px"><span>📸 Posizioni · in ordine</span><span class="cnt" id="carShotCnt">0 / 9</span></div>
-    <div class="pos-legend"><span class="leg leg-rit">Ritiro</span><span class="leg leg-ric">Riconsegna</span></div>
+    <div class="car-sub" style="margin-top:26px"><span>📸 Stato auto</span><span class="cnt" id="carShotCnt">0 / 9</span></div>
     <div id="carPositions"></div>
 
     <div class="car-sub" style="margin-top:26px"><span>⚠️ Segnalazione danni</span><span class="cnt" id="carDmgCnt">0 foto</span></div>
@@ -795,32 +812,36 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     document.getElementById('carContract').innerHTML=html;
     document.getElementById('carDocCnt').textContent=keys.length+' foto';
   }
-  function tile(phase,pos){
-    const key='ph:'+phase+':'+pos, d=data[key];
-    if(d) return `<div class="shot" data-act="pos" data-phase="${phase}" data-pos="${pos}"><img src="${d.dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="${key}" type="button" aria-label="Rimuovi foto">✕</button></div>`;
-    return `<div class="shot empty" data-act="pos" data-phase="${phase}" data-pos="${pos}"><span class="ph-plus">+</span><span class="ph-ico">📷</span></div>`;
-  }
+  let carPhase='ritiro';
+  const COORDS={ avanti:[120,48], parabrezza:[120,100], cruscotto:[120,152], latsx1:[60,150], latsx2:[60,268], latdx1:[180,150], latdx2:[180,268], lunotto:[120,300], dietro:[120,346] };
   function metaBox(phase){
-    const cls=phase==='ritiro'?'rit':'ric';
     const opts=FUEL.map(f=>`<option value="${f}"${mget(phase,'fuel')===f?' selected':''}>${f}</option>`).join('');
-    return `<div class="meta-box"><div class="cell-lbl ${cls}">${phase==='ritiro'?'Ritiro':'Riconsegna'}</div>`+
-      `<label class="meta-f">Km <input type="text" inputmode="numeric" class="meta-in" data-mph="${phase}" data-mf="km" value="${mget(phase,'km')}" placeholder="es. 45210"></label>`+
+    return `<div class="meta-box"><label class="meta-f">Km <input type="text" inputmode="numeric" class="meta-in" data-mph="${phase}" data-mf="km" value="${mget(phase,'km')}" placeholder="es. 45210"></label>`+
       `<label class="meta-f">Carburante <select class="meta-in" data-mph="${phase}" data-mf="fuel">${opts}</select></label></div>`;
   }
   function renderPositions(){
-    let ritDone=0;
-    const html=POS.map((p,i)=>{
-      if(data['ph:ritiro:'+p.id]) ritDone++;
-      let block=`<div class="pos"><div class="pos-h"><span class="pos-n">${i+1}</span> ${p.label}${p.hint?` <span class="pos-hint">${p.hint}</span>`:''}</div>`+
-        `<div class="pos-cells">`+
-        `<div class="pos-cell"><div class="cell-lbl rit">Ritiro</div>${tile('ritiro',p.id)}</div>`+
-        `<div class="pos-cell"><div class="cell-lbl ric">Riconsegna</div>${tile('riconsegna',p.id)}</div>`+
-        `</div>`;
-      if(p.meta) block+=`<div class="meta-grid">${metaBox('ritiro')}${metaBox('riconsegna')}</div>`;
-      return block+`</div>`;
+    const ph=carPhase;
+    const dots=POS.map((p,i)=>{
+      const c=COORDS[p.id]||[120,190], done=!!data['ph:'+ph+':'+p.id];
+      return `<g class="hot${done?' done':''}" data-act="pos" data-phase="${ph}" data-pos="${p.id}" transform="translate(${c[0]},${c[1]})" role="button" aria-label="${p.label}">`+
+        `<circle class="hot-hit" r="23"></circle><circle class="hot-dot" r="17"></circle>`+
+        `<text class="hot-ico" text-anchor="middle" dy="5.5">${done?'✓':(i+1)}</text></g>`;
     }).join('');
-    document.getElementById('carPositions').innerHTML=html;
-    document.getElementById('carShotCnt').textContent=ritDone+' / '+POS.length;
+    const svg=`<svg class="carsvg" viewBox="0 0 240 380">`+
+      `<rect class="car-body" x="50" y="28" width="140" height="324" rx="46"/>`+
+      `<rect class="car-roof" x="76" y="118" width="88" height="172" rx="26"/>`+
+      `<path class="car-line" d="M72 96 q48 -20 96 0"/><path class="car-line" d="M74 312 q46 16 92 0"/>`+
+      dots+`</svg>`;
+    const taken=POS.filter(p=>data['ph:'+ph+':'+p.id]);
+    const strip=taken.length ? `<div class="thumbs">`+taken.map(p=>`<div class="shot sm"><img src="${data['ph:'+ph+':'+p.id].dataURL}" alt="" loading="lazy" decoding="async"><button class="del" data-del="ph:${ph}:${p.id}" type="button" aria-label="Rimuovi foto">✕</button></div>`).join('')+`</div>` : '';
+    document.getElementById('carPositions').innerHTML=
+      `<div class="phasetoggle"><button class="ph-b${ph==='ritiro'?' on':''}" data-act="phase" data-ph="ritiro" type="button">Ritiro</button>`+
+      `<button class="ph-b${ph==='riconsegna'?' on':''}" data-act="phase" data-ph="riconsegna" type="button">Riconsegna</button></div>`+
+      `<div class="carmap-hint tiny muted">Tocca un punto per fotografarlo · ✓ = fatto</div>`+
+      svg+
+      `<div class="meta-wrap"><div class="meta-lbl">Km + carburante · ${ph==='ritiro'?'ritiro':'riconsegna'}</div>${metaBox(ph)}</div>`+
+      strip;
+    document.getElementById('carShotCnt').textContent=taken.length+' / '+POS.length;
   }
   function renderDamageCol(phase,mount){
     const keys=Object.keys(data).filter(k=>k.startsWith('dmg:'+phase+':')).sort();
@@ -1067,6 +1088,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
     const act=e.target.closest('[data-act]'); if(!act) return;
     if(act.dataset.act==='pos') pick({single:true,key:'ph:'+act.dataset.phase+':'+act.dataset.pos});
     else if(act.dataset.act==='add') pick({prefix:act.dataset.group});
+    else if(act.dataset.act==='phase'){ carPhase=act.dataset.ph; renderPositions(); }
   });
   document.getElementById('carPositions').addEventListener('change',e=>{
     const el=e.target.closest('.meta-in'); if(el) mset(el.dataset.mph,el.dataset.mf,el.value);
