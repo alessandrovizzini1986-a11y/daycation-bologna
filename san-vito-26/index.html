@@ -127,6 +127,21 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-hei
 .dintorni-link .dt{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink);display:block}
 .dintorni-link .ds{font-size:12.5px;color:var(--ink-soft);margin-top:2px;display:block}
 .dintorni-link .da{margin-left:auto;color:var(--ink-faint);font-weight:700;font-size:18px}
+/* voucher noleggio */
+.vou-card{max-height:90vh;overflow-y:auto}
+.vou-codes{display:flex;gap:10px;margin-bottom:4px}
+.vou-code{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;text-align:center}
+.vou-code .l{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+.vou-code .v{font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--ink);margin-top:4px}
+.vou-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.vou-row .k{color:var(--ink-soft);font-weight:600;flex-shrink:0}
+.vou-row .vv{color:var(--ink);font-weight:700;text-align:right}
+.vou-row .vv.warn{color:var(--alert)}
+.vou-note{background:var(--accent-soft);border-radius:var(--r-md);padding:11px 13px;font-size:12.5px;line-height:1.5;color:var(--ink);margin-top:6px}
+.vou-note.alert{background:var(--alert-soft)}
+.vou-note b{font-weight:800}
+.vou-h{font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);margin:12px 0 2px}
+.vou-call{display:block;text-align:center;text-decoration:none;background:var(--accent-fill);color:var(--on-fill);font-weight:800;font-size:14px;border-radius:var(--r-md);padding:12px;margin-top:6px}
 .clock{font-family:var(--font-sans);font-weight:500;font-size:28px;letter-spacing:.01em;
   line-height:1;color:var(--ink);font-feature-settings:"tnum" 1}
 .wx{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink-soft);margin-top:9px}
@@ -567,6 +582,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
   <!-- ═══ SEZIONE 5 · NOLEGGIO AUTO (ritiro · riconsegna · confronto) ═══ -->
   <section id="carSection">
     <div class="sec-title">Noleggio auto 🚗</div>
+    <button class="btn-verify" id="voucherBtn" type="button" style="margin-bottom:14px">📄 Voucher noleggio · mostra al banco</button>
     <div class="time-est">⏱ Controllo completo: <b>~7-8 min</b> · (contratto + 9 foto auto + eventuali danni). Avvisa pure chi ti aspetta 😉</div>
 
     <div class="card">
@@ -645,6 +661,37 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
   <div class="picksheet-card wxsheet-card">
     <div id="wxSheetBody"></div>
     <button class="picksheet-x" type="button" id="wxSheetX">Chiudi</button>
+  </div>
+</div>
+
+<!-- ═══ Voucher noleggio (bottom sheet) ═══ -->
+<div class="picksheet" id="voucherSheet">
+  <div class="picksheet-card vou-card">
+    <div class="picksheet-h">Voucher noleggio · Ecovia / Auto Europe</div>
+    <div class="vou-codes">
+      <div class="vou-code"><div class="l">Auto Europe</div><div class="v">947594979</div></div>
+      <div class="vou-code"><div class="l">Ecovia</div><div class="v">ECO-26146442</div></div>
+    </div>
+    <div class="vou-row"><span class="k">Conducente</span><span class="vv">Alessandro Vizzini</span></div>
+    <div class="vou-row"><span class="k">Auto</span><span class="vv">CUPRA Leon (gr. CDAR) o similare</span></div>
+    <div class="vou-row"><span class="k">Tipo</span><span class="vv">Compatta · automatica · A/C</span></div>
+    <div class="vou-h">📍 Ritiro</div>
+    <div class="vou-row"><span class="k">Dove</span><span class="vv">Aeroporto di Trapani (Ecovia · TPST)</span></div>
+    <div class="vou-row"><span class="k">Quando</span><span class="vv">14/06/2026 · 09:30</span></div>
+    <div class="vou-row"><span class="k">Volo</span><span class="vv">WI2009</span></div>
+    <div class="vou-h">📍 Riconsegna</div>
+    <div class="vou-row"><span class="k">Dove</span><span class="vv">Aeroporto di Trapani</span></div>
+    <div class="vou-row"><span class="k">Quando</span><span class="vv warn">18/06/2026 · 15:00 ⚠️</span></div>
+    <div class="vou-note alert">⚠️ <b>Attenzione date:</b> la riconsegna è il <b>18/06</b>, ma il volo di ritorno è il <b>19/06 ore 16:15</b>. Il 19 restereste senza auto. Valuta di spostare la riconsegna al 19.</div>
+    <div class="vou-h">Condizioni</div>
+    <div class="vou-row"><span class="k">Carburante</span><span class="vv">Pieno → pieno</span></div>
+    <div class="vou-row"><span class="k">Chilometri</span><span class="vv">Illimitati</span></div>
+    <div class="vou-row"><span class="k">Franchigia</span><span class="vv">€ 2.000 (CDW/furto)</span></div>
+    <div class="vou-row"><span class="k">Deposito</span><span class="vv">€ 700 (carta credito)</span></div>
+    <div class="vou-row"><span class="k">Extra</span><span class="vv">Seggiolino/rialzo ×1 (€ 50,02)</span></div>
+    <div class="vou-note">📋 <b>Da portare al banco:</b> patente fisica valida · carta di credito fisica intestata ad Alessandro · documento d'identità/passaporto · codice fiscale.</div>
+    <a class="vou-call" href="tel:+390923585083">📞 Ufficio Ecovia · +39 0923 585083</a>
+    <button class="picksheet-x" type="button" id="voucherX">Chiudi</button>
   </div>
 </div>
 
@@ -968,6 +1015,10 @@ weather(); setInterval(weather,600000);
 document.getElementById('wx').addEventListener('click',openWxSheet);
 document.getElementById('wxSheetX').addEventListener('click',closeWxSheet);
 document.getElementById('wxSheet').addEventListener('click',e=>{ if(e.target.id==='wxSheet') closeWxSheet(); });
+/* voucher noleggio */
+document.getElementById('voucherBtn').addEventListener('click',()=>document.getElementById('voucherSheet').classList.add('on'));
+document.getElementById('voucherX').addEventListener('click',()=>document.getElementById('voucherSheet').classList.remove('on'));
+document.getElementById('voucherSheet').addEventListener('click',e=>{ if(e.target.id==='voucherSheet') document.getElementById('voucherSheet').classList.remove('on'); });
 
 /* ════════ Spese & split 50/50 ════════ */
 const FIN_LS='svito26_spese';
