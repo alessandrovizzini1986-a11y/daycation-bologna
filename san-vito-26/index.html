@@ -278,6 +278,9 @@ section:first-of-type .sec-title{margin-top:0}
 .pm-b.on{border-color:transparent;background:var(--accent-fill);color:var(--on-fill);box-shadow:var(--shadow-sm)}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));z-index:120;height:54px;padding:0 20px;border:0;border-radius:var(--r-full);background:var(--accent-fill);color:var(--on-fill);font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:var(--shadow-lg);display:inline-flex;align-items:center;gap:8px}
 .fab:active{transform:scale(.96)}
+.viewnav{display:flex;gap:8px;margin:0 0 20px}
+.vn{flex:1;height:46px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.vn.on{border-color:transparent;background:var(--accent-fill);color:var(--on-fill);box-shadow:var(--shadow-sm)}
 .report{margin-top:16px;display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   padding:18px;box-shadow:var(--shadow-sm)}
 .report.show{display:block;animation:pop .3s ease}
@@ -342,10 +345,12 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
   <!-- ═══ SEZIONE 2 · BANNER CONTESTUALE ═══ -->
   <div class="banner" id="banner"><span class="b-ico" id="bIco">🌴</span><span id="bMsg"></span></div>
 
-  <!-- toggle: riapre la checklist valigia dopo la partenza (utile al ritorno) -->
-  <button class="cl-toggle" id="checklistToggle" type="button" aria-pressed="false">
-    <span class="ico">🎒</span><span class="lbl">Mostra checklist valigia</span>
-  </button>
+  <!-- nav: una cosa per volta -->
+  <nav class="viewnav" id="viewNav">
+    <button class="vn" data-v="valigia" type="button">🎒 Valigia</button>
+    <button class="vn" data-v="outfit" type="button">👔 Outfit</button>
+    <button class="vn" data-v="noleggio" type="button">🚗 Noleggio</button>
+  </nav>
 
   <!-- ═══ SEZIONE 3 · CHECKLIST (solo prima della partenza) ═══ -->
   <section id="checklistSection">
@@ -395,7 +400,7 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
   </section>
 
   <!-- ═══ SEZIONE 4 · OUTFIT PLANNER ═══ -->
-  <section>
+  <section id="outfitSection">
     <div class="sec-title">Outfit del giorno 👔</div>
     <div class="daytabs" id="dayTabs"></div>
     <div id="dayContent"></div>
@@ -645,15 +650,6 @@ function tick(){
   const now=new Date();
   document.getElementById('clock').textContent=romeParts(now).clock;
   setStatus(now); setBanner(now);
-  const beforeDep = now<DEP;
-  document.getElementById('checklistSection').style.display = (beforeDep || forceChecklist) ? '' : 'none';
-  const tg=document.getElementById('checklistToggle');
-  if(tg){
-    tg.style.display = beforeDep ? 'none' : 'flex';
-    tg.setAttribute('aria-pressed', forceChecklist ? 'true' : 'false');
-    tg.querySelector('.lbl').textContent = forceChecklist ? 'Nascondi checklist valigia' : 'Mostra checklist valigia';
-    tg.querySelector('.ico').textContent = forceChecklist ? '✕' : '🎒';
-  }
 }
 
 /* ════════ Meteo · Open-Meteo (no key) ════════ */
@@ -679,8 +675,22 @@ async function weather(){
 buildChecklist();
 buildTabs();
 renderDay(todayIndex(new Date()));
-const _clToggle=document.getElementById('checklistToggle');
-if(_clToggle) _clToggle.addEventListener('click',()=>{ forceChecklist=!forceChecklist; saveUI(); tick(); });
+function showView(v){
+  document.getElementById('checklistSection').style.display = v==='valigia'?'':'none';
+  document.getElementById('outfitSection').style.display   = v==='outfit'?'':'none';
+  document.getElementById('carSection').style.display      = v==='noleggio'?'':'none';
+  document.querySelectorAll('#viewNav .vn').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function defaultView(){
+  const now=new Date();
+  if(now<DEP) return 'valigia';
+  const ymd=romeParts(now).ymd;
+  if(ymd==='2026-06-14'||ymd==='2026-06-19') return 'noleggio';
+  return 'outfit';
+}
+document.getElementById('viewNav').addEventListener('click',e=>{ const b=e.target.closest('.vn'); if(b) showView(b.dataset.v); });
+showView(defaultView());
 tick(); setInterval(tick,1000);
 weather(); setInterval(weather,600000);
 /* re-sync della checklist quando si rientra nella pagina (reload, bfcache, ritorno da app) */
@@ -1069,7 +1079,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ checks=
   document.getElementById('pickMode').addEventListener('click',e=>{ const b=e.target.closest('.pm-b'); if(b) setPickMode(b.dataset.m); });
   setPickMode(pickMode);
   document.getElementById('goPhotos').addEventListener('click',()=>{
-    document.getElementById('carSection').scrollIntoView({behavior:'smooth',block:'start'});
+    if(typeof showView==='function') showView('noleggio');
     openInput({prefix:'doc'}, pickMode==='camera');
   });
 
