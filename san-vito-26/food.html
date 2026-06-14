@@ -160,6 +160,7 @@ table.plan{width:100%;border-collapse:collapse;font-size:13.5px}
     <a class="pick" href="#r-ittico"><span class="pk">🏆 Cena speciale</span><span class="pn">Ittico Osteria</span><span class="pr">Alta cucina creativa sul lungomare — la serata importante.</span></a>
     <a class="pick" href="#r-sciala"><span class="pk">🥇 Via Savoia</span><span class="pn">Sciala Mare</span><span class="pr">Il miglior pesce sulla via principale, rating altissimo.</span></a>
     <a class="pick" href="#r-billeci"><span class="pk">🦐 Crudi & spiaggia</span><span class="pn">Crudité Billeci</span><span class="pr">Gamberi rossi di Mazara e crudi vista mare, a pranzo.</span></a>
+    <a class="pick" href="#r-gnasara"><span class="pk">🌾 Cous cous</span><span class="pn">Gnà Sara</span><span class="pr">Il piatto simbolo di San Vito, all'istituzione del paese.</span></a>
   </div>
 
   <div class="grid" id="grid"></div>
@@ -313,7 +314,7 @@ function card(r){
         <span class="pill zone ${r.zone}">${r.zlabel}</span>
         <span class="pill price">${r.price}</span>
         ${closed?'<span class="pill closed">🔴 Chiuso oggi</span>':''}
-        <span class="c-rate">⭐ ${r.rating} <span class="cnt">(${r.reviews})</span></span>
+        ${r.rating?`<span class="c-rate">⭐ ${r.rating} <span class="cnt">(${r.reviews})</span></span>`:''}
       </div>
     </div>
     <p class="c-desc">${r.desc}</p>
