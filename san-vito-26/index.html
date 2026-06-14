@@ -1260,7 +1260,7 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
   function canvasJPEG(cv){ return new Promise((res,rej)=>{ const done=u=>{cv.width=cv.height=0;res(u);};
     if(cv.toBlob) cv.toBlob(b=>{ if(b) blobToDataURL(b).then(done,rej); else { try{done(cv.toDataURL('image/jpeg',PH_Q));}catch(e){rej(e);} } }, 'image/jpeg', PH_Q);
     else done(cv.toDataURL('image/jpeg',PH_Q)); }); }
-  async function toDataURL(file){
+  async function decodeToJPEG(file){
     let dim=null;
     try{ dim=jpegSize(await file.slice(0, Math.min(file.size, 1<<20)).arrayBuffer()); }catch(e){}
     if(self.createImageBitmap && dim){
@@ -1294,6 +1294,23 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
       img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('decodifica fallita')); };
       img.src=url;
     });
+  }
+  /* HEIC/HEIF: Chrome Android non li decodifica → convertitore on-demand (ospitato nel sito) */
+  let _heicLib=null;
+  async function heicToBlob(file){
+    if(typeof heic2any==='undefined'){
+      if(!_heicLib) _heicLib=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='./heic2any.min.js'; s.onload=res; s.onerror=()=>rej(new Error('convertitore HEIC non caricato (offline?)')); document.head.appendChild(s); });
+      await _heicLib;
+    }
+    const out=await heic2any({blob:file, toType:'image/jpeg', quality:0.9});
+    return Array.isArray(out)?out[0]:out;
+  }
+  async function toDataURL(file){
+    try{ return await decodeToJPEG(file); }
+    catch(e){
+      const jpg=await heicToBlob(file);   // se è HEIC lo converte e si riprova; altrimenti rilancia
+      return await decodeToJPEG(jpg);
+    }
   }
 
   /* ── render ── */
