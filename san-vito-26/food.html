@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e7bb8">
+<meta name="robots" content="noindex,nofollow">
+<title>🐟 Dove mangiare · San Vito Lo Capo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --font-sans:'Hanken Grotesk',-apple-system,system-ui,sans-serif;
+  --font-display:'Newsreader',Georgia,serif;
+
+  --grad-dawn:linear-gradient(135deg,#ffd89b 0%,#ff9a76 100%);
+  --grad-sky:linear-gradient(135deg,#36b6e0 0%,#1e7bb8 100%);
+  --grad-sunset:linear-gradient(135deg,#ff7e5f 0%,#feb47b 100%);
+
+  --r-sm:8px; --r-xl:18px; --r-2xl:22px; --pill:999px;
+
+  --bg:#eef3f8;
+  --surface:#ffffff;
+  --ink:#16242f;
+  --ink-soft:#52606d;
+  --ink-faint:#8492a0;
+  --line:#e1e8ef;
+
+  --blue:#1e7bb8;
+  --green:#1f9d57; --green-soft:#e6f6ec;
+  --orange:#e07b1f; --orange-soft:#fdeede;
+  --red:#d6453b; --red-soft:#fbe7e5;
+
+  --shadow-sm:0 1px 2px rgba(20,40,60,.06);
+  --shadow-md:0 2px 6px rgba(20,40,60,.07),0 8px 22px rgba(20,40,60,.08);
+  --shadow-lg:0 4px 12px rgba(20,40,60,.10),0 18px 44px rgba(20,40,60,.14);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1820; --surface:#16232e; --ink:#eaf1f7; --ink-soft:#a8b6c2; --ink-faint:#768996;
+  --line:#26333f; --green-soft:#16302180; --orange-soft:#3a2a1480; --red-soft:#3a1d1b80;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 2px 6px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.45);
+  --shadow-lg:0 4px 12px rgba(0,0,0,.5),0 18px 44px rgba(0,0,0,.55);
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:48px}
+::selection{background:#36b6e055}
+
+/* ── header ── */
+.top{position:sticky;top:0;z-index:30;padding:calc(14px + env(safe-area-inset-top,0)) 18px 12px;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(16px) saturate(1.5);-webkit-backdrop-filter:blur(16px) saturate(1.5);
+  border-bottom:1px solid var(--line)}
+@media (prefers-color-scheme:dark){.top{background:rgba(16,24,32,.72)}}
+.top h1{font-family:var(--font-display);font-weight:600;font-size:22px;letter-spacing:-.01em;line-height:1.1;color:var(--ink)}
+.top p{font-size:12.5px;color:var(--ink-soft);margin-top:3px;font-weight:600}
+
+/* ── filtri ── */
+.filters{position:sticky;top:0;z-index:20;display:flex;gap:8px;overflow-x:auto;padding:12px 18px;background:var(--bg);
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{flex:0 0 auto;height:38px;padding:0 15px;border-radius:var(--pill);border:1.5px solid var(--line);background:var(--surface);
+  color:var(--ink-soft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:transform .12s}
+.fbtn:active{transform:scale(.96)}
+.fbtn.on{border-color:transparent;background:var(--grad-sky);color:#fff;box-shadow:var(--shadow-sm)}
+
+main{max-width:760px;margin:0 auto;padding:6px 18px 0}
+
+/* ── top picks ── */
+.picks-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-faint);margin:14px 2px 9px}
+.picks{display:flex;gap:11px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.picks::-webkit-scrollbar{display:none}
+.pick{flex:0 0 78%;max-width:300px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+  padding:14px 16px;box-shadow:var(--shadow-sm);cursor:pointer;text-decoration:none;color:inherit;transition:transform .18s,box-shadow .18s}
+.pick:active{transform:scale(.98)}
+.pick .pk{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--blue)}
+.pick .pn{font-family:var(--font-display);font-weight:600;font-size:19px;margin:5px 0 4px;color:var(--ink)}
+.pick .pr{font-size:13px;color:var(--ink-soft);line-height:1.4}
+
+/* ── grid cards ── */
+.grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:18px}
+@media(min-width:680px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow-md);
+  padding:17px 17px 15px;display:flex;flex-direction:column;gap:11px;transition:transform .22s ease,box-shadow .22s ease,opacity .3s ease;scroll-margin-top:120px}
+@media(hover:hover){.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}}
+.card.hide{display:none}
+.card.anim{animation:fadeUp .34s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.c-top{display:flex;flex-direction:column;gap:8px}
+.c-name{font-family:var(--font-display);font-weight:600;font-size:21px;letter-spacing:-.01em;line-height:1.1;color:var(--ink);display:flex;gap:8px;align-items:baseline}
+.c-name .em{font-size:20px;flex-shrink:0}
+.c-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-size:11px;font-weight:800;letter-spacing:.02em;padding:3px 9px;border-radius:var(--pill);white-space:nowrap}
+.pill.zone{color:#fff}
+.pill.zone.savoia{background:#6b5bd2}.pill.zone.lungomare{background:#1e9fb8}.pill.zone.centro{background:#c2762a}
+.pill.price{background:var(--green-soft);color:var(--green)}
+.pill.closed{background:var(--red-soft);color:var(--red)}
+.c-rate{font-size:13px;font-weight:700;color:var(--ink);margin-left:auto}
+.c-rate .cnt{color:var(--ink-faint);font-weight:600}
+
+.c-desc{font-size:14px;color:var(--ink-soft);line-height:1.5}
+.c-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11.5px;font-weight:600;color:var(--ink-soft);background:var(--bg);border:1px solid var(--line);border-radius:var(--pill);padding:3px 9px}
+.c-meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-soft)}
+.c-meta b{color:var(--ink);font-weight:700}
+.c-hours.closed b{color:var(--red)}
+
+.c-cta{display:flex;gap:8px;margin-top:3px}
+.btn{flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:5px;border-radius:var(--pill);
+  font-size:12.5px;font-weight:800;text-decoration:none;cursor:pointer;font-family:inherit;text-align:center;line-height:1.1;transition:transform .12s}
+.btn:active{transform:scale(.96)}
+.btn.maps{background:var(--grad-sky);color:#fff;border:0}
+.btn.ta{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.btn.fork{background:transparent;color:var(--orange);border:1.5px solid var(--orange);position:relative}
+.btn.fork.conf{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+
+.c-note{font-size:12.5px;font-style:italic;color:var(--ink-soft);line-height:1.45;border-top:1px dashed var(--line);padding-top:9px}
+.badge-fork{display:inline-block;font-size:10px;font-weight:800;color:var(--green);margin-top:-2px}
+
+/* ── piano pasti ── */
+.section-h{font-family:var(--font-display);font-weight:600;font-size:20px;margin:30px 2px 12px;color:var(--ink)}
+.acc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow-sm);overflow:hidden}
+.acc-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 17px;background:none;border:0;
+  font-family:inherit;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left}
+.acc-btn .chev{transition:transform .25s;color:var(--ink-faint)}
+.acc.open .acc-btn .chev{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .32s ease}
+.acc.open .acc-body{max-height:520px}
+table.plan{width:100%;border-collapse:collapse;font-size:13.5px}
+.plan th,.plan td{text-align:left;padding:10px 17px;border-top:1px solid var(--line);vertical-align:top}
+.plan th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);font-weight:800}
+.plan td:first-child{font-weight:800;color:var(--ink);white-space:nowrap}
+.plan .warn{color:var(--orange);font-weight:700}
+
+/* ── tips ── */
+.tips{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-xl);padding:16px 18px;margin-top:18px}
+.tips h3{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:9px}
+.tips ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.tips li{font-size:13px;color:var(--ink-soft);line-height:1.45;padding-left:16px;position:relative}
+.tips li::before{content:"•";position:absolute;left:2px;color:var(--blue);font-weight:800}
+.foot{text-align:center;font-size:11.5px;color:var(--ink-faint);margin-top:26px;line-height:1.6}
+.empty{grid-column:1/-1;text-align:center;color:var(--ink-faint);font-size:14px;padding:30px 10px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>🐟 Dove mangiare — San Vito Lo Capo</h1>
+  <p>Guida personale · Giugno 2026</p>
+</header>
+
+<nav class="filters" id="filters"></nav>
+
+<main>
+  <div class="picks-h">🏆 Le scelte top</div>
+  <div class="picks" id="picks">
+    <a class="pick" href="#r-ittico"><span class="pk">🏆 Cena speciale</span><span class="pn">Ittico Osteria</span><span class="pr">Alta cucina creativa sul lungomare — la serata importante.</span></a>
+    <a class="pick" href="#r-sciala"><span class="pk">🥇 Via Savoia</span><span class="pn">Sciala Mare</span><span class="pr">Il miglior pesce sulla via principale, rating altissimo.</span></a>
+    <a class="pick" href="#r-billeci"><span class="pk">🦐 Crudi & spiaggia</span><span class="pn">Crudité Billeci</span><span class="pr">Gamberi rossi di Mazara e crudi vista mare, a pranzo.</span></a>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="section-h">📅 Piano pasti suggerito</div>
+  <div class="acc" id="planAcc">
+    <button class="acc-btn" id="planBtn" type="button">Apri il piano (Lun 15 → Gio 18) <span class="chev">▾</span></button>
+    <div class="acc-body">
+      <table class="plan">
+        <thead><tr><th>Giorno</th><th>Pranzo</th><th>Cena</th></tr></thead>
+        <tbody>
+          <tr><td>Lun 15</td><td>Crudité Billeci</td><td>Sciala Mare</td></tr>
+          <tr><td>Mar 16</td><td>Dal Cozzaro</td><td>Ittico Osteria <span class="warn">⚠️ prenota</span></td></tr>
+          <tr><td>Mer 17</td><td>Sapori di Mare</td><td>Libero</td></tr>
+          <tr><td>Gio 18</td><td>Crudité o Dal Cozzaro</td><td>Ultima sera — Sciala Mare</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tips">
+    <h3>🧠 Tips da local</h3>
+    <ul>
+      <li>Prenota <b>Ittico</b> con almeno 2 giorni di anticipo.</li>
+      <li><b>Crudité</b>: chiedi sempre il prezzo del pesce prima — è al kg e varia.</li>
+      <li><b>Dal Cozzaro</b> chiude il mercoledì.</li>
+      <li>Il <b>cous cous di pesce</b> è IL piatto di San Vito — ordinalo almeno una volta.</li>
+      <li><b>Granita con brioche</b> = colazione siciliana obbligatoria.</li>
+    </ul>
+  </div>
+
+  <div class="foot">Guida personale · dati indicativi, verifica orari sul posto 🐟</div>
+</main>
+
+<script>
+/* ════════ Dati ristoranti ════════ */
+const FILTERS=[
+  {key:'all',label:'Tutti'},
+  {key:'savoia',label:'Via Savoia'},
+  {key:'lungomare',label:'Lungomare'},
+  {key:'crudi',label:'Crudi'},
+  {key:'creativa',label:'Cucina creativa'},
+  {key:'rosticceria',label:'Rosticceria'},
+  {key:'budget',label:'Budget €€'},
+  {key:'alto',label:'Alto €€€'},
+];
+const taURL=n=>'https://www.tripadvisor.it/Search?q='+encodeURIComponent(n+' San Vito Lo Capo');
+const forkURL=n=>'https://www.thefork.it/search?cityName=San%20Vito%20Lo%20Capo&q='+encodeURIComponent(n);
+/* closedDay: 0=Dom 1=Lun ... 6=Sab (null = sempre aperto) */
+const R=[
+ {id:'sciala',name:'Sciala Mare',emoji:'🐟',zone:'savoia',zlabel:'Via Savoia',cats:['savoia','alto'],
+  price:'€€€',rating:'4.7',reviews:'86',spend:'~€35–45 /persona',
+  hours:'Tutti i giorni 12:00–23:00',closedDay:null,
+  specs:[['🐟','Pesce fresco'],['🍷','Vino locale'],['👨‍🍳','Cucina curata']],
+  desc:'Il migliore sulla via principale. Rating altissimo con poche recensioni — segnale di qualità genuina. Vino eccellente.',
+  note:'Prima scelta per cena su Via Savoia',
+  maps:'https://maps.google.com/?cid=455069792083450356', fork:{confirmed:true}},
+
+ {id:'cozzaro',name:'Dal Cozzaro',emoji:'🐟',zone:'savoia',zlabel:'Via Savoia',cats:['savoia','budget'],
+  price:'€€',rating:'4.2',reviews:'3.847',spend:'~€25–35 /persona',
+  hours:'12:00–15:30 · 18:30–23:00 · Mer CHIUSO',closedDay:3,
+  specs:[['🍝','Spaghetti vongole'],['🐟','Zuppa di pesce'],['🦪','Ostriche'],['🍆','Caponata']],
+  desc:'Il classico del paese. Volumi enormi di recensioni, prezzi onesti, porzioni abbondanti. Perfetto per pranzo senza prenotazione.',
+  note:'⚠️ Chiuso il mercoledì',
+  maps:'https://maps.google.com/?cid=5135715609250828071',
+  ta:'https://www.tripadvisor.com/Restaurant_Review-g656840-d743649-Reviews-Dal_Cozzaro-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html', fork:{confirmed:true}},
+
+ {id:'ittico',name:'Ittico — Osteria di Mare',emoji:'🍋',zone:'lungomare',zlabel:'Lungomare',cats:['lungomare','creativa','alto'],
+  price:'€€€',rating:'4.7',reviews:'145',spend:'~€50–70 /persona',
+  hours:'Orari limitati — verifica',closedDay:null,
+  specs:[['🍚','Risotto ventresca tonno'],['🐟','Spada/spuma porri'],['🦐','Crudi']],
+  desc:'Alta cucina creativa sul lungomare. La cena importante della vacanza. Piccolo, atmosferico, porzioni curate (non abbondanti).',
+  note:'Prenota obbligatorio: +39 0923 181 5079 — si riempie subito',
+  maps:'https://maps.google.com/?cid=12685040002533797787',
+  ta:'https://www.tripadvisor.com/Restaurant_Review-g656840-d33350549-Reviews-Ittico_Osteria_Di_Mare-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html', fork:false},
+
+ {id:'billeci',name:'Crudité Vista Mare Billeci',emoji:'🦐',zone:'lungomare',zlabel:'Lungomare',cats:['lungomare','crudi','alto'],
+  price:'€€€',rating:'4.3',reviews:'116',spend:'~€50–65 /persona (al kg)',
+  hours:'Tutti i giorni 11:30–23:30',closedDay:null,
+  specs:[['🦐','Gamberi rossi Mazara'],['🦪','Ostriche'],['🐟','Pesce al kg'],['🍤','Crudité']],
+  desc:'Solo crudi. Scegli il pesce dal frigo, lo grigliano al momento. I gamberi rossi di Mazara sono leggendari.',
+  note:'Meglio a pranzo dopo spiaggia. Pesce al kg — chiedi il prezzo prima',
+  maps:'https://maps.google.com/?cid=1242231255099186724',
+  ta:'https://www.tripadvisor.com/Restaurant_Review-g656840-d27816765-Reviews-Crudite_Vista_Mare_Billeci-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html', fork:false},
+
+ {id:'sapori',name:'Sapori di Mare',emoji:'🐟',zone:'centro',zlabel:'Centro',cats:['centro','budget'],
+  price:'€€',rating:'4.4',reviews:'1.299',spend:'~€30–40 /persona',
+  hours:'Tutti i giorni 12:00–15:00 · 19:00–00:00',closedDay:null,
+  specs:[['🐙','Polpo'],['🌾','Cous cous pesce'],['🐟','Tartare tonno'],['🍚','Risotto frutti di mare']],
+  desc:'Solido e affidabile. Polpo eccezionale, cous cous di pesce ottimo. Aperto fino a mezzanotte — flessibile per cena tardi.',
+  note:'Prenota per cena in alta stagione',
+  maps:'https://maps.google.com/?cid=13649471482333100181',
+  fork:{confirmed:true,url:'https://www.thefork.it/ristorante/trattoria-sapori-di-mare-r685103'}},
+
+ {id:'mancia',name:'Mancia e Vattinni',emoji:'🍤',zone:'savoia',zlabel:'Via Savoia',cats:['savoia','rosticceria'],
+  price:'€',rating:'~4,4',reviews:'approssimativo',spend:'~€8–15 /persona',
+  hours:'Ogni giorno · colazione → tarda sera (orari variabili)',closedDay:null,
+  specs:[['🍤','Coppo di pesce fritto'],['🍙','Arancine'],['🥔','Panelle & cazzilli'],['🌾','Gluten free (AIC)']],
+  desc:'Street food siciliano d’asporto: fritto di pesce, arancine e crocchè a ottimo prezzo. Ampie opzioni senza glutine certificate.',
+  note:'Perfetto da portare in spiaggia. Tra i pochi col fritto gluten free.',
+  ta:'https://www.tripadvisor.com/Restaurant_Review-g656840-d24841027-Reviews-Mancia_E_Vattinni-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html', fork:false},
+
+ {id:'sirenetta',name:'Gelateria La Sirenetta',emoji:'🍧',zone:'lungomare',zlabel:'Lungomare',cats:['lungomare'],
+  price:'€€',rating:'~4,4',reviews:'approssimativo',spend:'~€5–12 /persona',
+  hours:'Stagionale · dal mattino a sera',closedDay:null,
+  specs:[['🍧','Granita ai gelsi'],['🥐','Brioche col tuppo'],['🍨','Caldofreddo'],['🍦','Gelato artigianale']],
+  desc:'Storica gelateria dal 1969 sul lungomare: granita e brioche vista mare. Il “caldofreddo” è nato qui — la specialità della casa.',
+  note:'Colazione siciliana obbligatoria: granita ai gelsi + brioche.',
+  fork:false},
+
+ {id:'profumi',name:'Profumi di Cous Cous',emoji:'🥘',zone:'centro',zlabel:'Centro',cats:['centro','alto'],
+  price:'€€€',rating:'~4,2',reviews:'approssimativo',spend:'~€35–50 /persona',
+  hours:'Tutti i giorni 12:30–14:30 · 19:30–23:00',closedDay:null,
+  specs:[['🥘','Cous cous di pesce'],['🐟','Cernia'],['🦐','Gamberi & calamari'],['🌿','Finocchietto']],
+  desc:'Ristorante dell’Hotel Ghibli (aperto a tutti), tra i più rinomati per il cous cous di pesce in tante varianti. Selezione Michelin, cortile tra gli agrumi.',
+  note:'Prenota in alta stagione · Via Regina Margherita 76 · 0923 974155',
+  ta:'https://www.tripadvisor.com/Restaurant_Review-g656840-d1068731-Reviews-Profumi_di_Cous_Cous-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html', fork:{confirmed:true}},
+
+ {id:'gnasara',name:'Gnà Sara',emoji:'🍕',zone:'centro',zlabel:'Centro',cats:['centro','budget'],
+  price:'€€',rating:'~4,3',reviews:'approssimativo',spend:'~€30–40 /persona',
+  hours:'Stagionale (verifica orari)',closedDay:null,
+  specs:[['🥘','Cous cous pesce'],['🍝','Busiate pesto trapanese'],['🐟','Pesce fresco'],['🍕','Pizza forno a legna']],
+  desc:'Storico locale del centro, informale e accogliente: cous cous di pesce rinomato e pizze trapanesi nel forno a legna. Porzioni abbondanti.',
+  note:'Prenota a cena · opzioni gluten free · 0923 972100',
+  fork:false},
+
+ {id:'amuri',name:'Ristorantino L’Amuri',emoji:'🍝',zone:'centro',zlabel:'Centro',cats:['centro','alto'],
+  price:'€€€',rating:'4,2',reviews:'896 · TripAdvisor',spend:'~€35–45 /persona',
+  hours:'Mercoledì CHIUSO · altri orari da verificare',closedDay:3,
+  specs:[['🍝','Spaghetti bottarga'],['🥘','Cous cous agrodolce'],['🐟','Pesce fresco']],
+  desc:'Cucina di mare curata e creativa nel cuore del paese. Vincitore del Cous Cous Fest 2015 con il cous cous agrodolce di ricciola.',
+  note:'Locale piccolo — meglio prenotare · 349 6828270',
+  fork:false},
+];
+
+/* ════════ Render ════════ */
+const DOW=new Date().getDay();
+const grid=document.getElementById('grid');
+function priceClass(p){return p==='€€€'?'alto':'budget';}
+function card(r){
+  const closed = r.closedDay===DOW;
+  const forkConf = r.fork && r.fork.confirmed;
+  const forkHref = (r.fork && r.fork.url) ? r.fork.url : forkURL(r.name);
+  const mapsHref = r.maps || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(r.name+' San Vito Lo Capo'));
+  const taHref = r.ta || taURL(r.name);
+  const tags = r.cats.concat([priceClass(r.price)]);
+  return `<article class="card anim" id="r-${r.id}" data-tags="${tags.join(' ')}">
+    <div class="c-top">
+      <div class="c-name"><span class="em">${r.emoji}</span><span>${r.name}</span></div>
+      <div class="c-pills">
+        <span class="pill zone ${r.zone}">${r.zlabel}</span>
+        <span class="pill price">${r.price}</span>
+        ${closed?'<span class="pill closed">🔴 Chiuso oggi</span>':''}
+        <span class="c-rate">⭐ ${r.rating} <span class="cnt">(${r.reviews})</span></span>
+      </div>
+    </div>
+    <p class="c-desc">${r.desc}</p>
+    <div class="c-tags">${r.specs.map(s=>`<span class="tag">${s[0]} ${s[1]}</span>`).join('')}</div>
+    <div class="c-meta">
+      <span>💶 <b>${r.spend}</b></span>
+      <span class="c-hours${closed?' closed':''}">🕐 <b>${r.hours}</b></span>
+    </div>
+    <div class="c-cta">
+      <a class="btn maps" href="${mapsHref}" target="_blank" rel="noopener">📍 Maps</a>
+      <a class="btn ta" href="${taHref}" target="_blank" rel="noopener">🌐 TripAdvisor</a>
+      <a class="btn fork${forkConf?' conf':''}" href="${forkHref}" target="_blank" rel="noopener">🍴 TheFork${forkConf?' ✓':''}</a>
+    </div>
+    ${forkConf?'<div class="badge-fork">🍴 Sconti possibili su TheFork ✓</div>':''}
+    ${r.note?`<div class="c-note">💬 ${r.note}</div>`:''}
+  </article>`;
+}
+function render(filter){
+  grid.innerHTML = R.map(card).join('') || '';
+  applyFilter(filter||'all');
+}
+function applyFilter(f){
+  let shown=0;
+  document.querySelectorAll('.card').forEach(el=>{
+    const tags=el.dataset.tags.split(' ');
+    const ok = f==='all' || tags.includes(f);
+    el.classList.toggle('hide',!ok);
+    if(ok){ shown++; el.classList.remove('anim'); void el.offsetWidth; el.classList.add('anim'); }
+  });
+  let empty=document.getElementById('emptyMsg');
+  if(!shown){ if(!empty){ empty=document.createElement('div'); empty.id='emptyMsg'; empty.className='empty'; empty.textContent='Nessun locale per questo filtro.'; grid.appendChild(empty); } }
+  else if(empty){ empty.remove(); }
+}
+
+/* filtri */
+const fbar=document.getElementById('filters');
+let active='all';
+try{ active=localStorage.getItem('svito26_food_filter')||'all'; }catch(e){}
+if(!FILTERS.some(f=>f.key===active)) active='all';
+fbar.innerHTML=FILTERS.map(f=>`<button class="fbtn${f.key===active?' on':''}" data-f="${f.key}" type="button">${f.label}</button>`).join('');
+fbar.addEventListener('click',e=>{
+  const b=e.target.closest('.fbtn'); if(!b) return;
+  active=b.dataset.f;
+  document.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x===b));
+  try{ localStorage.setItem('svito26_food_filter',active); }catch(e){}
+  applyFilter(active);
+});
+
+render(active);
+
+/* piano pasti collapsible */
+const acc=document.getElementById('planAcc');
+document.getElementById('planBtn').addEventListener('click',()=>acc.classList.toggle('open'));
+
+/* smooth scroll dai top picks (con offset gestito da scroll-margin) */
+document.querySelectorAll('.pick').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const id=a.getAttribute('href').slice(1); const el=document.getElementById(id);
+    if(el){ e.preventDefault();
+      if(active!=='all'){ active='all'; document.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); applyFilter('all'); }
+      el.scrollIntoView({behavior:'smooth',block:'start'});
+      el.style.transition='box-shadow .3s'; el.style.boxShadow='0 0 0 2px var(--blue)';
+      setTimeout(()=>el.style.boxShadow='',1400);
+    }
+  });
+});
+</script>
+</body>
+</html>
