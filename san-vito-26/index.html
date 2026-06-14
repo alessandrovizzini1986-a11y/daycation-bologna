@@ -1266,6 +1266,16 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
         return await canvasJPEG(cv);
       }catch(e){ /* fallback */ }
     }
+    /* qualsiasi formato (HEIC/PNG/WebP…): createImageBitmap diretto, poi scala su canvas */
+    if(self.createImageBitmap){
+      try{
+        const bmp=await createImageBitmap(file);
+        const t=fit(bmp.width,bmp.height);
+        const cv=document.createElement('canvas'); cv.width=t.w; cv.height=t.h;
+        cv.getContext('2d').drawImage(bmp,0,0,t.w,t.h); if(bmp.close)bmp.close();
+        return await canvasJPEG(cv);
+      }catch(e){ /* fallback <img> */ }
+    }
     return await new Promise((res,rej)=>{
       const url=URL.createObjectURL(file); const img=new Image();
       img.onload=()=>{ try{
@@ -1381,7 +1391,7 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
         }catch(err){ failN++; console.warn('foto non caricata',err); }
       }
       renderAll();
-      if(failN) showReport('⚠️ '+failN+' foto non caricata. Se compare un errore di memoria scattando, scatta con l\'app Fotocamera e poi usa «Carica da galleria».');
+      if(failN) showReport('⚠️ '+failN+' foto su '+(okN+failN)+' non caricate. Su iPhone: Impostazioni → Fotocamera → Formati → «Massima compatibilità» (salva in JPEG), poi riprova da «🖼️ Galleria» poche per volta.');
     });
     inp.click();
   }
