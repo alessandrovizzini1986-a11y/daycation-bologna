@@ -1386,7 +1386,8 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
     inp.multiple=!target.single && !useCapture; inp.style.display='none';
     document.body.appendChild(inp);
     inp.addEventListener('change',async()=>{
-      const files=[...inp.files]; inp.remove(); if(!files.length) return;
+      const files=[...inp.files]; inp.remove();
+      if(!files.length){ showReport('ℹ️ Nessuna foto ricevuta dal telefono. Riprova, oppure usa «🖼️ Galleria».'); return; }
       let n=0, okN=0, failN=0, lastErr='';
       for(const f of files){
         try{
@@ -1396,8 +1397,9 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
           if(target.single) break;
         }catch(err){ failN++; lastErr=(err&&(err.name+': '+err.message))||String(err); console.warn('foto non caricata',err); }
       }
-      renderAll();
-      if(failN) showReport('⚠️ '+failN+' foto su '+(okN+failN)+' non caricate.\nMotivo tecnico: '+lastErr+'\n\nSu iPhone: Impostazioni → Fotocamera → Formati → «Massima compatibilità» (salva in JPEG), poi riprova da «🖼️ Galleria» poche per volta. Se usi la navigazione privata di Safari, le foto non si salvano: usa una scheda normale.');
+      try{ renderAll(); }catch(e){ showReport('⚠️ Foto elaborata ma non mostrata: '+((e&&e.message)||e)); return; }
+      if(failN) showReport('⚠️ '+failN+' su '+(okN+failN)+' non caricate.\nMotivo: '+lastErr+'\n\n📱 Samsung/Android: Fotocamera → Impostazioni → disattiva «Immagini ad alta efficienza» (HEIF) così salva in JPG; Chrome non legge l\'HEIC. In modalità incognito le foto non si salvano.');
+      else showReport('✅ '+okN+' foto aggiunta'+(okN===1?'':'e')+'. Se non la vedi: controlla la colonna giusta (Ritiro/Riconsegna) o ricarica.');
     });
     inp.click();
   }
