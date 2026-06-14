@@ -525,6 +525,12 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
     <span class="da">›</span>
   </a>
 
+  <a class="dintorni-link" href="./food.html">
+    <span class="di">🐟</span>
+    <span><span class="dt">Dove mangiare</span><span class="ds">Guida ristoranti: pesce, cous cous, crudi e street food</span></span>
+    <span class="da">›</span>
+  </a>
+
   <!-- ═══ SEZIONE 3 · CHECKLIST (solo prima della partenza) ═══ -->
   <section id="checklistSection">
     <div class="sec-title">Hai messo tutto in valigia? 🎒</div>
@@ -1381,17 +1387,17 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
     document.body.appendChild(inp);
     inp.addEventListener('change',async()=>{
       const files=[...inp.files]; inp.remove(); if(!files.length) return;
-      let n=0, okN=0, failN=0;
+      let n=0, okN=0, failN=0, lastErr='';
       for(const f of files){
         try{
           const url=await toDataURL(f);
           const key=target.single ? target.key : (target.prefix+':'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+(n++));
           data[key]=Object.assign({}, data[key], {dataURL:url, ts:Date.now()+n}); await dbSet(key,data[key]); okN++;
           if(target.single) break;
-        }catch(err){ failN++; console.warn('foto non caricata',err); }
+        }catch(err){ failN++; lastErr=(err&&(err.name+': '+err.message))||String(err); console.warn('foto non caricata',err); }
       }
       renderAll();
-      if(failN) showReport('⚠️ '+failN+' foto su '+(okN+failN)+' non caricate. Su iPhone: Impostazioni → Fotocamera → Formati → «Massima compatibilità» (salva in JPEG), poi riprova da «🖼️ Galleria» poche per volta.');
+      if(failN) showReport('⚠️ '+failN+' foto su '+(okN+failN)+' non caricate.\nMotivo tecnico: '+lastErr+'\n\nSu iPhone: Impostazioni → Fotocamera → Formati → «Massima compatibilità» (salva in JPEG), poi riprova da «🖼️ Galleria» poche per volta. Se usi la navigazione privata di Safari, le foto non si salvano: usa una scheda normale.');
     });
     inp.click();
   }
