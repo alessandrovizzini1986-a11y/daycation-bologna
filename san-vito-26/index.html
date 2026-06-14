@@ -1383,10 +1383,12 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
   function openInput(target,useCapture){
     const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
     if(useCapture) inp.setAttribute('capture','environment');
-    inp.multiple=!target.single && !useCapture; inp.style.display='none';
+    inp.multiple=!target.single && !useCapture;
+    /* NON display:none: su Chrome Android l'evento change non scatta. Input fuori schermo ma "renderizzato". */
+    inp.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;';
     document.body.appendChild(inp);
     inp.addEventListener('change',async()=>{
-      const files=[...inp.files]; inp.remove();
+      const files=[...inp.files]; setTimeout(()=>inp.remove(),0);
       if(!files.length){ showReport('ℹ️ Nessuna foto ricevuta dal telefono. Riprova, oppure usa «🖼️ Galleria».'); return; }
       let n=0, okN=0, failN=0, lastErr='';
       for(const f of files){
