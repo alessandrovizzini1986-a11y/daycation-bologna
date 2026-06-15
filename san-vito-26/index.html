@@ -1041,7 +1041,7 @@ tick(); setInterval(tick,1000);
 weather(); setInterval(weather,600000);
 
 /* ════════ Gita in barca · dati live (vento + onde) ════════ */
-const BOAT={date:'2026-06-16', time:'13:45', from:12, to:17};
+const BOAT={date:'2026-06-17', time:'08:45', from:8, to:13};
 async function boatCard(){
   const el=document.getElementById('boatCard'); if(!el) return;
   if(romeParts(new Date()).ymd>BOAT.date){ el.innerHTML=''; return; }   // nascondi dopo la gita
@@ -1079,7 +1079,7 @@ async function boatCard(){
         <div class="boat-cell"><div class="k">${wmo(code)} Cielo</div><div class="v">${rainMax>=20?('💧 '+rainMax+'%'):'asciutto'}</div></div>
         <div class="boat-cell"><div class="k">🌡️ Temperatura</div><div class="v">${tAvg}°C</div></div>
       </div>
-      <div class="boat-upd">Finestra 13–17 · aggiornato alle ${upd} · si aggiorna ad ogni apertura</div>
+      <div class="boat-upd">Finestra 8–13 (gita ~4h) · aggiornato alle ${upd} · si aggiorna ad ogni apertura</div>
     </div>`;
   }catch(e){ el.innerHTML=''; }
 }
