@@ -1,7 +1,7 @@
 /* San Vito '26 — service worker
    Strategia: network-first per le pagine (fresco quando c'è rete),
    fallback alla cache quando si è offline (es. in aereo).            */
-const CACHE = 'svito26-v13';
+const CACHE = 'svito26-v14';
 const ASSETS = [
   './', './index.html', './dintorni.html', './lei.html',
   './manifest.webmanifest',
