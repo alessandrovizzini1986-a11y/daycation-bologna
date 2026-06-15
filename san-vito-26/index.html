@@ -127,6 +127,18 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);line-hei
 .dintorni-link .dt{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink);display:block}
 .dintorni-link .ds{font-size:12.5px;color:var(--ink-soft);margin-top:2px;display:block}
 .dintorni-link .da{margin-left:auto;color:var(--ink-faint);font-weight:700;font-size:18px}
+/* gita in barca */
+.boat{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent-fill);border-radius:var(--r-lg);padding:15px 17px;margin:0 0 20px;box-shadow:var(--shadow-sm)}
+.boat-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.boat-h .bt{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink)}
+.boat-h .bd{font-size:12px;font-weight:700;color:var(--accent)}
+.boat-verdict{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.4;margin:2px 0 10px}
+.boat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.boat-cell{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 11px}
+.boat-cell .k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+.boat-cell .v{font-weight:800;font-size:15px;color:var(--ink);margin-top:2px}
+.boat-cell .v.warn{color:var(--alert)}
+.boat-upd{font-size:11px;color:var(--ink-faint);margin-top:9px}
 /* voucher noleggio */
 .vou-card{max-height:90vh;overflow-y:auto}
 .vou-codes{display:flex;gap:10px;margin-bottom:4px}
@@ -510,6 +522,9 @@ select.meta-in{appearance:none;-webkit-appearance:none;background-image:linear-g
 <main>
   <!-- ═══ SEZIONE 2 · BANNER CONTESTUALE ═══ -->
   <div class="banner" id="banner"><span class="b-ico" id="bIco">🌴</span><span id="bMsg"></span></div>
+
+  <!-- gita in barca (dati live, si nasconde dopo) -->
+  <div id="boatCard"></div>
 
   <!-- nav: una cosa per volta -->
   <nav class="viewnav" id="viewNav">
@@ -1024,6 +1039,52 @@ document.getElementById('viewNav').addEventListener('click',e=>{ const b=e.targe
 showView(defaultView());
 tick(); setInterval(tick,1000);
 weather(); setInterval(weather,600000);
+
+/* ════════ Gita in barca · dati live (vento + onde) ════════ */
+const BOAT={date:'2026-06-16', time:'13:45', from:12, to:17};
+async function boatCard(){
+  const el=document.getElementById('boatCard'); if(!el) return;
+  if(romeParts(new Date()).ymd>BOAT.date){ el.innerHTML=''; return; }   // nascondi dopo la gita
+  const lat=38.1747, lon=12.7358, dir=d=>['N','NE','E','SE','S','SO','O','NO'][Math.round((d||0)/45)%8];
+  try{
+    const fc=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weathercode,windspeed_10m,windgusts_10m,winddirection_10m,precipitation_probability&timezone=Europe%2FRome&forecast_days=4`)).json();
+    let mar=null; try{ mar=await (await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_direction&timezone=Europe%2FRome&forecast_days=4`)).json(); }catch(e){}
+    const H=fc.hourly, idx=[];
+    for(let i=0;i<H.time.length;i++){ const t=H.time[i]; if(t.slice(0,10)===BOAT.date){ const h=+t.slice(11,13); if(h>=BOAT.from&&h<=BOAT.to) idx.push(i); } }
+    if(!idx.length){ el.innerHTML=''; return; }
+    const windAvg=Math.round(idx.reduce((a,i)=>a+H.windspeed_10m[i],0)/idx.length);
+    const gustMax=Math.round(Math.max(...idx.map(i=>H.windgusts_10m[i])));
+    const rainMax=Math.max(...idx.map(i=>H.precipitation_probability[i]??0));
+    const tAvg=Math.round(idx.reduce((a,i)=>a+H.temperature_2m[i],0)/idx.length);
+    const wdir=dir(H.winddirection_10m[idx[Math.floor(idx.length/2)]]);
+    const code=Math.max(...idx.map(i=>H.weathercode[i]));
+    let waveMax=null;
+    if(mar&&mar.hourly){ const wv=[]; for(const i of idx){ const j=mar.hourly.time.indexOf(H.time[i]); if(j>=0&&mar.hourly.wave_height[j]!=null) wv.push(mar.hourly.wave_height[j]); } if(wv.length) waveMax=Math.max(...wv); }
+    let sea='n/d', seaWarn=false;
+    if(waveMax!=null){ if(waveMax<0.5)sea='🟢 mare calmo'; else if(waveMax<1.0)sea='🟡 poco mosso'; else if(waveMax<1.5){sea='🟠 mosso';seaWarn=true;} else {sea='🔴 agitato';seaWarn=true;} }
+    const windWarn=gustMax>=40;
+    let vico,verdict;
+    if(rainMax>=50){ vico='🌧️'; verdict='Possibile pioggia — tieni d’occhio il meteo.'; }
+    else if(seaWarn||gustMax>=45){ vico='⚠️'; verdict='Mare/vento sostenuto: valuta bene, possibile rinvio.'; }
+    else if((waveMax==null||waveMax<0.6)&&gustMax<35){ vico='👍'; verdict='Condizioni buone per la barca.'; }
+    else { vico='🆗'; verdict='Condizioni accettabili, mare un po’ vivace.'; }
+    const wd=new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Rome'}).format(new Date(BOAT.date+'T12:00:00'));
+    const upd=new Intl.DateTimeFormat('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'}).format(new Date());
+    el.innerHTML=`<div class="boat">
+      <div class="boat-h"><span class="bt">🚤 Gita in barca</span><span class="bd">${wd} · ore ${BOAT.time}</span></div>
+      <div class="boat-verdict">${vico} ${verdict}</div>
+      <div class="boat-grid">
+        <div class="boat-cell"><div class="k">🌊 Onde</div><div class="v${seaWarn?' warn':''}">${waveMax==null?sea:sea+' · '+waveMax.toFixed(1)+' m'}</div></div>
+        <div class="boat-cell"><div class="k">💨 Vento (raffica)</div><div class="v${windWarn?' warn':''}">${windAvg} (${gustMax}) km/h ${wdir}</div></div>
+        <div class="boat-cell"><div class="k">${wmo(code)} Cielo</div><div class="v">${rainMax>=20?('💧 '+rainMax+'%'):'asciutto'}</div></div>
+        <div class="boat-cell"><div class="k">🌡️ Temperatura</div><div class="v">${tAvg}°C</div></div>
+      </div>
+      <div class="boat-upd">Finestra 13–17 · aggiornato alle ${upd} · si aggiorna ad ogni apertura</div>
+    </div>`;
+  }catch(e){ el.innerHTML=''; }
+}
+boatCard(); setInterval(boatCard, 1800000);
+
 document.getElementById('wx').addEventListener('click',openWxSheet);
 document.getElementById('wxSheetX').addEventListener('click',closeWxSheet);
 document.getElementById('wxSheet').addEventListener('click',e=>{ if(e.target.id==='wxSheet') closeWxSheet(); });
