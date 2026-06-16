@@ -95,7 +95,7 @@ main{max-width:760px;margin:0 auto;padding:6px 18px 0}
 .c-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .pill{font-size:11px;font-weight:800;letter-spacing:.02em;padding:3px 9px;border-radius:var(--pill);white-space:nowrap}
 .pill.zone{color:#fff}
-.pill.zone.savoia{background:#6b5bd2}.pill.zone.lungomare{background:#1e9fb8}.pill.zone.centro{background:#c2762a}
+.pill.zone.savoia{background:#6b5bd2}.pill.zone.lungomare{background:#1e9fb8}.pill.zone.centro{background:#c2762a}.pill.zone.macari{background:#3a9d6e}
 .pill.price{background:var(--green-soft);color:var(--green)}
 .pill.closed{background:var(--red-soft);color:var(--red)}
 .c-rate{font-size:13px;font-weight:700;color:var(--ink);margin-left:auto}
@@ -205,6 +205,7 @@ const FILTERS=[
   {key:'creativa',label:'Cucina creativa'},
   {key:'rosticceria',label:'Rosticceria'},
   {key:'gelato',label:'Gelato & granita'},
+  {key:'macari',label:'Macari & dintorni'},
   {key:'budget',label:'Budget €€'},
   {key:'alto',label:'Alto €€€'},
 ];
@@ -351,6 +352,51 @@ const R=[
   ta:'https://www.tripadvisor.it/Restaurant_Review-g656840-d4770706-Reviews-Ristorante_Mediterraneo-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html',
   maps:'https://www.google.com/maps/search/Ristorante+Mediterraneo+Via+Faro+San+Vito+Lo+Capo',
   fork:{confirmed:true}},
+
+ {id:'pocho',name:'Pocho',emoji:'🌅',zone:'macari',zlabel:'Macari',cats:['macari','alto'],
+  price:'€€€',rating:'4,0',reviews:'TripAdvisor',spend:'~€40–60 /persona',
+  hours:'Cena · stagionale (prenota)',closedDay:null,
+  specs:[['🌅','Vista tramonto'],['🐟','Pesce del giorno'],['🍷','Storico di Marilù']],
+  desc:'L’icona del tramonto a Macari: terrazza sul Golfo del Cofano e pesce del giorno che cambia col mercato.',
+  note:'Tramonto in terrazza se prenoti ~20:00',
+  ta:'https://www.tripadvisor.it/Restaurant_Review-g656840-d779016-Reviews-Pocho-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html',
+  maps:'https://www.google.com/maps/search/Pocho+Macari+San+Vito+Lo+Capo', fork:false},
+
+ {id:'azzurra',name:'Azzurra Makari',emoji:'🌅',zone:'macari',zlabel:'Macari',cats:['macari','budget'],
+  price:'€€',rating:'4,2',reviews:'1.659',spend:'~€30–40 /persona',
+  hours:'Pranzo e cena · stagionale',closedDay:null,
+  specs:[['🌊','Terrazza panoramica'],['🐟','Pesce fresco'],['💶','Buon q/p']],
+  desc:'Terrazza con vista mare, porzioni generose e ottimo rapporto qualità-prezzo. Tra i più amati di Macari.',
+  note:'Prenota in alta stagione',
+  ta:'https://www.tripadvisor.it/Restaurant_Review-g656840-d2102709-Reviews-Azzurra_Makari-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html',
+  maps:'https://www.google.com/maps/search/Azzurra+Makari+San+Vito+Lo+Capo', fork:false},
+
+ {id:'anticoborgo',name:'Antico Borgo',emoji:'🐟',zone:'macari',zlabel:'Macari',cats:['macari','alto'],
+  price:'€€€',rating:'',reviews:'',spend:'~€40–55 /persona',
+  hours:'Cena · stagionale',closedDay:null,
+  specs:[['🌊','Terrazza vista baia'],['🐙','Insalata di polpo'],['🍝','Busiate pesto trapanese']],
+  desc:'Pesce siciliano raffinato dal 2006, terrazza affacciata sulla baia di Macari tra gli ulivi. Cena romantica.',
+  note:'Molto ben recensito · prenota',
+  ta:'https://www.tripadvisor.it/Restaurant_Review-g656840-d1879760-Reviews-Antico_Borgo_Ristorante-San_Vito_lo_Capo_Province_of_Trapani_Sicily.html',
+  maps:'https://www.google.com/maps/search/Antico+Borgo+Ristorante+Macari+San+Vito+Lo+Capo', fork:false},
+
+ {id:'lozammu',name:'Lo Zammù',emoji:'🍝',zone:'macari',zlabel:'Castelluzzo',cats:['macari','budget'],
+  price:'€€',rating:'4,0',reviews:'381',spend:'~€25–35 /persona',
+  hours:'Cena · anche pizza',closedDay:null,
+  specs:[['🌾','Cous cous di pesce'],['🍕','Pizza'],['🐟','Cucina trapanese']],
+  desc:'Trattoria-pizzeria tipica di una famiglia di Castelluzzo: cous cous di pesce e piatti trapanesi, casalingo e informale.',
+  note:'Comodo con i bambini (c’è anche la pizza)',
+  ta:'https://www.tripadvisor.it/Search?q=Lo%20Zamm%C3%B9%20Castelluzzo%20San%20Vito%20Lo%20Capo',
+  maps:'https://www.google.com/maps/search/Lo+Zamm%C3%B9+Castelluzzo+San+Vito+Lo+Capo', fork:false},
+
+ {id:'oasipaolo',name:'Oasi da Paolo',emoji:'🐟',zone:'macari',zlabel:'Castelluzzo',cats:['macari','budget'],
+  price:'€€',rating:'',reviews:'',spend:'~€25–35 /persona',
+  hours:'Stagionale',closedDay:null,
+  specs:[['🐟','Pesce fresco'],['🍴','Cucina tipica'],['👨‍🍳','Storico · 40 anni']],
+  desc:'Storico locale di Castelluzzo (40 anni): cucina tipica con ingredienti freschi di qualità, genuino e senza fronzoli.',
+  note:'',
+  ta:'https://www.tripadvisor.it/Search?q=Oasi%20da%20Paolo%20Castelluzzo%20San%20Vito%20Lo%20Capo',
+  maps:'https://www.google.com/maps/search/Oasi+da+Paolo+Castelluzzo+San+Vito+Lo+Capo', fork:false},
 ];
 
 /* ════════ Render ════════ */
