@@ -1,5 +1,5 @@
 /* Service worker — cache offline dell'app (non delle quote live) */
-const CACHE = 'pronostici-v3';
+const CACHE = 'pronostici-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -7,6 +7,9 @@ const ASSETS = [
   './app.js',
   './manifest.webmanifest',
   './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (e) => {
