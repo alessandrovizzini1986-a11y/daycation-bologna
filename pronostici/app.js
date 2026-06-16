@@ -13,9 +13,11 @@ const DEFAULT_STATE = {
     bankroll: 100,        // bankroll iniziale (€)
     kelly: 0.25,          // frazione di Kelly
     apiKey: '',           // The Odds API
+    myBooks: [],          // chiavi dei bookmaker dove HO il conto (vuoto = mostrali tutti)
   },
   bets: [],               // {id,date,sport,event,selection,odds,stake,result,note,createdAt}
   sports: [],             // cache lista sport attivi da the-odds-api
+  seenBooks: [],          // {key,title} dei bookmaker incontrati nell'ultima ricerca
 };
 
 let state = load();
@@ -30,6 +32,7 @@ function load() {
       settings: { ...DEFAULT_STATE.settings, ...(parsed.settings || {}) },
       bets: Array.isArray(parsed.bets) ? parsed.bets : [],
       sports: Array.isArray(parsed.sports) ? parsed.sports : [],
+      seenBooks: Array.isArray(parsed.seenBooks) ? parsed.seenBooks : [],
     };
   } catch (e) {
     console.warn('Stato corrotto, riparto pulito', e);
@@ -446,6 +449,7 @@ async function scanValue() {
   out.innerHTML = `<div class="empty"><span class="spinner"></span> Analizzo ${targets.length} competizioni…</div>`;
 
   const found = [];
+  const seenMap = {};
   let lastRes = null;
   try {
     for (const sport of targets) {
@@ -455,6 +459,7 @@ async function scanValue() {
       if (!res.ok) { console.warn('skip', sport.key, res.status); continue; }
       const events = await res.json();
       for (const ev of events) {
+        for (const bk of (ev.bookmakers || [])) seenMap[bk.key] = { key: bk.key, title: bk.title };
         found.push(...findValueInEvent(ev, sport, minEdge));
       }
     }
@@ -463,6 +468,11 @@ async function scanValue() {
     out.innerHTML = `<div class="note-warn">Errore di rete o chiave non valida.</div>`;
     return;
   }
+
+  // memorizza i bookmaker visti, così in Impostazioni puoi spuntare i tuoi
+  state.seenBooks = Object.values(seenMap).sort((a, b) => a.title.localeCompare(b.title));
+  save();
+  renderMyBooks();
 
   if (lastRes) showQuota(lastRes);
   found.sort((a, b) => b.edge - a.edge);
@@ -493,9 +503,12 @@ function findValueInEvent(ev, sport, minEdge) {
   if (counted < 3) return [];
   const consensus = {}; names.forEach(n => consensus[n] = sumProb[n] / counted);
 
-  // cerca, per ogni book e ogni esito, dove la quota offerta batte la quota equa
+  // cerca, per ogni book e ogni esito, dove la quota offerta batte la quota equa.
+  // Se ho indicato i MIEI bookmaker, consiglio solo quelli (ma il consenso resta su tutti).
+  const mine = state.settings.myBooks || [];
   const results = [];
   for (const bk of books) {
+    if (mine.length && !mine.includes(bk.key)) continue;
     for (const o of bk.outcomes) {
       const p = consensus[o.name];
       if (!(p > 0) || !(o.price > 1)) continue;
@@ -527,15 +540,20 @@ function findValueInEvent(ev, sport, minEdge) {
 
 function renderValueList(found) {
   const out = $('#liveResults');
+  const mine = state.settings.myBooks || [];
   if (!found.length) {
-    out.innerHTML = `<div class="empty">Oggi nessuna occasione di valore. 🤷<br/>
+    out.innerHTML = `<div class="empty">Oggi nessuna occasione di valore${mine.length ? ' sui <b>tuoi</b> bookmaker' : ''}. 🤷<br/>
       Le quote cambiano di continuo: riprova tra qualche ora.<br/>
-      <small style="color:var(--muted)">(Il calcio riapre con la nuova stagione; ora c'è soprattutto tennis.)</small></div>`;
+      ${mine.length
+        ? '<small style="color:var(--muted)">Suggerimento: aggiungi qualche bookmaker in ⚙️ Imposta per avere più occasioni.</small>'
+        : '<small style="color:var(--muted)">(Il calcio riapre con la nuova stagione; ora c\'è soprattutto tennis.)</small>'}</div>`;
     return;
   }
   const strength = (e) => e >= 0.08 ? 'forte' : e >= 0.04 ? 'buona' : 'leggera';
-  out.innerHTML =
-    `<p class="hint">Ecco dove il banco paga <b>più del giusto</b>. La cifra in verde è <b>quanto puntare</b>. È un vantaggio nel tempo, non una certezza sulla singola giocata.</p>` +
+  const filterNote = mine.length
+    ? `<p class="hint">Mostro solo i <b>tuoi ${mine.length} bookmaker</b> (li cambi in ⚙️ Imposta). La cifra in verde è <b>quanto puntare</b>.</p>`
+    : `<p class="note-warn">Stai vedendo <b>tutti</b> i bookmaker, anche dove non hai il conto. Vai in <b>⚙️ Imposta → I miei bookmaker</b> e spunta i tuoi: vedrai solo le giocate che puoi davvero fare.</p>`;
+  out.innerHTML = filterNote +
     found.map((r, i) => {
       const when = new Date(r.commence).toLocaleString('it-IT', { weekday:'short', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
       return `
@@ -591,6 +609,34 @@ function hydrateSettings() {
   $('#setBankroll').value = state.settings.bankroll;
   $('#setKelly').value = String(state.settings.kelly);
   $('#setApiKey').value = state.settings.apiKey;
+  renderMyBooks();
+}
+
+// Checklist "I miei bookmaker": spunti dove hai il conto, vedi solo quelle giocate.
+function renderMyBooks() {
+  const box = $('#myBooksList');
+  if (!box) return;
+  const seen = state.seenBooks || [];
+  if (!seen.length) {
+    box.innerHTML = `<p class="hint">Premi una volta <b>⚡ Oggi → Trova le occasioni</b>: qui compariranno i bookmaker disponibili e potrai spuntare quelli dove hai il conto.</p>`;
+    return;
+  }
+  const mine = new Set(state.settings.myBooks || []);
+  box.innerHTML =
+    `<p class="hint">Spunta i bookmaker dove <b>hai il conto</b>. Se non spunti nulla, vedi tutti.</p>` +
+    seen.map(b => `
+      <label class="bookrow">
+        <input type="checkbox" data-book="${esc(b.key)}" ${mine.has(b.key) ? 'checked' : ''} />
+        <span>${esc(b.title)}</span>
+      </label>`).join('');
+  $$('#myBooksList input[data-book]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const set = new Set(state.settings.myBooks || []);
+      if (inp.checked) set.add(inp.dataset.book); else set.delete(inp.dataset.book);
+      state.settings.myBooks = [...set];
+      save();
+    });
+  });
 }
 function saveSettings() {
   state.settings.bankroll = Math.max(0, parseFloat($('#setBankroll').value) || 0);
