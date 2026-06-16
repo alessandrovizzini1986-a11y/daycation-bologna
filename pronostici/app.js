@@ -14,6 +14,7 @@ const DEFAULT_STATE = {
     kelly: 0.25,          // frazione di Kelly
     apiKey: '',           // The Odds API
     myBooks: [],          // chiavi dei bookmaker dove HO il conto (vuoto = mostrali tutti)
+    autoRefresh: false,   // ri-cerca da solo ogni 20 min se l'app resta aperta
   },
   bets: [],               // {id,date,sport,event,selection,odds,stake,result,note,createdAt}
   sports: [],             // cache lista sport attivi da the-odds-api
@@ -382,6 +383,46 @@ function importJSON(file) {
    ============================================================ */
 const ODDS_BASE = 'https://api.the-odds-api.com/v4';
 
+// Siti dei bookmaker per l'"apertura rapida" (non è un bot: apre solo il sito).
+const BOOK_URLS = {
+  pinnacle:'https://www.pinnacle.com', betfair_ex_eu:'https://www.betfair.com', betfair:'https://www.betfair.com',
+  williamhill:'https://www.williamhill.com', unibet_eu:'https://www.unibet.com', unibet:'https://www.unibet.com',
+  coolbet:'https://www.coolbet.com', betclic:'https://www.betclic.it', bet365:'https://www.bet365.it',
+  marathonbet:'https://www.marathonbet.com', nordicbet:'https://www.nordicbet.com', betsson:'https://www.betsson.com',
+  onexbet:'https://1xbet.com', betway:'https://betway.com', '888sport':'https://www.888sport.com',
+  leovegas:'https://www.leovegas.com', tipico:'https://www.tipico.it', matchbook:'https://www.matchbook.com',
+  betvictor:'https://www.betvictor.com', skybet:'https://m.skybet.com', ladbrokes:'https://sports.ladbrokes.com',
+  coral:'https://sports.coral.co.uk', paddypower:'https://www.paddypower.com',
+  sisal:'https://www.sisal.it', snai:'https://www.snai.it', eurobet:'https://www.eurobet.it',
+  goldbet:'https://www.goldbet.it', lottomatica:'https://www.lottomatica.it', planetwin365:'https://www.planetwin365.it',
+  gtbets:'https://www.gtbets.eu', betanysports:'https://betanysports.eu',
+};
+function bookUrl(key, title, event) {
+  if (BOOK_URLS[key]) return BOOK_URLS[key];
+  // fallback: cerca la partita sul motore di ricerca col nome del book
+  return 'https://www.google.com/search?q=' + encodeURIComponent(`${title || ''} ${event || ''}`.trim());
+}
+
+// Notifica locale (funziona quando l'app è aperta / in background sul telefono)
+function notify(title, body) {
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: 'icon-192.png', badge: 'icon-192.png' });
+    }
+  } catch (e) { /* ignora */ }
+}
+
+// Auto-aggiornamento: ri-cerca da solo ogni 20 min se l'app resta aperta e visibile.
+let autoTimer = null;
+function setupAutoRefresh() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  if (state.settings.autoRefresh) {
+    autoTimer = setInterval(() => {
+      if (state.settings.apiKey && document.visibilityState === 'visible') findOpportunities(true);
+    }, 20 * 60 * 1000);
+  }
+}
+
 // quali sport ci interessano: calcio italiano/UEFA + tennis
 function isInterestingSport(s) {
   const k = s.key || '';
@@ -406,7 +447,7 @@ async function loadSports() {
 }
 
 // IL flusso semplice: un solo bottone fa tutto (carica + analizza)
-async function findOpportunities() {
+async function findOpportunities(auto = false) {
   const key = state.settings.apiKey.trim();
   if (!key) { $('#liveNoKey').hidden = false; return; }
   $('#liveNoKey').hidden = true;
@@ -415,10 +456,10 @@ async function findOpportunities() {
   const original = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Cerco le occasioni…';
-  $('#liveResults').innerHTML = '';
+  if (!auto) $('#liveResults').innerHTML = '';
   try {
     await loadSports();          // aggiorna sempre la lista del giorno
-    await scanValue();           // analizza e mostra
+    await scanValue(auto);       // analizza e mostra
   } catch (e) {
     console.error(e);
     $('#liveResults').innerHTML = `<div class="note-warn">Non riesco a leggere le quote. Controlla la connessione o la chiave (in Imposta).</div>`;
@@ -436,7 +477,7 @@ function showQuota(res) {
   }
 }
 
-async function scanValue() {
+async function scanValue(auto = false) {
   const key = state.settings.apiKey.trim();
   if (!key) { $('#liveNoKey').hidden = false; return; }
   const minEdge = 0.02; // soglia di valore: 2% (dietro le quinte)
@@ -446,7 +487,7 @@ async function scanValue() {
   if (!targets.length) { renderValueList([]); return; }
 
   const out = $('#liveResults');
-  out.innerHTML = `<div class="empty"><span class="spinner"></span> Analizzo ${targets.length} competizioni…</div>`;
+  if (!auto) out.innerHTML = `<div class="empty"><span class="spinner"></span> Analizzo ${targets.length} competizioni…</div>`;
 
   const found = [];
   const seenMap = {};
@@ -477,6 +518,13 @@ async function scanValue() {
   if (lastRes) showQuota(lastRes);
   found.sort((a, b) => b.edge - a.edge);
   renderValueList(found);
+
+  // avviso automatico quando la ricerca gira da sola e trova qualcosa
+  if (auto && found.length) {
+    const strong = found.filter(r => r.edge >= 0.05).length;
+    notify('Edge — occasioni di oggi',
+      `${found.length} giocate di valore${strong ? `, di cui ${strong} forti` : ''}. Apri per vederle.`);
+  }
 }
 
 // Per un evento: consenso no-vig su tutti i book, poi cerca book che pagano di più
@@ -520,6 +568,7 @@ function findValueInEvent(ev, sport, minEdge) {
           commence: ev.commence_time,
           selection: o.name,
           book: bk.title,
+          bookKey: bk.key,
           odds: o.price,
           fairOdds: 1 / p,
           prob: p,
@@ -576,7 +625,8 @@ function renderValueList(found) {
         <div class="kv"><span>Quanto puntare (¼ Kelly)</span><b>${eur(r.stake)}</b></div>
       </details>
       <div class="btn-row" style="margin-top:10px">
-        <button class="btn small" data-add="${i}">Ho scommesso → salva nel registro</button>
+        <a class="btn small secondary openbook" href="${bookUrl(r.bookKey, r.book, r.event)}" target="_blank" rel="noopener">Apri ${esc(r.book)} ↗</a>
+        <button class="btn small" data-add="${i}">Ho scommesso ✓</button>
       </div>
     </div>`;
     }).join('');
@@ -609,6 +659,7 @@ function hydrateSettings() {
   $('#setBankroll').value = state.settings.bankroll;
   $('#setKelly').value = String(state.settings.kelly);
   $('#setApiKey').value = state.settings.apiKey;
+  const a = $('#setAuto'); if (a) a.checked = !!state.settings.autoRefresh;
   renderMyBooks();
 }
 
@@ -702,10 +753,23 @@ function init() {
   $('#importFile').addEventListener('change', e => { if (e.target.files[0]) importJSON(e.target.files[0]); });
 
   // live — un solo bottone fa tutto
-  $('#btnFind').addEventListener('click', findOpportunities);
+  $('#btnFind').addEventListener('click', () => findOpportunities(false));
 
   // impostazioni
   $('#btnSaveSettings').addEventListener('click', saveSettings);
+  $('#btnNotify').addEventListener('click', async () => {
+    if (!('Notification' in window)) { toast('Il tuo browser non supporta gli avvisi.'); return; }
+    const p = await Notification.requestPermission();
+    toast(p === 'granted' ? 'Avvisi attivati ✅' : 'Avvisi non attivati.');
+    if (p === 'granted') notify('Edge', 'Gli avvisi sono attivi 🎯');
+  });
+  $('#setAuto').addEventListener('change', (e) => {
+    state.settings.autoRefresh = e.target.checked;
+    save();
+    setupAutoRefresh();
+    toast(e.target.checked ? 'Auto-aggiornamento attivo' : 'Auto-aggiornamento spento');
+  });
+  setupAutoRefresh();
   $('#btnReset').addEventListener('click', () => {
     if (!confirm('Azzerare TUTTO (registro + impostazioni)? Operazione irreversibile.')) return;
     state = structuredClone(DEFAULT_STATE);

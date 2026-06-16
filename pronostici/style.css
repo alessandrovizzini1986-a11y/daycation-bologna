@@ -183,6 +183,16 @@ button.btn.ghost { background: transparent; color: var(--muted); border: 1px sol
 button.btn.small { width: auto; padding: 8px 12px; font-size: .85rem; }
 .btn-row { display: flex; gap: 10px; margin-top: 4px; }
 
+/* link con aspetto da bottone (apertura rapida bookmaker) */
+a.openbook {
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; color: var(--text);
+  background: var(--card-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 8px 12px; font-size: .85rem; font-weight: 600;
+}
+.value-item .btn-row .openbook,
+.value-item .btn-row .btn { flex: 1; }
+
 /* ---------- Result box ---------- */
 .result-box {
   margin-top: 14px;
