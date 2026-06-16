@@ -1,6 +1,6 @@
 {
-  "name": "Pronostici — scommetti con la testa",
-  "short_name": "Pronostici",
+  "name": "Edge — scommetti con la testa",
+  "short_name": "Edge",
   "description": "Value betting, gestione bankroll (Kelly) e registro scommesse. Calcio e Tennis.",
   "start_url": "./index.html",
   "scope": "./",

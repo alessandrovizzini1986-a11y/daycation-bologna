@@ -389,32 +389,40 @@ function isInterestingSport(s) {
   return false;
 }
 
+// Scarica le competizioni attive (silenzioso: lo usa il flusso "un tocco")
 async function loadSports() {
+  const key = state.settings.apiKey.trim();
+  if (!key) return false;
+  const res = await fetch(`${ODDS_BASE}/sports/?apiKey=${encodeURIComponent(key)}`);
+  if (!res.ok) throw new Error(await res.text());
+  const all = await res.json();
+  state.sports = all.filter(s => s.active && isInterestingSport(s));
+  save();
+  showQuota(res);
+  return true;
+}
+
+// IL flusso semplice: un solo bottone fa tutto (carica + analizza)
+async function findOpportunities() {
   const key = state.settings.apiKey.trim();
   if (!key) { $('#liveNoKey').hidden = false; return; }
   $('#liveNoKey').hidden = true;
-  toast('Carico la lista sport…');
+
+  const btn = $('#btnFind');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Cerco le occasioni…';
+  $('#liveResults').innerHTML = '';
   try {
-    const res = await fetch(`${ODDS_BASE}/sports/?apiKey=${encodeURIComponent(key)}`);
-    if (!res.ok) throw new Error(await res.text());
-    const all = await res.json();
-    state.sports = all.filter(s => s.active && isInterestingSport(s));
-    save();
-    fillSportFilter();
-    showQuota(res);
-    toast(`${state.sports.length} competizioni disponibili.`);
+    await loadSports();          // aggiorna sempre la lista del giorno
+    await scanValue();           // analizza e mostra
   } catch (e) {
     console.error(e);
-    toast('Errore nel caricare gli sport (chiave valida?).');
+    $('#liveResults').innerHTML = `<div class="note-warn">Non riesco a leggere le quote. Controlla la connessione o la chiave (in Imposta).</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
   }
-}
-
-function fillSportFilter() {
-  const sel = $('#liveSportFilter');
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">Tutti gli sport disponibili</option>` +
-    state.sports.map(s => `<option value="${esc(s.key)}">${esc(s.title)}</option>`).join('');
-  if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
 }
 
 function showQuota(res) {
@@ -427,15 +435,12 @@ function showQuota(res) {
 
 async function scanValue() {
   const key = state.settings.apiKey.trim();
-  if (!key) { $('#liveNoKey').hidden = false; switchView('live'); return; }
-  const minEdge = (parseFloat($('#liveMinEdge').value) || 0) / 100;
+  if (!key) { $('#liveNoKey').hidden = false; return; }
+  const minEdge = 0.02; // soglia di valore: 2% (dietro le quinte)
 
-  let targets = state.sports;
-  const picked = $('#liveSportFilter').value;
-  if (picked) targets = targets.filter(s => s.key === picked);
-  if (!targets.length) { toast('Aggiorna prima la lista sport.'); return; }
-  // limita per non bruciare richieste
-  targets = targets.slice(0, 8);
+  // analizza tutte le competizioni attive (max 8 per non bruciare richieste)
+  const targets = state.sports.slice(0, 8);
+  if (!targets.length) { renderValueList([]); return; }
 
   const out = $('#liveResults');
   out.innerHTML = `<div class="empty"><span class="spinner"></span> Analizzo ${targets.length} competizioni…</div>`;
@@ -523,32 +528,40 @@ function findValueInEvent(ev, sport, minEdge) {
 function renderValueList(found) {
   const out = $('#liveResults');
   if (!found.length) {
-    out.innerHTML = `<div class="empty">Nessuna scommessa sopra la soglia di edge.<br/>
-      Prova ad abbassare l'edge minimo o aggiorna più tardi (le quote cambiano).</div>`;
+    out.innerHTML = `<div class="empty">Oggi nessuna occasione di valore. 🤷<br/>
+      Le quote cambiano di continuo: riprova tra qualche ora.<br/>
+      <small style="color:var(--muted)">(Il calcio riapre con la nuova stagione; ora c'è soprattutto tennis.)</small></div>`;
     return;
   }
-  out.innerHTML = found.map((r, i) => {
-    const when = new Date(r.commence).toLocaleString('it-IT', { weekday:'short', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
-    return `
+  const strength = (e) => e >= 0.08 ? 'forte' : e >= 0.04 ? 'buona' : 'leggera';
+  out.innerHTML =
+    `<p class="hint">Ecco dove il banco paga <b>più del giusto</b>. La cifra in verde è <b>quanto puntare</b>. È un vantaggio nel tempo, non una certezza sulla singola giocata.</p>` +
+    found.map((r, i) => {
+      const when = new Date(r.commence).toLocaleString('it-IT', { weekday:'short', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      return `
     <div class="value-item" data-idx="${i}">
       <div class="top">
         <div>
-          <div class="teams">${esc(r.event)}</div>
-          <div class="meta">${esc(r.sportTitle)} · ${esc(when)}</div>
+          <div class="teams">Punta su <b>${esc(r.selection)}</b></div>
+          <div class="meta">${esc(r.event)} · ${esc(r.sportTitle)} · ${esc(when)}</div>
         </div>
-        <div class="ev">+${(r.edge*100).toFixed(1)}%</div>
+        <div class="ev">${eur(r.stake)}</div>
       </div>
-      <div class="line">
-        Punta su <b>${esc(r.selection)}</b> @ <b>${r.odds.toFixed(2)}</b>
-        su <span class="book">${esc(r.book)}</span>
-        <span class="badge">equa ${r.fairOdds.toFixed(2)}</span>
-        <span class="badge">stake ${eur(r.stake)}</span>
+      <div class="line">su <span class="book">${esc(r.book)}</span> a quota <b>${r.odds.toFixed(2)}</b>
+        <span class="badge">occasione ${strength(r.edge)}</span>
       </div>
+      <details class="why">
+        <summary>Perché?</summary>
+        <div class="kv"><span>Vantaggio stimato</span><b style="color:var(--green)">+${(r.edge*100).toFixed(1)}%</b></div>
+        <div class="kv"><span>Quota giusta (consenso dei book)</span><b>${r.fairOdds.toFixed(2)}</b></div>
+        <div class="kv"><span>Quota di ${esc(r.book)}</span><b>${r.odds.toFixed(2)} → paga più del giusto</b></div>
+        <div class="kv"><span>Quanto puntare (¼ Kelly)</span><b>${eur(r.stake)}</b></div>
+      </details>
       <div class="btn-row" style="margin-top:10px">
-        <button class="btn small" data-add="${i}">Aggiungi al registro</button>
+        <button class="btn small" data-add="${i}">Ho scommesso → salva nel registro</button>
       </div>
     </div>`;
-  }).join('');
+    }).join('');
 
   $$('#liveResults [data-add]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -624,7 +637,6 @@ function init() {
   const keyJustSet = applyKeyFromUrl();
   hydrateSettings();
   renderAll();
-  fillSportFilter();
   $('#liveNoKey').hidden = !!state.settings.apiKey;
   if (keyJustSet) { switchView('live'); setTimeout(() => toast('Chiave API inserita ✅'), 300); }
 
@@ -643,16 +655,15 @@ function init() {
   $('#btnImport').addEventListener('click', () => $('#importFile').click());
   $('#importFile').addEventListener('change', e => { if (e.target.files[0]) importJSON(e.target.files[0]); });
 
-  // live
-  $('#btnLoadSports').addEventListener('click', loadSports);
-  $('#btnScan').addEventListener('click', scanValue);
+  // live — un solo bottone fa tutto
+  $('#btnFind').addEventListener('click', findOpportunities);
 
   // impostazioni
   $('#btnSaveSettings').addEventListener('click', saveSettings);
   $('#btnReset').addEventListener('click', () => {
     if (!confirm('Azzerare TUTTO (registro + impostazioni)? Operazione irreversibile.')) return;
     state = structuredClone(DEFAULT_STATE);
-    save(); hydrateSettings(); renderAll(); fillSportFilter();
+    save(); hydrateSettings(); renderAll();
     toast('Tutto azzerato.');
   });
 

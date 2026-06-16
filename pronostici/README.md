@@ -1,4 +1,4 @@
-# Pronostici — scommetti con la testa
+# Edge — scommetti con la testa
 
 Strumento personale per scommettere in modo **disciplinato**, non a caso.
 Web-app statica (PWA): la apri da telefono o pc, funziona anche offline, salva

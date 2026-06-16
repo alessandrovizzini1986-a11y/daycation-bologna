@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Pronostici — scommetti con la testa</title>
+  <title>Edge — scommetti con la testa</title>
   <meta name="description" content="Strumento personale di value betting: trova le quote di valore, calcola lo stake con Kelly, tieni il registro delle giocate. Calcio e Tennis." />
   <meta name="theme-color" content="#0c1116" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -14,7 +14,7 @@
 <body>
   <header class="app-header">
     <img class="logo" src="icon.svg" alt="" />
-    <h1>Pronostici <small>scommetti con la testa</small></h1>
+    <h1>Edge <small>scommetti con la testa</small></h1>
     <div class="bankroll-chip">
       Bankroll
       <b id="hdrBankroll">—</b>
@@ -48,31 +48,14 @@
 
     <!-- ============ LIVE / TROVA VALUE ============ -->
     <section id="view-live" class="view">
-      <h2 class="section-title">Trova value (quote live)</h2>
-      <p class="hint">
-        Confronto le quote di tutti i bookmaker, tolgo il margine, calcolo la
-        probabilità "vera" di consenso e segnalo dove un bookmaker paga
-        <b>più del giusto</b>. Quello è il value. Serve la chiave API gratuita
-        (Impostazioni).
-      </p>
+      <h2 class="section-title">Le occasioni di oggi</h2>
       <div id="liveNoKey" class="note-warn" hidden>
-        Nessuna chiave API impostata. Vai in <b>Impostazioni</b> e incolla la tua
-        chiave gratuita di The Odds API per usare i dati live.
+        Manca la chiave per leggere le quote. Vai in <b>⚙️ Imposta</b> (una volta sola) e incolla la chiave.
       </div>
 
       <div class="card">
-        <div class="filter-row">
-          <select id="liveSportFilter">
-            <option value="">Tutti gli sport disponibili</option>
-          </select>
-          <button class="btn small secondary" id="btnLoadSports" type="button">Aggiorna lista</button>
-        </div>
-        <label class="field" style="margin-bottom:8px">
-          <span>Edge minimo per segnalare (%)</span>
-          <input type="number" id="liveMinEdge" value="2" step="0.5" min="0" />
-        </label>
-        <button class="btn" id="btnScan" type="button">Cerca scommesse di valore</button>
-        <p class="hint" id="liveQuota" style="margin:10px 0 0"></p>
+        <button class="btn" id="btnFind" type="button">⚡ Trova le occasioni di oggi</button>
+        <p class="hint" id="liveQuota" style="margin:12px 0 0">Un tocco: leggo le quote di tutti i bookmaker e ti dico su cosa conviene puntare.</p>
       </div>
 
       <div id="liveResults"></div>
@@ -196,7 +179,7 @@
 
   <nav class="tabbar">
     <button data-view="dash" class="active"><span class="ic">📊</span>Cruscotto</button>
-    <button data-view="live"><span class="ic">📡</span>Live</button>
+    <button data-view="live"><span class="ic">⚡</span>Oggi</button>
     <button data-view="calc"><span class="ic">🧮</span>Calcola</button>
     <button data-view="bets"><span class="ic">🧾</span>Registro</button>
     <button data-view="set"><span class="ic">⚙️</span>Imposta</button>

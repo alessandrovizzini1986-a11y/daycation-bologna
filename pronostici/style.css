@@ -277,3 +277,12 @@ canvas#bankrollChart { width: 100%; height: 160px; display: block; }
 .filter-row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
 .filter-row select { width:auto; flex:1; min-width:120px; }
 .note-warn { font-size:.78rem; color:var(--gold); background:#2a2412; border:1px solid #443a14; padding:10px 12px; border-radius:10px; margin-bottom:12px; }
+
+/* "Perché?" — dettaglio tecnico nascosto sotto ogni occasione */
+.why { margin-top:10px; }
+.why summary { cursor:pointer; color:var(--muted); font-size:.82rem; list-style:none; user-select:none; }
+.why summary::-webkit-details-marker { display:none; }
+.why summary::before { content:'▸ '; }
+.why[open] summary::before { content:'▾ '; }
+.why .kv { font-size:.84rem; }
+.value-item .ev { white-space:nowrap; }
