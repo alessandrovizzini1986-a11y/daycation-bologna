@@ -46,7 +46,7 @@ def download_pdf(season):
 
 def pdf_to_text():
     result = subprocess.run(["pdftotext", "-layout", TMP_PDF, TMP_TXT],
-                            capture_output=True, text=True)
+                            capture_output=True, text=True, timeout=120)
     if result.returncode != 0:
         raise RuntimeError(f"pdftotext failed: {result.stderr}")
 

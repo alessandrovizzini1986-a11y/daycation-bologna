@@ -11,6 +11,7 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 12          # il job non resta mai appeso: fallisce pulito e il giro dopo recupera
     permissions:
       contents: write
     steps:
@@ -30,6 +31,7 @@ jobs:
 
       - name: Fetch prices (optional, fail-soft)
         continue-on-error: true
+        timeout-minutes: 6       # se l'API prezzi è lenta, non trascina l'intero job (i prezzi sono opzionali)
         env:
           TRAVELPAYOUTS_TOKEN: ${{ secrets.TRAVELPAYOUTS_TOKEN }}
           TRAVELPAYOUTS_MARKER: ${{ secrets.TRAVELPAYOUTS_MARKER }}
