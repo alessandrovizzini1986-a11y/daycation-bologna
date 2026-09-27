@@ -36,6 +36,14 @@ def next_season(season):
     return f"summer_{parts[2]}"
 
 
+def prev_season(season):
+    parts = season.split('_')
+    if parts[0] == 'summer':
+        y = int(parts[1])
+        return f"winter_{y-1}_{y}"
+    return f"summer_{parts[1]}"
+
+
 def download_pdf(season):
     url = f"{BASE_URL}/orario_voli_{season}.pdf"
     print(f"Download {url}", file=sys.stderr)
@@ -168,6 +176,10 @@ def parse_pdf():
     return parse_section(lines[:split_idx]), parse_section(lines[split_idx:])
 
 
+def start_date(flights):
+    return min(r[0] for f in flights for r in f['val'])
+
+
 def clip_before(flights, cutoff):
     """Tronca i periodi di validità al giorno prima di `cutoff` (yyyymmdd)."""
     last = (datetime.datetime.strptime(cutoff, "%Y%m%d").date()
@@ -198,21 +210,36 @@ def main():
     deps, arrs = parse_pdf()
     seasons = [season]
 
-    # Se l'aeroporto ha già pubblicato l'orario della stagione successiva,
-    # lo accodo: fino al suo primo giorno vale la stagione corrente, da lì in poi
-    # la nuova. Così si possono cercare date oltre il cambio stagione.
-    # Fail-soft: se il PDF non c'è o non si parsa, resta solo la stagione corrente.
-    nxt = next_season(season)
-    if download_pdf(nxt):
+    # Accodo anche le stagioni adiacenti, se BLQ le ha online:
+    # - successiva: già pubblicata prima del cambio (es. inverno da 01/11);
+    # - precedente: dopo il cambio di fine marzo/ottobre il PDF vecchio copre
+    #   ancora qualche giorno (es. estate fino al 31/10, inverno dal 01/11).
+    # Ogni stagione vale fino al giorno prima dell'inizio della successiva.
+    # Fail-soft: se un PDF non c'è o non si parsa, resta quello che c'è.
+    today = datetime.date.today().strftime("%Y%m%d")
+    for other, is_next in [(next_season(season), True), (prev_season(season), False)]:
+        if not download_pdf(other):
+            continue
         try:
-            n_deps, n_arrs = parse_pdf()
-            cutoff = min(r[0] for f in n_deps + n_arrs for r in f['val'])
-            deps = clip_before(deps, cutoff) + n_deps
-            arrs = clip_before(arrs, cutoff) + n_arrs
-            seasons.append(nxt)
-            print(f"   + {nxt} dal {cutoff}", file=sys.stderr)
+            o_deps, o_arrs = parse_pdf()
         except (SystemExit, Exception) as e:
-            print(f"   {nxt} ignorata: {e}", file=sys.stderr)
+            print(f"   {other} ignorata: {e}", file=sys.stderr)
+            continue
+        if is_next:
+            cutoff = start_date(o_deps + o_arrs)
+            deps = clip_before(deps, cutoff) + o_deps
+            arrs = clip_before(arrs, cutoff) + o_arrs
+            seasons.append(other)
+        else:
+            cutoff = start_date(deps + arrs)
+            o_deps = [f for f in clip_before(o_deps, cutoff) if max(b for _, b in f['val']) >= today]
+            o_arrs = [f for f in clip_before(o_arrs, cutoff) if max(b for _, b in f['val']) >= today]
+            if not (o_deps or o_arrs):
+                continue
+            deps = o_deps + deps
+            arrs = o_arrs + arrs
+            seasons.insert(0, other)
+        print(f"   + {other} (confine {cutoff})", file=sys.stderr)
     print(f"   Partenze: {len(deps)} | Arrivi: {len(arrs)}", file=sys.stderr)
 
     deps_dc = [v for v in deps if '04:00' <= v['dep'] <= '14:00']
