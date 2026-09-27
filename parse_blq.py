@@ -28,6 +28,22 @@ def detect_current_season():
         return f"winter_{year}_{year+1}"
 
 
+def next_season(season):
+    parts = season.split('_')
+    if parts[0] == 'summer':
+        y = int(parts[1])
+        return f"winter_{y}_{y+1}"
+    return f"summer_{parts[2]}"
+
+
+def prev_season(season):
+    parts = season.split('_')
+    if parts[0] == 'summer':
+        y = int(parts[1])
+        return f"winter_{y-1}_{y}"
+    return f"summer_{parts[1]}"
+
+
 def download_pdf(season):
     url = f"{BASE_URL}/orario_voli_{season}.pdf"
     print(f"Download {url}", file=sys.stderr)
@@ -74,9 +90,11 @@ def freq_bitmap(freq_list):
 
 
 def vstr_compact(a, b):
-    da, ma, _ = a.split('/')
-    db, mb, _ = b.split('/')
-    return [ma+da, mb+db]
+    # "dd/mm/yyyy" -> "yyyymmdd": con l'anno, i periodi invernali a cavallo
+    # di capodanno (es. 01/11 - 21/03) restano confrontabili come stringhe.
+    da, ma, ya = a.split('/')
+    db, mb, yb = b.split('/')
+    return [ya+ma+da, yb+mb+db]
 
 
 def find_departures_arrivals_split(lines):
@@ -148,6 +166,32 @@ def parse_section(lines):
     return flights
 
 
+def parse_pdf():
+    pdf_to_text()
+    lines = open(TMP_TXT).readlines()
+    split_idx = find_departures_arrivals_split(lines)
+    if not split_idx:
+        print("ERRORE: split partenze/arrivi non trovato", file=sys.stderr)
+        sys.exit(1)
+    return parse_section(lines[:split_idx]), parse_section(lines[split_idx:])
+
+
+def start_date(flights):
+    return min(r[0] for f in flights for r in f['val'])
+
+
+def clip_before(flights, cutoff):
+    """Tronca i periodi di validità al giorno prima di `cutoff` (yyyymmdd)."""
+    last = (datetime.datetime.strptime(cutoff, "%Y%m%d").date()
+            - datetime.timedelta(days=1)).strftime("%Y%m%d")
+    out = []
+    for f in flights:
+        vals = [[a, min(b, last)] for a, b in f['val'] if a <= last]
+        if vals:
+            out.append({**f, "val": vals})
+    return out
+
+
 def main():
     season = detect_current_season()
     print(f"Stagione: {season}", file=sys.stderr)
@@ -163,15 +207,39 @@ def main():
             print("ERRORE: PDF non scaricabile", file=sys.stderr)
             sys.exit(1)
 
-    pdf_to_text()
-    lines = open(TMP_TXT).readlines()
-    split_idx = find_departures_arrivals_split(lines)
-    if not split_idx:
-        print("ERRORE: split partenze/arrivi non trovato", file=sys.stderr)
-        sys.exit(1)
+    deps, arrs = parse_pdf()
+    seasons = [season]
 
-    deps = parse_section(lines[:split_idx])
-    arrs = parse_section(lines[split_idx:])
+    # Accodo anche le stagioni adiacenti, se BLQ le ha online:
+    # - successiva: già pubblicata prima del cambio (es. inverno da 01/11);
+    # - precedente: dopo il cambio di fine marzo/ottobre il PDF vecchio copre
+    #   ancora qualche giorno (es. estate fino al 31/10, inverno dal 01/11).
+    # Ogni stagione vale fino al giorno prima dell'inizio della successiva.
+    # Fail-soft: se un PDF non c'è o non si parsa, resta quello che c'è.
+    today = datetime.date.today().strftime("%Y%m%d")
+    for other, is_next in [(next_season(season), True), (prev_season(season), False)]:
+        if not download_pdf(other):
+            continue
+        try:
+            o_deps, o_arrs = parse_pdf()
+        except (SystemExit, Exception) as e:
+            print(f"   {other} ignorata: {e}", file=sys.stderr)
+            continue
+        if is_next:
+            cutoff = start_date(o_deps + o_arrs)
+            deps = clip_before(deps, cutoff) + o_deps
+            arrs = clip_before(arrs, cutoff) + o_arrs
+            seasons.append(other)
+        else:
+            cutoff = start_date(deps + arrs)
+            o_deps = [f for f in clip_before(o_deps, cutoff) if max(b for _, b in f['val']) >= today]
+            o_arrs = [f for f in clip_before(o_arrs, cutoff) if max(b for _, b in f['val']) >= today]
+            if not (o_deps or o_arrs):
+                continue
+            deps = o_deps + deps
+            arrs = o_arrs + arrs
+            seasons.insert(0, other)
+        print(f"   + {other} (confine {cutoff})", file=sys.stderr)
     print(f"   Partenze: {len(deps)} | Arrivi: {len(arrs)}", file=sys.stderr)
 
     deps_dc = [v for v in deps if '04:00' <= v['dep'] <= '14:00']
@@ -189,6 +257,7 @@ def main():
         "meta": {
             "source": "Aeroporto G. Marconi Bologna (BLQ)",
             "season": season,
+            "seasons": seasons,
             "url": f"{BASE_URL}/orario_voli_{season}.pdf",
             "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "deps_total": len(deps),
@@ -215,6 +284,7 @@ def main():
         "meta": {
             "source": "Aeroporto G. Marconi Bologna (BLQ)",
             "season": season,
+            "seasons": seasons,
             "url": f"{BASE_URL}/orario_voli_{season}.pdf",
             "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "deps_total": len(deps_full),

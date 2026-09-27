@@ -536,7 +536,9 @@ const PRICE_NOTE = '<div class="price-note">💶 Prezzi <strong>indicativi</stro
 
 const t2m = t => parseInt(t)*60 + parseInt(t.slice(3));
 const freqOk = (bm, wd) => (bm >> (wd-1)) & 1;
-const inVal = (iso, vals) => { const md = iso.slice(5,7)+iso.slice(8,10); return vals.some(([f,t]) => f<=md && md<=t); };
+const inVal = (iso, vals) => { const md = iso.replace(/-/g,''); return vals.some(([f,t]) => f<=md && md<=t); };
+const seasonLabel = () => (DATA.meta.seasons||[DATA.meta.season]).map(x=>x.replace('_',' ').replace('_','/')).join(' + ');
+const fmtVal = v => `${v.slice(6)}/${v.slice(4,6)}/${v.slice(0,4)}`;
 const fmtISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const todayPlus = n => { const d=new Date(); d.setDate(d.getDate()+n); return fmtISO(d); };
 const MONTHS = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
@@ -600,10 +602,7 @@ function findByCity(city,minH,rangeOpt,weekdaysOk){
   if(rangeOpt==='all'){
     const allDates=DATA.d.flatMap(v=>v[5]).flat();
     const maxMd=allDates.reduce((a,b)=>a>b?a:b);
-    const mm=parseInt(maxMd.slice(0,2)),dd=parseInt(maxMd.slice(2));
-    const yr=today.getFullYear();
-    endDate=new Date(yr,mm-1,dd);
-    if(endDate<today)endDate=new Date(yr+1,mm-1,dd);
+    endDate=new Date(+maxMd.slice(0,4),+maxMd.slice(4,6)-1,+maxMd.slice(6));
   }else{
     endDate=new Date(today);
     endDate.setDate(endDate.getDate()+parseInt(rangeOpt));
@@ -627,9 +626,8 @@ function computeDaycationCapableCities(){
   if(!allDates.length)return [];
   const minMd=allDates.reduce((a,b)=>a<b?a:b);
   const maxMd=allDates.reduce((a,b)=>a>b?a:b);
-  const yr=new Date().getFullYear();
-  const start=new Date(yr, parseInt(minMd.slice(0,2))-1, parseInt(minMd.slice(2)));
-  const end=new Date(yr, parseInt(maxMd.slice(0,2))-1, parseInt(maxMd.slice(2)));
+  const start=new Date(+minMd.slice(0,4), +minMd.slice(4,6)-1, +minMd.slice(6));
+  const end=new Date(+maxMd.slice(0,4), +maxMd.slice(4,6)-1, +maxMd.slice(6));
   const cities=[...new Set(DATA.d.map(v=>v[0]))];
   const capable=[];
   for(const c of cities){
@@ -725,9 +723,9 @@ function render(){
 function renderByDate(root){
   const allD=DATA.d.flatMap(v=>v[5]).flat();
   const vr=allD.length?{min:allD.reduce((a,b)=>a<b?a:b),max:allD.reduce((a,b)=>a>b?a:b)}:null;
-  const md=STATE.date.slice(5,7)+STATE.date.slice(8,10);
+  const md=STATE.date.replace(/-/g,'');
   if(vr&&(md<vr.min||md>vr.max)){
-    root.innerHTML=`<div class="state"><div class="state-icon">🗓</div><div class="state-title">Data fuori stagione</div><div class="state-msg">Il dataset attuale (<strong>${DATA.meta.season.replace('_',' ')}</strong>) copre da ${vr.min.slice(2)}/${vr.min.slice(0,2)} a ${vr.max.slice(2)}/${vr.max.slice(0,2)}.</div></div>`;
+    root.innerHTML=`<div class="state"><div class="state-icon">🗓</div><div class="state-title">Data fuori stagione</div><div class="state-msg">Il dataset attuale (<strong>${seasonLabel()}</strong>) copre da ${fmtVal(vr.min)} a ${fmtVal(vr.max)}.</div></div>`;
     return;
   }
   const results=findByDate(STATE.date,STATE.minH);
@@ -902,7 +900,7 @@ async function init(){
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     DATA=await resp.json();
     DAYCATION_CITIES=computeDaycationCapableCities();
-    document.getElementById('metaInfo').textContent=`${DAYCATION_CITIES.length} destinazioni daycation · ${DATA.meta.season.replace('_',' ')}`;
+    document.getElementById('metaInfo').textContent=`${DAYCATION_CITIES.length} destinazioni daycation · ${seasonLabel()}`;
     if(DATA.meta&&DATA.meta.generated){
       const g=new Date(DATA.meta.generated);
       const fEl=document.getElementById('freshInfo');
