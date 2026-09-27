@@ -444,7 +444,9 @@ let WEEKEND_CITIES = [];
 
 const t2m = t => parseInt(t)*60 + parseInt(t.slice(3));
 const freqOk = (bm, wd) => (bm >> (wd-1)) & 1;
-const inVal = (iso, vals) => { const md = iso.slice(5,7)+iso.slice(8,10); return vals.some(([f,t]) => f<=md && md<=t); };
+const inVal = (iso, vals) => { const md = iso.replace(/-/g,''); return vals.some(([f,t]) => f<=md && md<=t); };
+const seasonLabel = () => (DATA.meta.seasons||[DATA.meta.season]).map(x=>x.replace('_',' ').replace('_','/')).join(' + ');
+const fmtVal = v => `${v.slice(6)}/${v.slice(4,6)}/${v.slice(0,4)}`;
 const fmtISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const MONTHS = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 const DAYS_S = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
@@ -655,7 +657,7 @@ function renderByWeekend(root){
   const results=findByWeekend(STATE.sunday,STATE.nights);
   if(!results.length){
     const range=seasonRange();
-    const extra=range?`<div class="state-msg">Il dataset attuale (<strong>${DATA.meta.season.replace('_',' ')}</strong>) copre da ${range.min.slice(2)}/${range.min.slice(0,2)} a ${range.max.slice(2)}/${range.max.slice(0,2)}.</div>`:'';
+    const extra=range?`<div class="state-msg">Il dataset attuale (<strong>${seasonLabel()}</strong>) copre da ${fmtVal(range.min)} a ${fmtVal(range.max)}.</div>`:'';
     root.innerHTML=`<div class="state"><div class="state-icon">🌥</div><div class="state-title">Nessun weekend possibile</div><div class="state-msg">Per ${fmtDateShort(out)} → ${fmtDateShort(ret)} non c'è una combinazione A/R diretta da BLQ con ${nightsLabel(STATE.nights)}.</div>${extra}<div class="state-hint">💡 Prova un'altra durata o un altro weekend.</div></div>`;
     return;
   }
@@ -757,7 +759,7 @@ async function init(){
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     DATA=await resp.json();
     WEEKEND_CITIES=computeWeekendCapableCities();
-    document.getElementById('metaInfo').textContent=`${WEEKEND_CITIES.length} mete weekend · ${DATA.meta.season.replace('_',' ')}`;
+    document.getElementById('metaInfo').textContent=`${WEEKEND_CITIES.length} mete weekend · ${seasonLabel()}`;
     if(DATA.meta&&DATA.meta.generated){
       const g=new Date(DATA.meta.generated);
       const fEl=document.getElementById('freshInfo');

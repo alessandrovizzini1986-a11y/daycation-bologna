@@ -11,6 +11,8 @@ ufficiali aggiornati automaticamente.
   pomeriggio, ora italiana), scarica il PDF corrente (rileva da sola se è stagione
   `summer_YYYY` o `winter_YYYY_YYYY+1`), riparsa tutto, aggiorna i prezzi e fa
   commit dei JSON se è cambiato qualcosa. Netlify ribuilda automaticamente.
+  Se BLQ ha già pubblicato l'orario della stagione successiva, viene accodato:
+  la corrente vale fino al giorno prima dell'inizio della nuova.
 - **App**: HTML statico (`public/index.html`) che fa `fetch('data.json')` al
   caricamento e mostra le daycation possibili per la data scelta.
 

@@ -28,6 +28,14 @@ def detect_current_season():
         return f"winter_{year}_{year+1}"
 
 
+def next_season(season):
+    parts = season.split('_')
+    if parts[0] == 'summer':
+        y = int(parts[1])
+        return f"winter_{y}_{y+1}"
+    return f"summer_{parts[2]}"
+
+
 def download_pdf(season):
     url = f"{BASE_URL}/orario_voli_{season}.pdf"
     print(f"Download {url}", file=sys.stderr)
@@ -74,9 +82,11 @@ def freq_bitmap(freq_list):
 
 
 def vstr_compact(a, b):
-    da, ma, _ = a.split('/')
-    db, mb, _ = b.split('/')
-    return [ma+da, mb+db]
+    # "dd/mm/yyyy" -> "yyyymmdd": con l'anno, i periodi invernali a cavallo
+    # di capodanno (es. 01/11 - 21/03) restano confrontabili come stringhe.
+    da, ma, ya = a.split('/')
+    db, mb, yb = b.split('/')
+    return [ya+ma+da, yb+mb+db]
 
 
 def find_departures_arrivals_split(lines):
@@ -148,6 +158,28 @@ def parse_section(lines):
     return flights
 
 
+def parse_pdf():
+    pdf_to_text()
+    lines = open(TMP_TXT).readlines()
+    split_idx = find_departures_arrivals_split(lines)
+    if not split_idx:
+        print("ERRORE: split partenze/arrivi non trovato", file=sys.stderr)
+        sys.exit(1)
+    return parse_section(lines[:split_idx]), parse_section(lines[split_idx:])
+
+
+def clip_before(flights, cutoff):
+    """Tronca i periodi di validità al giorno prima di `cutoff` (yyyymmdd)."""
+    last = (datetime.datetime.strptime(cutoff, "%Y%m%d").date()
+            - datetime.timedelta(days=1)).strftime("%Y%m%d")
+    out = []
+    for f in flights:
+        vals = [[a, min(b, last)] for a, b in f['val'] if a <= last]
+        if vals:
+            out.append({**f, "val": vals})
+    return out
+
+
 def main():
     season = detect_current_season()
     print(f"Stagione: {season}", file=sys.stderr)
@@ -163,15 +195,24 @@ def main():
             print("ERRORE: PDF non scaricabile", file=sys.stderr)
             sys.exit(1)
 
-    pdf_to_text()
-    lines = open(TMP_TXT).readlines()
-    split_idx = find_departures_arrivals_split(lines)
-    if not split_idx:
-        print("ERRORE: split partenze/arrivi non trovato", file=sys.stderr)
-        sys.exit(1)
+    deps, arrs = parse_pdf()
+    seasons = [season]
 
-    deps = parse_section(lines[:split_idx])
-    arrs = parse_section(lines[split_idx:])
+    # Se l'aeroporto ha già pubblicato l'orario della stagione successiva,
+    # lo accodo: fino al suo primo giorno vale la stagione corrente, da lì in poi
+    # la nuova. Così si possono cercare date oltre il cambio stagione.
+    # Fail-soft: se il PDF non c'è o non si parsa, resta solo la stagione corrente.
+    nxt = next_season(season)
+    if download_pdf(nxt):
+        try:
+            n_deps, n_arrs = parse_pdf()
+            cutoff = min(r[0] for f in n_deps + n_arrs for r in f['val'])
+            deps = clip_before(deps, cutoff) + n_deps
+            arrs = clip_before(arrs, cutoff) + n_arrs
+            seasons.append(nxt)
+            print(f"   + {nxt} dal {cutoff}", file=sys.stderr)
+        except (SystemExit, Exception) as e:
+            print(f"   {nxt} ignorata: {e}", file=sys.stderr)
     print(f"   Partenze: {len(deps)} | Arrivi: {len(arrs)}", file=sys.stderr)
 
     deps_dc = [v for v in deps if '04:00' <= v['dep'] <= '14:00']
@@ -189,6 +230,7 @@ def main():
         "meta": {
             "source": "Aeroporto G. Marconi Bologna (BLQ)",
             "season": season,
+            "seasons": seasons,
             "url": f"{BASE_URL}/orario_voli_{season}.pdf",
             "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "deps_total": len(deps),
@@ -215,6 +257,7 @@ def main():
         "meta": {
             "source": "Aeroporto G. Marconi Bologna (BLQ)",
             "season": season,
+            "seasons": seasons,
             "url": f"{BASE_URL}/orario_voli_{season}.pdf",
             "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "deps_total": len(deps_full),
