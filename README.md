@@ -3,17 +3,24 @@
 App personale per trovare gite in giornata in aereo da Bologna BLQ, con orari
 ufficiali aggiornati automaticamente.
 
+**Online:** https://alessandrovizzini1986-a11y.github.io/daycation-bologna/
+(GitHub Pages, branch `main`).
+
 ## Come funziona
 
 - **Dati**: il parser scarica il PDF ufficiale degli orari da `bologna-airport.it`
   e lo trasforma in JSON.
-- **Aggiornamento**: una GitHub Action gira 3 volte al giorno (notte, mattina e
-  pomeriggio, ora italiana), scarica il PDF corrente (rileva da sola se è stagione
-  `summer_YYYY` o `winter_YYYY_YYYY+1`), riparsa tutto, aggiorna i prezzi e fa
-  commit dei JSON se è cambiato qualcosa. Netlify ribuilda automaticamente.
-  Se BLQ ha già pubblicato l'orario della stagione successiva, viene accodato:
-  la corrente vale fino al giorno prima dell'inizio della nuova.
-- **App**: HTML statico (`public/index.html`) che fa `fetch('data.json')` al
+- **Aggiornamento**: una GitHub Action gira 3 volte al giorno (~03:23, ~07:23 e
+  ~16:23 ora italiana estiva; GitHub può partire in ritardo), scarica il PDF
+  corrente (rileva da sola se è stagione `summer_YYYY` o `winter_YYYY_YYYY+1`),
+  riparsa tutto, aggiorna i prezzi e fa commit dei JSON se è cambiato qualcosa.
+  GitHub Pages ripubblica automaticamente.
+  Se BLQ ha online anche l'orario della stagione successiva e/o precedente,
+  vengono accodati: ogni stagione vale fino al giorno prima dell'inizio della
+  successiva (es. estate fino al 31/10, inverno dal 01/11).
+- **Se fallisce**: una seconda Action (`rerun-on-failure.yml`) rilancia la run
+  una volta in automatico; se fallisce ancora, il giro successivo recupera.
+- **App**: HTML statico (`index.html` alla radice) che fa `fetch('data.json')` al
   caricamento e mostra le daycation possibili per la data scelta.
 
 ## Setup iniziale (una volta sola)
@@ -25,30 +32,25 @@ ufficiali aggiornati automaticamente.
 - Seleziona **"Read and write permissions"** → salva
   (così l'action può fare commit del data.json aggiornato)
 
-### 2. Netlify
-- Vai su [netlify.com](https://netlify.com) → "Add new site" → "Import from Git"
-- Connetti il repository GitHub
-- Configurazione automatica:
-  - Build command: vuoto o `echo`
-  - Publish directory: `public`
-- Deploy
+### 2. GitHub Pages
+- Vai in `Settings → Pages`
+- Source: **"Deploy from a branch"** → branch `main`, cartella `/ (root)` → salva
+- Dopo 1-2 minuti il sito è su `https://<utente>.github.io/daycation-bologna/`
 
 ### 3. Primo aggiornamento dati
 - Vai su GitHub → tab "Actions" → "Update BLQ flight data" → "Run workflow"
 - Aspetta ~30 secondi
-- Netlify ribuilderà entro 1-2 minuti
+- GitHub Pages ripubblicherà entro 1-2 minuti
 
-L'URL Netlify (es. `daycation-bologna.netlify.app`) mostrerà l'app con dati
-freschi.
+L'URL di GitHub Pages mostrerà l'app con dati freschi.
 
 ## Prezzi nell'app (opzionale)
 
 L'app può mostrare un badge **"da €XX A/R"** su ogni destinazione, con il prezzo
 più basso andata+ritorno diretto preso dalla cache di Aviasales (ricerche reali
-recenti). I prezzi vengono scaricati **ogni notte** dalla stessa GitHub Action e
+recenti). I prezzi vengono scaricati dalla stessa GitHub Action (3 volte al giorno) e
 salvati dentro `data.json` e `weekend-data.json`: nessun costo a runtime,
-funziona anche offline. L'aggiornamento gira 3 volte al giorno (notte, mattina,
-pomeriggio).
+funziona anche offline.
 
 Per attivarli serve un token gratuito Travelpayouts (vale anche come affiliato:
 le prenotazioni dal badge ti riconoscono una commissione):
@@ -64,9 +66,10 @@ Senza il secret, lo step prezzi non fa nulla e tutto il resto funziona come prim
 
 ## Manutenzione
 
-**Zero.** Ogni notte il bot controlla, aggiorna se serve, e Netlify ripubblica
-da solo. Quando l'aeroporto pubblica gli orari della nuova stagione (estate o
-inverno), la action prende il nuovo PDF automaticamente.
+**Zero.** 3 volte al giorno il bot controlla, aggiorna se serve, e GitHub Pages
+ripubblica da solo. Quando l'aeroporto pubblica gli orari della nuova stagione
+(estate o inverno), la action prende il nuovo PDF automaticamente, anche prima
+del cambio stagione.
 
 Se vuoi forzare un aggiornamento subito: GitHub → Actions → Run workflow.
 
@@ -92,8 +95,9 @@ footer.
 ├── sw.js                     # Service worker (offline / PWA)
 ├── manifest.json             # Manifest PWA
 ├── .github/workflows/
-│   └── update-data.yml       # Action giornaliera (aggiorna entrambi i json)
-├── netlify.toml              # Config Netlify
+│   ├── update-data.yml       # Action 3x/giorno (aggiorna entrambi i json)
+│   └── rerun-on-failure.yml  # Rilancia una volta la action se fallisce
+├── netlify.toml              # Vecchia config Netlify (non usata: il sito è su GitHub Pages)
 └── README.md
 ```
 
@@ -102,7 +106,7 @@ footer.
 - I dati sono solo BLQ: niente voli da altri aeroporti italiani.
 - Solo voli diretti: niente combinazioni con scalo.
 - I prezzi nell'app (se attivati, vedi sopra) sono un riferimento "da €XX A/R"
-  aggiornato ogni notte dalla cache Aviasales, non la quotazione live del giorno
+  aggiornato più volte al giorno dalla cache Aviasales, non la quotazione live del giorno
   esatto: per la conferma resta il bottone "Cerca prezzi" (Skyscanner).
 - Se BLQ cambia il layout del PDF o la nomenclatura degli URL, il parser
   potrebbe rompersi. In quel caso la action fallisce visibilmente su GitHub e
