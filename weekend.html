@@ -521,14 +521,16 @@ function findWeekendsForCity(city,dur){
   return res;
 }
 
-/* Prossimi weekend (domeniche) entro l'orizzonte; filtra quelli con la data di partenza già passata. */
+/* Prossimi weekend (domeniche) fino alla fine dell'orario caricato
+   (16 settimane finché i dati non sono arrivati); esclude quelli con la partenza già passata. */
 let WEEKENDS=[];
 function buildWeekends(){
   const today=new Date();today.setHours(0,0,0,0);
   let d=new Date(today);
   do{ d.setDate(d.getDate()+1); }while(d.getDay()!==0);  // prima domenica successiva a oggi
+  const range=DATA?seasonRange():null;
   const out=[];
-  for(let i=0;i<16;i++){ out.push(fmtISO(d)); d.setDate(d.getDate()+7); }
+  for(let i=0;range?fmtISO(d).replace(/-/g,'')<=range.max:i<16;i++){ out.push(fmtISO(d)); d.setDate(d.getDate()+7); }
   WEEKENDS=out;
 }
 
@@ -758,6 +760,7 @@ async function init(){
     const resp=await fetch('weekend-data.json',{cache:'no-cache'});
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     DATA=await resp.json();
+    buildWeekends();
     WEEKEND_CITIES=computeWeekendCapableCities();
     document.getElementById('metaInfo').textContent=`${WEEKEND_CITIES.length} mete weekend · ${seasonLabel()}`;
     if(DATA.meta&&DATA.meta.generated){
